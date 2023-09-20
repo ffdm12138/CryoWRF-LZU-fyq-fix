@@ -736,10 +736,19 @@
              WRITE(wrf_err_message,*)'input_wrf: global attribute SF_SURFACE_PHYSICS returns ', itmp
              CALL wrf_debug ( 300 , wrf_err_message )
              IF ( config_flags%sf_surface_physics /= itmp ) THEN
-                IF ( ( config_flags%sf_surface_physics == LSMSCHEME ) .and. ( itmp == NOAHMPSCHEME ) ) then
-                   ! All is well.  Noah-MP and Noah have compatible wrfinput files.
-                ELSE IF ( ( config_flags%sf_surface_physics == NOAHMPSCHEME ) .and. ( itmp == LSMSCHEME ) ) then
-                   ! All is well.  Noah-MP and Noah have compatible wrfinput files.
+                !IF ( ( config_flags%sf_surface_physics == LSMSCHEME ) .and. ( itmp == NOAHMPSCHEME ) ) then
+                !   ! All is well.  Noah-MP and Noah have compatible wrfinput files.
+                !ELSE IF ( ( config_flags%sf_surface_physics == NOAHMPSCHEME ) .and. ( itmp == LSMSCHEME ) ) then
+                !   ! All is well.  Noah-MP and Noah have compatible wrfinput files.
+
+                IF( ( (config_flags%sf_surface_physics == SNOWPACKSCHEME)       .or. & 
+&                           (config_flags%sf_surface_physics == LSMSCHEME)      .or. &
+&                           (config_flags%sf_surface_physics == NOAHMPSCHEME) ) &
+&                           .and. &
+&                         ( (itmp == SNOWPACKSCHEME) .or. &
+&                           (itmp == LSMSCHEME)      .or. &
+&                           (itmp == NOAHMPSCHEME) ) ) then
+                   ! All is well. Noah-MP and Noah have compatible wrfinput files. 
                 ELSE
                    call wrf_message("----------------- ERROR -------------------")
                    WRITE(wrf_err_message,'("namelist    : sf_surface_physics = ",I10)') config_flags%sf_surface_physics

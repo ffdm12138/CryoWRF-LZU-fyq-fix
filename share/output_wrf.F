@@ -161,6 +161,16 @@
     call nl_get_nproc_x            ( 1,        ntasks_x           )
     call nl_get_nproc_y            ( 1,        ntasks_y           )
 
+       CALL nl_get_simulation_start_year   ( 1, simulation_start_year   )
+       CALL nl_get_simulation_start_month  ( 1, simulation_start_month  )
+       CALL nl_get_simulation_start_day    ( 1, simulation_start_day    )
+       CALL nl_get_simulation_start_hour   ( 1, simulation_start_hour   )
+       CALL nl_get_simulation_start_minute ( 1, simulation_start_minute )
+       CALL nl_get_simulation_start_second ( 1, simulation_start_second )
+
+
+
+
 #if (EM_CORE == 1)
     dt = grid%dt
     adapt_dt_min = grid%min_time_step

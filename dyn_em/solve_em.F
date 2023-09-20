@@ -3825,7 +3825,22 @@ BENCH_START(micro_driver_tim)
       &        ,WACT=grid%WACT,CCN1_GS=grid%CCN1_GS,CCN2_GS=grid%CCN2_GS,CCN3_GS=grid%CCN3_GS  &
       &        ,CCN4_GS=grid%CCN4_GS,CCN5_GS=grid%CCN5_GS,CCN6_GS=grid%CCN6_GS &
       &        ,CCN7_GS=grid%CCN7_GS,NR_CU=grid%NR_CU,QR_CU=grid%QR_CU,NS_CU=grid%NS_CU &
-      &        ,QS_CU=grid%QS_CU,CU_UAF=grid%CU_UAF,mskf_refl_10cm=grid%mskf_refl_10cm)
+      &        ,QS_CU=grid%QS_CU,CU_UAF=grid%CU_UAF,mskf_refl_10cm=grid%mskf_refl_10cm  &
+!!!!!! ADDED FOR BLOWING SNOW BY VARUN
+     &        ,snc_Z=grid%snc_Z,snc_N=config_flags%num_bs_sfc_layers &
+     &        ,sn_qs=grid%sn_qs,sn_ns=grid%sn_ns &
+     &        ,sfc_T=grid%sfc_T,sfc_Q=grid%sfc_Q &
+     &        ,sfc_RH=grid%sfc_RH,sfc_SQ=grid%sfc_SQ &
+     &        ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR &
+     &        ,sfc_SQ_HFX=grid%sfc_SQ_HFX,sfc_SQ_QFX=grid%sfc_SQ_QFX &
+     &        ,bs_qi=moist(ims,kms,jms,P_bs_qi),bs_qni=scalar(ims,kms,jms,P_bs_qni),bs_meanR=grid%bs_meanR &
+     &        ,bs_qi_rad = grid%bs_qi_rad, bs_qni_rad = grid%bs_qni_rad      &
+!    &        ,bs_qi=grid%bs_qi,bs_qni=grid%bs_qni,bs_meanR=grid%bs_meanR &
+     &        ,corr_q_for_rad=grid%corr_q_for_rad,corr_N_for_rad=grid%corr_N_for_rad &
+     &        ,tsk=grid%tsk,in_q_lb = grid%in_q_lb, in_N_lb = grid%in_N_lb, in_bs_sedi = grid%bs_sedi &
+     &        ,bs_bool=config_flags%blowing_snow,bool_snow_sublimation=config_flags%blowing_snow_sublimation &
+     &        ,bs_rad_effect=config_flags%bs_rad_effect,in_hsalt=grid%in_hsalt,bs_sublim=grid%bs_sublim,xkhv_LES=grid%xkmv &
+     &        ,bs_qi_sublim3d=grid%bs_qi_sublim3d,sn_qi_sublim3d=grid%sn_qi_sublim3d ) !!!! ENDING FOR BLOWING SNOW BY VARUN)
                                                                           
 BENCH_END(micro_driver_tim)
 

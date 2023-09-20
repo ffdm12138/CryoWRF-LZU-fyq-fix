@@ -985,6 +985,7 @@
                               refl_10cm, diagflag, ke_diag, do_radar_ref,      &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
+                              bs_qi_rad,bs_qni_rad,bs_rad_effect,     &! ADDED FOR CRYOWRF
                               ids,ide, jds,jde, kds,kde, &             ! domain dims
                               ims,ime, jms,jme, kms,kme, &             ! memory dims
                               its,ite, jts,jte, kts,kte)               ! tile dims
@@ -1018,6 +1019,12 @@
       REAL, INTENT(IN):: dt_in
       INTEGER, INTENT(IN):: itimestep
 
+      !!! ADDED FOR CRYOWRF !!!
+      real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: bs_qi_rad,bs_qni_rad
+      real, dimension(kts:kte) :: bs_qi_rad_loc,bs_qni_rad_loc
+      logical,intent(in) :: bs_rad_effect
+      real, dimension(kts:kte) :: qi1d_rad,ni1d_rad
+      !!! ADDED FOR CRYOWRF !!!
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
@@ -1129,6 +1136,10 @@
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
+
+            bs_qi_rad_loc(k)  = bs_qi_rad(i,k,j)
+            bs_qni_rad_loc(k) = bs_qni_rad(i,k,j)
+
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1302,13 +1313,22 @@
          endif
          ENDIF
 
+         qi1d_rad = qi1d
+         ni1d_rad = ni1d
+
+         if(bs_rad_effect) then
+            qi1d_rad  = qi1d + bs_qi_rad_loc 
+            ni1d_rad  = ni1d + bs_qni_rad_loc
+         endif
+
+
          IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
           do k = kts, kte
              re_qc1d(k) = 2.49E-6
              re_qi1d(k) = 4.99E-6
              re_qs1d(k) = 9.99E-6
           enddo
-          call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
+          call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d_rad, ni1d_rad, qs1d,  &
                       re_qc1d, re_qi1d, re_qs1d, kts, kte)
           do k = kts, kte
              re_cloud(i,k,j) = MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))

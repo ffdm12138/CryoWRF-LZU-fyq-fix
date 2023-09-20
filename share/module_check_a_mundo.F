@@ -3031,6 +3031,9 @@
          model_config_rec % num_soil_layers = 10
       ELSE IF (   model_config_rec % sf_surface_physics(1) .EQ. SSIBSCHEME   ) THEN
          model_config_rec % num_soil_layers = 3
+      ELSE IF (   model_config_rec % sf_surface_physics(1) .EQ. SNOWPACKSCHEME   ) THEN
+         model_config_rec % num_soil_layers = 4
+
 #if (NMM_CORE == 1)
       ELSE IF (   model_config_rec % sf_surface_physics(1) .EQ. GFDLSLAB     ) THEN
          model_config_rec % num_soil_layers = 4

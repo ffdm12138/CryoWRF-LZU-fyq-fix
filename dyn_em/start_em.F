@@ -123,6 +123,7 @@
 !..Need to fill special height var for setting up initial condition.  G. Thompson
    REAL, ALLOCATABLE, DIMENSION(:,:,:) :: z_at_q
    REAL, ALLOCATABLE, DIMENSION(:,:,:) :: dz8w   !mchen
+   real, allocatable, dimension(:,:) :: z_firstlev
 
 !  CCN for MP=18 initializatio
    REAL :: ccn_max_val
@@ -147,6 +148,8 @@
 #endif
    ALLOCATE(dz8w(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; dz8w = 0.
    ALLOCATE(z_at_q(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; z_at_q = 0.
+   ALLOCATE(z_firstlev(IMS:IME,JMS:JME),STAT=I)  ; z_firstlev = 0.
+
    CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
    IF ( ( MOD (ide-ids,config_flags%parent_grid_ratio) .NE. 0 ) .OR. &
@@ -869,6 +872,8 @@
          ENDDO
       ENDDO
    ENDDO
+   k=1
+   z_firstlev(:,:) = (grid%phb(:,k+1,:)+grid%ph_2(:,k+1,:))/g - (grid%phb(:,k,:)+grid%ph_2(:,k,:))/g
 
    IF ( grid%press_adj .and. ( grid%id .NE. 1 ) .AND. .NOT. ( config_flags%restart ) .AND. &
        ( ( config_flags%input_from_hires ) .OR. ( config_flags%input_from_file ) ) ) THEN
@@ -1248,7 +1253,12 @@ endif
                       ,grid%NC_CU, grid%NI_CU, grid%NR_CU, grid%NS_CU,grid%CCN_CU                    &
                       ,grid%alevsiz_cu,grid%num_months,grid%no_src_types_cu,grid%aeromcu             &
                       ,grid%aeropcu,grid%EFCG,grid%EFCS,grid%EFIG,grid%EFIS,grid%EFSG,grid%EFSS      &
-                      )
+                      ,grid%in_drift,grid%in_conc,grid%in_csalt,grid%in_q_lb,grid%in_N_lb, grid%grid_id, grid%glo_counter &
+                      ,grid%sn_T,grid%sn_thick,grid%sn_volI,grid%sn_volW,grid%sn_volV,grid%sn_rg,grid%sn_rb &
+                      ,grid%sn_dd,grid%sn_sp,grid%sn_cdot,grid%sn_meta,grid%sn_depd,grid%sn_graintype,grid%sn_mk &
+                      ,grid%sn_nlayers,&
+                       grid%sn_start_from_file,z_firstlev,config_flags%num_bs_sfc_layers,grid%snc_Z,&
+                       grid%sn_qs,grid%sn_ns)
        ENDDO ! loop of tiles for phy_init
 
        if(.not.grid%restart) then

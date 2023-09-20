@@ -257,7 +257,13 @@ CONTAINS
                          ,alevsiz_cu,num_months,no_src_types_cu,aeromcu,aeropcu   & ! PSH/TWG 06/10/16                         
                          ,EFCG,EFCS,EFIG,EFIS,EFSG,EFSS                           & ! TWG
 #endif
-                          )
+!!! ADDED FOR CRYOWRF
+                         ,in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_grid_id,in_glo_counter &
+                         ,sn_T,sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd &
+                         ,sn_graintype,sn_mk, sn_nlayers, &
+                         sn_start_from_file,z_firstlev,snc_N,snc_Z,sn_qs,sn_ns &
+!!! ADDED FOR CRYOWRF
+)
 
 !-----------------------------------------------------------------
    USE module_domain
@@ -270,6 +276,9 @@ CONTAINS
    USE module_wind_fitch
    IMPLICIT NONE
 !-----------------------------------------------------------------
+
+   integer, intent(in) :: snc_N, in_grid_id ! ADDED FOR CRYOWRF
+
    TYPE (grid_config_rec_type)              :: config_flags
 
    INTEGER , INTENT(IN)        :: id
@@ -784,6 +793,32 @@ CONTAINS
    REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(OUT) :: &
              RDCASHTEN, RQCDCSHTEN
 
+
+!!! ADDED FOR CRYOWRF
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_T
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_thick 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_volI 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_volW 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_volV  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_rg    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_rb    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_dd    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_sp    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_cdot 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_meta  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_depd 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_graintype 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme),intent(inout) :: sn_mk
+
+   real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: snc_Z,sn_ns,sn_qs
+
+   integer, dimension(ims:ime,jms:jme),intent(inout) :: sn_nlayers
+   logical ,intent(inout):: sn_start_from_file
+
+!!! ADDED FOR CRYOWRF
+
+
+
 ! Local data
 
    REAL    :: ALBLND,ZZLND,ZZWTR,THINLD,XMAVA,CEN_LAT,pptop
@@ -835,7 +870,10 @@ CONTAINS
    REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_soil_layers*mosaic_cat, jms:jme ), INTENT(INOUT) :: TBL_URB3D_mosaic
    REAL, OPTIONAL, DIMENSION( ims:ime, 1:num_soil_layers*mosaic_cat, jms:jme ), INTENT(INOUT) :: TGL_URB3D_mosaic  
    LOGICAL :: IPRINT
- 
+   REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: in_drift,in_conc,in_csalt,in_q_lb,in_N_lb
+   integer, optional, dimension( ims:ime, jms:jme), intent(inout) :: in_glo_counter
+   real, dimension(ims:ime,jms:jme), intent(in) :: z_firstlev
+
 !-------------------------------------------------
 ! End of Noah-mosaic 
 !-------------------------------------------------  
@@ -1317,7 +1355,8 @@ CONTAINS
                 its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte                    )
 
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to bl_init' )
-   CALL bl_init(STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,        &
+   CALL bl_init(in_grid_id, & ! ADDED FOR CRYOWRF
+                STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,        &
                 RQVBLTEN,RQCBLTEN,RQIBLTEN,TSK,TMN,             &
                 config_flags,restart,UST,LOWLYR,TSLB,ZS,DZS,    &
                 num_soil_layers,TKE_PBL,mfshconv,               &
@@ -1341,6 +1380,7 @@ CONTAINS
                 SFCEVP,GRDFLX,                                  &
                 TRIM (MMINLU_LOC),                              &
                 XLAT,                                           &
+                XLONG,                                          &
                 ISNOWXY, ZSNSOXY, TSNOXY,                       &
                 SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,         &
                 CANLIQXY, EAHXY, TAHXY, CMXY,                   &
@@ -1466,8 +1506,16 @@ CONTAINS
                 ,G_URB2D_mosaic,RN_URB2D_mosaic                 &  !danli mosaic 
                 ,TS_URB2D_mosaic                                &  !danli mosaic 
                 ,TS_RUL2D_mosaic                                &  !danli mosaic 
-                ,irr_rand_field,irr_ph,irr_freq                 &
-               ) 
+                ,irr_rand_field,irr_ph,irr_freq                 &  ! ADDED FOR CRYOWRF
+                ,in_drift,in_conc,in_csalt,in_q_lb,in_N_lb      &  ! " " "
+                ,in_glo_counter,sn_T,sn_thick,sn_volI           &  ! " " "
+                ,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp        &  ! " " "
+                ,sn_cdot,sn_meta,sn_depd,sn_graintype,sn_mk,sn_nlayers  &  ! " " "
+                ,sn_start_from_file,zfull,zhalf                 &  ! " " "
+                ,z_firstlev,snc_N,snc_Z ) 
+
+                sn_qs = 0.0
+                sn_ns = 0.0
 
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to cu_init' )
 
@@ -2327,7 +2375,8 @@ CONTAINS
 
    END SUBROUTINE ra_init
 
-   SUBROUTINE bl_init(STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,  &
+   SUBROUTINE bl_init(in_grid_id, & ! ADDED FOR CRYOWRF
+                STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,  &
                 RQVBLTEN,RQCBLTEN,RQIBLTEN,TSK,TMN,             &
                 config_flags,restart,UST,LOWLYR,TSLB,ZS,DZS,    &
                 num_soil_layers,TKE_PBL,mfshconv,               &
@@ -2348,6 +2397,7 @@ CONTAINS
                 QKE, SFCEVP,GRDFLX,                             &
                 MMINLU,                                         &
                 XLAT,                                           &
+                XLONG,                                          & ! ADDED FOR CRYOWRF
                 ISNOWXY, ZSNSOXY, TSNOXY,                       &
                 SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,         &
                 CANLIQXY, EAHXY, TAHXY, CMXY,                   &
@@ -2474,8 +2524,13 @@ CONTAINS
                 ,G_URB2D_mosaic,RN_URB2D_mosaic                 &  !danli mosaic 
                 ,TS_URB2D_mosaic                                &  !danli mosaic 
                 ,TS_RUL2D_mosaic                                &  !danli mosaic  
-                ,irr_rand_field,irr_ph,irr_freq                 &
-                                                                ) !Optional oml
+                ,irr_rand_field,irr_ph,irr_freq                 &  !optional oml
+                ,in_drift,in_conc,in_csalt                      &  ! ADDED FOR CRYOWRF
+                ,in_q_lb,in_N_lb,in_glo_counter,sn_T            &  ! " " "
+                ,sn_thick,sn_volI,sn_volW,sn_volV               &  ! " " "
+                ,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot                &  ! " " "
+                ,sn_meta,sn_depd,sn_graintype,sn_mk,sn_nlayers,sn_start_from_file, &  ! " " "
+                zfull,zhalf,z_firstlev,snc_N,snc_Z  )
 !--------------------------------------------------------------------
    USE module_sf_sfclay
    USE module_sf_sfclayrev
@@ -2525,6 +2580,8 @@ CONTAINS
 #if (NMM_CORE == 1)
    USE module_sf_gfdl
 #endif
+
+   USE module_sf_snowpacklsm ! ADDED FOR CRYOWRF
 !--------------------------------------------------------------------
    IMPLICIT NONE
 !--------------------------------------------------------------------
@@ -2895,6 +2952,36 @@ CONTAINS
    INTEGER :: mynn_closure_level
 #endif
 
+!!! ADDED FOR CRYOWRF !!!
+   INTEGER , INTENT(IN) :: in_grid_id
+   REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: in_drift,in_conc,in_csalt,in_q_lb,in_N_lb
+   integer, optional, dimension(ims:ime, jms:jme),intent(inout) :: in_glo_counter
+   real, optional, dimension( ims:ime, 1:100,jms:jme),intent(inout) :: sn_T
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_thick 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_volI 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_volW 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_volV  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_rg    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_rb    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_dd    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_sp    
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_cdot 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_meta  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_depd  
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_graintype 
+   REAL,    OPTIONAL, DIMENSION(ims:ime,1:100,jms:jme) ,intent(inout) :: sn_mk
+
+   integer, dimension(ims:ime,jms:jme),intent(inout) :: sn_nlayers
+   logical,intent(inout) :: sn_start_from_file
+   REAL,     DIMENSION( kms:kme ) , INTENT(IN) :: zfull, zhalf
+   REAL, DIMENSION(ims:ime,jms:jme),intent(in) :: z_firstlev
+   integer, intent(in) :: snc_N
+   real, dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z
+
+   real, dimension(ims:ime,jms:jme) :: XLONG
+
+
+
   if ( config_flags%fractional_seaice == 0 ) then
      xice_threshold = 0.5
   else if ( config_flags%fractional_seaice == 1 ) then
@@ -3167,6 +3254,29 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
           ENDIF               
           
 !
+
+!!! ADDED FOR CRYOWRF
+      CASE (SNOWPACKSCHEME)
+
+          in_drift = real(0.0,8)
+          in_conc  = real(0.0,8)
+          in_csalt = real(0.0,8)
+          in_q_lb  = real(0.0,8)
+          in_N_lb  = real(0.0,8)
+
+          in_glo_counter = 999
+          CALL snowpack_init(snow,snowh,isltyp,xlat,xlong, &
+                             ids,ide,jds,jde,kds,kde,  &
+                             ims,ime,jms,jme,kms,kme,  &
+                             its,ite,jts,jte,kts,kte,  &
+                             dt,ht,in_grid_id,in_glo_counter,sn_nlayers,sn_T, &
+                             sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb, &
+                             sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd,sn_graintype,sn_mk,sn_start_from_file, &
+                             z_firstlev,snc_N,snc_Z,snpack_dt = config_flags%snpack_dt, &
+                            snpack_write_dt = config_flags%snpack_write_dt, &
+                            snpack_layers_to_save = config_flags%no_snpack_lay_to_sav &
+                     )
+!!! ADDED FOR CRYOWRF
 
       CASE (NOAHMPSCHEME)
           IF ( TRIM(mminlu) .EQ. 'NLCD40' ) THEN

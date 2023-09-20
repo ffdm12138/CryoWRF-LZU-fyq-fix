@@ -53,7 +53,7 @@ CONTAINS
 #ifdef DM_PARALLEL
     USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, wrf_dm_maxval
     USE module_comm_dm, ONLY : halo_em_phys_a_sub,halo_em_fdda_sfc_sub,halo_pwp_sub,halo_em_chem_e_3_sub, &
-    halo_em_chem_e_5_sub, halo_em_hydro_noahmp_sub
+    halo_em_chem_e_5_sub, halo_em_hydro_noahmp_sub, halo_em_blowingsnow_sub
 #if ( WRFPLUS == 1 )
     USE module_comm_dm, ONLY : halo_em_phys_a_bl_surf_sub
 #endif
@@ -469,6 +469,12 @@ BENCH_START(surf_driver_tim)
 
 #ifdef DM_PARALLEL
 #     include "HALO_PWP.inc"
+#endif
+
+#if (EM_CORE == 1)
+#ifdef DM_PARALLEL
+#     include "HALO_EM_BLOWINGSNOW.inc"
+#endif
 #endif
 
       CALL wrf_debug ( 200 , ' call surface_driver' )
@@ -901,7 +907,28 @@ BENCH_START(surf_driver_tim)
      &        ,spp_lsm=config_flags%spp_lsm,pattern_spp_lsm=grid%pattern_spp_lsm     & !SPP
      &        ,field_sf=grid%field_sf                                                & !SPP
      &        ,spp_pbl=config_flags%spp_pbl,pattern_spp_pbl=grid%pattern_spp_pbl     & !SPP
-     &                                                           )
+     &        ,in_drift=grid%in_drift,in_conc=grid%in_conc,in_csalt=grid%in_csalt,in_q_lb=grid%in_q_lb,in_N_lb=grid%in_N_lb &
+     &        ,in_bs_m_exch = grid%bs_sedi &
+     &        ,ice_fluxq=grid%ice_fluxq,ice_fluxN=grid%ice_fluxN &
+     &        ,m_budg_precip=grid%m_budg_precip,m_budg_erosion=grid%m_budg_erosion,m_budg_sublim=grid%m_budg_sublim,m_budg_deposit=grid%m_budg_deposit &
+     &        ,m_budg_swe=grid%m_budg_swe,m_budg_melt=grid%m_budg_melt,m_budg_refreeze=grid%m_budg_refreeze &
+     &        ,e_budg_lw_in=grid%e_budg_lw_in,e_budg_lw_out=grid%e_budg_lw_out,e_budg_sw_in=grid%e_budg_sw_in &
+     &        ,e_budg_sw_out=grid%e_budg_sw_out,e_budg_sensib=grid%e_budg_sensib,e_budg_latent=grid%e_budg_latent,e_budg_low_bc=grid%e_budg_low_bc &
+     &        ,e_budg_raine=grid%e_budg_raine,e_budg_totale=grid%e_budg_totale,in_glo_counter=grid%glo_counter &
+     &        ,sn_T = grid%sn_T , sn_thick = grid%sn_thick , sn_volI = grid%sn_volI , sn_volW = grid%sn_volW , sn_volV = grid%sn_volV &
+     &        ,sn_rg = grid%sn_rg , sn_rb = grid%sn_rb , sn_dd = grid%sn_dd , sn_sp = grid%sn_sp , sn_cdot = grid%sn_cdot &
+     &        ,sn_meta = grid%sn_meta,sn_depd = grid%sn_depd,sn_graintype=grid%sn_graintype,sn_mk=grid%sn_mk &
+     &        ,bs_bool = config_flags%blowing_snow, sn_nlayers = grid%sn_nlayers &
+     &        ,snc_Z=grid%snc_Z,snc_N=config_flags%num_bs_sfc_layers,snpack_layers_to_save=config_flags%no_snpack_lay_to_sav &
+     &        ,sn_qs=grid%sn_qs,sn_ns=grid%sn_ns &
+     &        ,sfc_T=grid%sfc_T,sfc_Q=grid%sfc_Q,sfc_RH=grid%sfc_RH,sfc_SQ=grid%sfc_SQ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR &
+     &        ,sfc_SQ_HFX=grid%sfc_SQ_HFX,sfc_SQ_QFX=grid%sfc_SQ_QFX,corr_q_for_rad=grid%corr_q_for_rad,corr_N_for_rad=grid%corr_N_for_rad &
+     &        ,exch_h=grid%exch_h,bs_qi=moist(ims,kms,jms,P_bs_qi),bs_qni=scalar(ims,kms,jms,P_bs_qni),in_hsalt=grid%in_hsalt &
+     &        ,global_bs_bdg_div=grid%global_bs_bdg_div,global_bs_bdg_xch=grid%global_bs_bdg_xch,sfc_qi_drift=grid%sfc_qi_drift &
+     &        ,sfc_qni_drift=grid%sfc_qni_drift,sfc_u_angle=grid%sfc_u_angle,sfc_v_angle=grid%sfc_v_angle &
+     &        ,bs_sfc_qi_advt=grid%bs_sfc_qi_advt,bs_sfc_qni_advt=grid%bs_sfc_qni_advt,snpack_dt=config_flags%snpack_dt &
+     &        ,snpack_write_dt = config_flags%snpack_write_dt,snpack_psi_s = grid%snpack_psi_s &
+     &        ,loc_sza = grid%sza, tau_qc = grid%tau_qc, tau_qi = grid%tau_qi, tau_qc_tot = grid%tau_qc_tot, tau_qi_tot = grid%tau_qi_tot )
 
 #ifdef WRF_HYDRO
         if(HYDRO_dt .gt. 1 ) call wrf_drv_HYDRO(HYDRO_dt, grid,  &
@@ -910,6 +937,15 @@ BENCH_START(surf_driver_tim)
 #endif
 
 BENCH_END(surf_driver_tim)
+
+#if (EM_CORE == 1)
+#ifdef DM_PARALLEL
+#     include "HALO_EM_BLOWINGSNOW.inc"
+#endif
+#endif
+
+
+
 
 !*********
 ! pbl

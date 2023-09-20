@@ -29,20 +29,21 @@ SUBROUTINE calc_ts_locations( grid )
 
    ! Local variables
    INTEGER :: ntsloc_temp
-   INTEGER :: i, j, k, iunit
+   INTEGER :: i, j, k, iunit  
    REAL :: ts_rx, ts_ry, ts_xlat, ts_xlong, ts_hgt
    REAL :: known_lat, known_lon
    CHARACTER (LEN=132) :: message
-   CHARACTER (LEN=24) :: ts_profile_filename
+   CHARACTER (LEN=40) :: ts_profile_filename
 #if (WRF_CHEM == 1)
-   INTEGER, PARAMETER :: TS_FIELDS = 8
+   INTEGER, PARAMETER :: TS_FIELDS = 15
    CHARACTER (LEN=2), DIMENSION(TS_FIELDS) :: &
-      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR', 'O3'/)
+      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR', 'RO', 'O3', 'QS', 'NS', 'SQ', 'SN', 'DQ', 'DN'/)
 #else
-   INTEGER, PARAMETER :: TS_FIELDS = 7
+   INTEGER, PARAMETER :: TS_FIELDS = 14
    CHARACTER (LEN=2), DIMENSION(TS_FIELDS) :: &
-      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR'/) 
+      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR', 'RO', 'QS', 'NS', 'SQ', 'SN','DQ', 'DN' /) 
 #endif
+   INTEGER :: num_fields_out
    INTEGER   ierr
    CHARACTER (len=19) simulation_start_date
    INTEGER simulation_start_year   , &
@@ -63,7 +64,20 @@ SUBROUTINE calc_ts_locations( grid )
               imsy, imey, jmsy, jmey, kmsy, kmey,  &
               ipsy, ipey, jpsy, jpey, kpsy, kpey
 
+   CHARACTER(len=256)           :: newFolder
+   LOGICAL :: dirExists
+              
+   CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
+
+! Output drifting snow only if sf_surface_physics == 18
+   IF (config_flags%sf_surface_physics == 18) THEN
+      num_fields_out = SIZE(ts_file_endings)
+   ELSE
+      num_fields_out = SIZE(ts_file_endings)-6
+   END IF
+     
+      
    IF ( grid%ntsloc .LE. 0 ) RETURN
 
 #if ((EM_CORE == 1) && (DA_CORE != 1))
@@ -77,9 +91,8 @@ SUBROUTINE calc_ts_locations( grid )
                                ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
                                imsy, imey, jmsy, jmey, kmsy, kmey,  &
                                ipsy, ipey, jpsy, jpey, kpsy, kpey )
-   
-      CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-   
+
+
       ! Set up map transformation structure
       CALL map_init(ts_proj)
    
@@ -162,6 +175,17 @@ SUBROUTINE calc_ts_locations( grid )
                       stagger  = HH)
    
       END IF
+
+      !Create output folder does not exist
+      INQUIRE( file=TRIM(config_flags%tslist_outfolder), EXIST=dirExists )
+      IF (dirExists) THEN
+         WRITE (*,*) "Directory already exists: '"//TRIM(config_flags%tslist_outfolder)//"'"
+      ELSE
+         newFolder = 'mkdir -p '//TRIM(config_flags%tslist_outfolder)
+         WRITE(*,'(a)') "Creating new directory: '"//TRIM(config_flags%tslist_outfolder)//"'"
+         CALL system( newFolder )
+      ENDIF
+
    
       ! Determine simulation start time
       ierr = 0
@@ -247,7 +271,7 @@ SUBROUTINE calc_ts_locations( grid )
                IF ( iunit <= 0 ) THEN
                   CALL wrf_error_fatal('Error in calc_ts_locations: could not find a free Fortran unit.')
                END IF
-               WRITE(grid%ts_filename(k),'(A)') TRIM(grid%nametsloc(grid%id_tsloc(k)))//'.d00.TS'
+               WRITE(grid%ts_filename(k),'(A)') TRIM(config_flags%tslist_outfolder) // TRIM(grid%nametsloc(grid%id_tsloc(k)))//'.d00.TS'
                i = LEN_TRIM(grid%ts_filename(k))
                WRITE(grid%ts_filename(k)(i-4:i-3),'(I2.2)') grid%id
                OPEN(UNIT=iunit, FILE=TRIM(grid%ts_filename(k)), FORM='FORMATTED', STATUS='REPLACE')
@@ -283,7 +307,7 @@ SUBROUTINE calc_ts_locations( grid )
                CLOSE(UNIT=iunit)
 
                ts_profile_filename = grid%ts_filename(k)
-               DO j=1,SIZE(ts_file_endings)
+               DO j=1,num_fields_out
                   ! Create the output files for the vertical profiles, one file for each variable
                   iunit = get_unused_unit()
                   IF ( iunit <= 0 ) THEN
@@ -466,9 +490,20 @@ SUBROUTINE calc_ts( grid )
             ELSE
                grid%ts_th_profile(n,i,k)  =  grid%t_2(ix,k,iy) + T0
             END IF
-            grid%ts_qv_profile(n,i,k)  = grid%moist(ix,k,iy,P_QV)
-            grid%ts_p_profile(n,i,k)   = grid%pb(ix,k,iy)+grid%p(ix,k,iy)
+            grid%ts_qv_profile(n,i,k)   = grid%moist(ix,k,iy,P_QV)
+            grid%ts_p_profile(n,i,k)    = grid%pb(ix,k,iy)+grid%p(ix,k,iy)
+            grid%ts_rho_profile(n,i,k)  = grid%rho(ix,k,iy)
+            grid%ts_qi_profile(n,i,k)   = grid%moist(ix,k,iy,P_BS_QI)
+            grid%ts_qni_profile(n,i,k)  = grid%scalar(ix,k,iy,P_BS_QNI)
             END DO
+
+            do k=1,config_flags%num_bs_sfc_layers
+               grid%ts_sfc_qd_profile(n,i,k)   = grid%sfc_qi_drift(ix,k,iy)
+               grid%ts_sfc_nd_profile(n,i,k)   = grid%sfc_qni_drift(ix,k,iy)
+               grid%ts_sfc_qi_profile(n,i,k)   = grid%sn_qs(ix,k,iy)
+               grid%ts_sfc_qni_profile(n,i,k)  = grid%sn_ns(ix,k,iy)
+            enddo
+
 #endif
 #if (WRF_CHEM == 1)
             DO k=1,grid%max_ts_level
@@ -489,6 +524,13 @@ SUBROUTINE calc_ts( grid )
          grid%ts_rainc(n,i)  = grid%rainc(ix,iy)
          grid%ts_rainnc(n,i) = grid%rainnc(ix,iy)
          grid%ts_tsk(n,i)  = grid%tsk(ix,iy)
+
+         grid%ts_snd(n,i)  = grid%in_drift(ix,iy)
+         grid%ts_hsalt(n,i) = grid%in_hsalt(ix,iy)
+         grid%ts_q_lb(n,i)  = grid%in_q_lb(ix,iy)
+         grid%ts_N_lb(n,i)  = grid%in_N_lb(ix,iy)
+         grid%ts_uthresh(n,i) = grid%in_csalt(ix,iy)
+
          IF ( model_config_rec%process_time_series == 2 ) THEN
             !!! Solar diagnostics
             grid%ts_cldfrac2d(n,i) = grid%cldfrac2d(ix,iy)
@@ -532,7 +574,18 @@ SUBROUTINE calc_ts( grid )
          grid%ts_th_profile(n,i,k)    = 1.E30
          grid%ts_qv_profile(n,i,k)    = 1.E30
          grid%ts_p_profile(n,i,k)     = 1.E30
+         grid%ts_rho_profile(n,i,k)   = 1.E30
+         grid%ts_qi_profile(n,i,k)    = 1.E30
+         grid%ts_qni_profile(n,i,k)    = 1.E30
          END DO
+
+         do k=1,config_flags%num_bs_sfc_layers
+             grid%ts_sfc_qi_profile(n,i,k)    = 1.E30
+             grid%ts_sfc_qni_profile(n,i,k)   = 1.E30
+             grid%ts_sfc_qd_profile(n,i,k)    = 1.E30
+             grid%ts_sfc_nd_profile(n,i,k)    = 1.E30
+         enddo
+
 #endif   
 #if (WRF_CHEM == 1)
          DO k=1,grid%max_ts_level
@@ -553,6 +606,15 @@ SUBROUTINE calc_ts( grid )
          grid%ts_clw(n,i)  = 1.E30
          grid%ts_rainc(n,i)  = 1.E30
          grid%ts_rainnc(n,i) = 1.E30
+
+         grid%ts_snd(n,i)  = 1.E30
+         grid%ts_hsalt(n,i) = 1.E30 
+         grid%ts_q_lb(n,i)  = 1.E30
+         grid%ts_N_lb(n,i)  = 1.E30
+         grid%ts_uthresh(n,i) = 1.E30
+
+
+
          IF ( model_config_rec%process_time_series == 2 ) THEN
             !!! Solar diagnostics
             grid%ts_cldfrac2d(n,i) = 1.E30
@@ -604,12 +666,13 @@ SUBROUTINE write_ts( grid )
    USE module_domain, ONLY : domain
    USE module_dm, ONLY : wrf_dm_min_reals
    USE module_state_description
-   USE module_configure, ONLY : model_config_rec
+   USE module_configure, ONLY : model_config_rec, grid_config_rec_type, model_to_grid_config_rec
 
    IMPLICIT NONE
 
    ! Arguments
    TYPE (domain), INTENT(INOUT) :: grid
+   TYPE (grid_config_rec_type) :: config_flags
 
    LOGICAL, EXTERNAL :: wrf_dm_on_monitor
    INTEGER, EXTERNAL :: get_unused_unit
@@ -617,8 +680,10 @@ SUBROUTINE write_ts( grid )
    ! Local variables
    INTEGER :: i, n, ix, iy, iunit, k
    REAL, ALLOCATABLE, DIMENSION(:,:) :: ts_buf
-   CHARACTER (LEN=24) :: ts_profile_filename
+   CHARACTER (LEN=40) :: ts_profile_filename
    CHARACTER (LEN=26) :: profile_format
+
+   CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
    IF ( grid%ntsloc_domain .LE. 0 ) RETURN
 
@@ -631,6 +696,8 @@ SUBROUTINE write_ts( grid )
 
    ts_buf(:,:) = grid%ts_hour(:,:)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_hour(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
 #if (EM_CORE == 1) 
    DO k=1,grid%max_ts_level
@@ -667,6 +734,42 @@ SUBROUTINE write_ts( grid )
    ts_buf(:,:) = grid%ts_p_profile(:,:,k)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_p_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
    END DO
+
+   DO k=1,grid%max_ts_level
+   ts_buf(:,:) = grid%ts_rho_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_rho_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,grid%max_ts_level
+   ts_buf(:,:) = grid%ts_qi_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_qi_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,grid%max_ts_level
+   ts_buf(:,:) = grid%ts_qni_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_qni_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,config_flags%num_bs_sfc_layers
+   ts_buf(:,:) = grid%ts_sfc_qi_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sfc_qi_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,config_flags%num_bs_sfc_layers
+   ts_buf(:,:) = grid%ts_sfc_qni_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sfc_qni_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,config_flags%num_bs_sfc_layers
+   ts_buf(:,:) = grid%ts_sfc_qd_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sfc_qd_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
+   DO k=1,config_flags%num_bs_sfc_layers
+   ts_buf(:,:) = grid%ts_sfc_nd_profile(:,:,k)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sfc_nd_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
+   END DO
+
 #endif         
 #if (WRF_CHEM == 1)
    DO k=1,grid%max_ts_level
@@ -710,6 +813,21 @@ SUBROUTINE write_ts( grid )
 
    ts_buf(:,:) = grid%ts_rainnc(:,:)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_rainnc(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   ts_buf(:,:) = grid%ts_snd(:,:)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_snd(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   ts_buf(:,:) = grid%ts_hsalt(:,:)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_hsalt(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   ts_buf(:,:) = grid%ts_q_lb(:,:)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_q_lb(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   ts_buf(:,:) = grid%ts_N_lb(:,:)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_N_lb(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+   ts_buf(:,:) = grid%ts_uthresh(:,:)
+   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_uthresh(:,:),grid%ts_buf_size*grid%max_ts_locs)
 
    IF ( model_config_rec%process_time_series == 2 ) THEN
       !!! Solar diagnostics
@@ -817,7 +935,32 @@ SUBROUTINE write_ts( grid )
 
 #if (EM_CORE == 1)
             IF ( model_config_rec%process_time_series == 1 ) THEN
-               WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,14(f13.5,1x))')  &
+               IF ( config_flags%sf_surface_physics == 18) THEN
+                  ! If surface physics set to SNOWPACK
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,19(f13.5,1x))')  &
+                                 grid%id, grid%ts_hour(n,i),                &
+                                 grid%id_tsloc(i), ix, iy,                  &
+                                 grid%ts_t(n,i),                            &
+                                 grid%ts_q(n,i),                            &
+                                 grid%ts_u(n,i),                            &
+                                 grid%ts_v(n,i),                            &
+                                 grid%ts_psfc(n,i),                         &
+                                 grid%ts_glw(n,i),                          &
+                                 grid%ts_gsw(n,i),                          &
+                                 grid%ts_hfx(n,i),                          &
+                                 grid%ts_lh(n,i),                           &
+                                 grid%ts_tsk(n,i),                          &
+                                 grid%ts_tslb(n,i),                         &
+                                 grid%ts_rainc(n,i),                        &
+                                 grid%ts_rainnc(n,i),                       &
+                                 grid%ts_clw(n,i),                          &
+                                 grid%ts_snd(n,i),                          &
+                                 grid%ts_hsalt(n,i),                        &
+                                 grid%ts_q_lb(n,i),                         &
+                                 grid%ts_N_lb(n,i),                         &
+                                 grid%ts_uthresh(n,i)
+               ELSE
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,14(f13.5,1x))')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &
@@ -834,9 +977,61 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_rainc(n,i),                        &
                                  grid%ts_rainnc(n,i),                       &
                                  grid%ts_clw(n,i)
+               END IF
+                                 
             ELSE
                !!! WRF-Solar diagnostics
-               WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,39(f13.5,1x))')  &
+               IF ( config_flags%sf_surface_physics == 18 ) THEN
+                  ! If surface physics set to SNOWPACK
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,44(f13.5,1x))')  &
+                                 grid%id, grid%ts_hour(n,i),                &
+                                 grid%id_tsloc(i), ix, iy,                  &
+                                 grid%ts_t(n,i),                            &
+                                 grid%ts_q(n,i),                            &
+                                 grid%ts_u(n,i),                            &
+                                 grid%ts_v(n,i),                            &
+                                 grid%ts_psfc(n,i),                         &
+                                 grid%ts_glw(n,i),                          &
+                                 grid%ts_gsw(n,i),                          &
+                                 grid%ts_hfx(n,i),                          &
+                                 grid%ts_lh(n,i),                           &
+                                 grid%ts_tsk(n,i),                          &
+                                 grid%ts_tslb(n,i),                         &
+                                 grid%ts_rainc(n,i),                        &
+                                 grid%ts_rainnc(n,i),                       &
+                                 grid%ts_snd(n,i),                          &
+                                 grid%ts_hsalt(n,i),                        &
+                                 grid%ts_q_lb(n,i),                         &
+                                 grid%ts_N_lb(n,i),                         &
+                                 grid%ts_uthresh(n,i),                      &
+                                 grid%ts_clw(n,i),                          &
+                                 grid%ts_cldfrac2d(n,i),                    &
+                                 grid%ts_wvp(n,i),                          &
+                                 grid%ts_lwp(n,i),                          &
+                                 grid%ts_iwp(n,i),                          &
+                                 grid%ts_swp(n,i),                          &
+                                 grid%ts_wp_sum(n,i),                       &
+                                 grid%ts_lwp_tot(n,i),                      &
+                                 grid%ts_iwp_tot(n,i),                      &
+                                 grid%ts_wp_tot_sum(n,i),                   &
+                                 grid%ts_re_qc(n,i),                        &
+                                 grid%ts_re_qi(n,i),                        &
+                                 grid%ts_re_qs(n,i),                        &
+                                 grid%ts_re_qc_tot(n,i),                    &
+                                 grid%ts_re_qi_tot(n,i),                    &
+                                 grid%ts_tau_qc(n,i),                       &
+                                 grid%ts_tau_qi(n,i),                       &
+                                 grid%ts_tau_qs(n,i),                       &
+                                 grid%ts_tau_qc_tot(n,i),                   &
+                                 grid%ts_tau_qi_tot(n,i),                   &
+                                 grid%ts_cbaseht(n,i),                      &
+                                 grid%ts_ctopht(n,i),                       &
+                                 grid%ts_cbaseht_tot(n,i),                  &
+                                 grid%ts_ctopht_tot(n,i),                   &
+                                 grid%ts_clrnidx(n,i),                      &
+                                 grid%ts_sza(n,i)
+               ELSE
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,39(f13.5,1x))')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &
@@ -878,6 +1073,7 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_ctopht_tot(n,i),                   &
                                  grid%ts_clrnidx(n,i),                      &
                                  grid%ts_sza(n,i)
+               END IF
             END IF
 #else
             WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,7(f13.5,1x))')   &
@@ -906,7 +1102,7 @@ SUBROUTINE write_ts( grid )
             CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
             END IF
          !Recreate filename for u wind component profiles
-         WRITE(ts_profile_filename,'(A)') TRIM(grid%nametsloc(grid%id_tsloc(i)))//'.d00.TS'
+         WRITE(ts_profile_filename,'(A)') TRIM(config_flags%tslist_outfolder) // TRIM(grid%nametsloc(grid%id_tsloc(i)))//'.d00.TS'
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-4:k-3),'(I2.2)') grid%id
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'UU'
@@ -1019,6 +1215,8 @@ SUBROUTINE write_ts( grid )
             IF ( iunit <= 0 ) THEN
             CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
             END IF
+
+
          !Recreate filename for pressure profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'PR'
@@ -1026,12 +1224,170 @@ SUBROUTINE write_ts( grid )
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
-
+               
             WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_p_profile(n,i,1:grid%max_ts_level)                                       
          END DO
          CLOSE(UNIT=iunit)
+
+         !Write air density profile to separate file
+         iunit = get_unused_unit()
+            IF ( iunit <= 0 ) THEN
+            CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+            END IF
+
+
+         !Recreate filename for air density profiles
+         k = LEN_TRIM(ts_profile_filename)
+         WRITE(ts_profile_filename(k-1:k),'(A2)') 'RO'
+
+         OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+
+         DO n=1,grid%next_ts_time - 1
+
+            WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_rho_profile(n,i,1:grid%max_ts_level)
+         END DO
+         CLOSE(UNIT=iunit)
+
+
+         !Write blowing snow mixing ratio (bs_qi) profile to separate file
+         iunit = get_unused_unit()
+         IF ( iunit <= 0 ) THEN
+            CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+         END IF
+
+         ! Write blowing snow variables only if SNOWPACK is used as surface model
+         IF (config_flags%sf_surface_physics == 18) THEN
+            !Recreate filename for blowing snow mixing ratio
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'QS'
+
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+
+            DO n=1,grid%next_ts_time - 1
+               
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_qi_profile(n,i,1:grid%max_ts_level)
+            END DO
+            CLOSE(UNIT=iunit)
+
+            !Write blowing snow number concentration (bs_qni) profile to separate file
+            iunit = get_unused_unit()
+               IF ( iunit <= 0 ) THEN
+                  CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+               END IF
+               
+            !Recreate filename for blowing snow number concentration
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'NS'
+               
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+
+            DO n=1,grid%next_ts_time - 1
+                  
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_qni_profile(n,i,1:grid%max_ts_level)
+            END DO
+            CLOSE(UNIT=iunit)
+
+            !Write sfc snow mixing ratio :mass (sfc_qi_profile) profile to separate file
+            iunit = get_unused_unit()
+            IF ( iunit <= 0 ) THEN
+               CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+            END IF
+
+            !Recreate filename for snow drift rate
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'SQ'
+            
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+
+            DO n=1,grid%next_ts_time - 1
+
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_sfc_qi_profile(n,i,1:config_flags%num_bs_sfc_layers)
+            END DO
+            CLOSE(UNIT=iunit)
+
+            !Write sfc snow mixing ratio :number (sfc_qni_profile) profile to separate file
+            iunit = get_unused_unit()
+            IF ( iunit <= 0 ) THEN
+               CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+            END IF
+
+            !Recreate filename for snow drift rate
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'SN'
+
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+            
+            DO n=1,grid%next_ts_time - 1
+               
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_sfc_qni_profile(n,i,1:config_flags%num_bs_sfc_layers)
+            END DO
+            CLOSE(UNIT=iunit)
+
+
+            !Write sfc snow drift rate:number (sfc_qd_drift) profile to separate file
+            iunit = get_unused_unit()
+            IF ( iunit <= 0 ) THEN
+               CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+            END IF
+
+            !Recreate filename for snow drift rate
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'DQ'
+
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+            
+            DO n=1,grid%next_ts_time - 1
+               
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_sfc_qd_profile(n,i,1:config_flags%num_bs_sfc_layers)
+            END DO
+            CLOSE(UNIT=iunit)
+
+
+            !Write sfc snow drift rate:number (sfc_nd_drift) profile to separate file
+            iunit = get_unused_unit()
+            IF ( iunit <= 0 ) THEN
+               CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
+            END IF
+
+            !Recreate filename for snow drift rate
+            k = LEN_TRIM(ts_profile_filename)
+            WRITE(ts_profile_filename(k-1:k),'(A2)') 'DN'
+
+            OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
+            
+            DO n=1,grid%next_ts_time - 1
+               
+               WRITE(UNIT=iunit,FMT=profile_format)  &
+                              grid%ts_hour(n,i),             &
+                              grid%ts_sfc_nd_profile(n,i,1:config_flags%num_bs_sfc_layers)
+            END DO
+            CLOSE(UNIT=iunit)
+
+
+
+
+
+
+
+
+
+
+
+         END IF
 
 #endif   
 #if (WRF_CHEM == 1)
