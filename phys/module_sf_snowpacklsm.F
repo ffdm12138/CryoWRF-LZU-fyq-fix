@@ -970,7 +970,7 @@ endif
     INTEGER :: counter_snowpoints
     logical :: new_alloc
     integer :: l_maxdom
-    real :: z_top,z_top_c,z_bot,dz_bot
+    real :: z_top,z_top_c,h_salt,logdz,logzi
     integer :: nz_c
     double precision :: tmp_snow,tmp_snowh
     character*256 :: snpack_mode
@@ -1085,6 +1085,7 @@ endif
            enddo
         enddo
 
+        h_salt = 0.15 ! Quick fix: hard-code the same value as in Coupler.cpp
         counter_snowpoints=0
         do J=jts,jtf
            do I=its,itf
@@ -1092,10 +1093,18 @@ endif
                 !write(*,*) 'z_firstlev: ', z_firstlev(I,J)
                 Z_top = z_firstlev(I,J) * 0.5
                 Z_top_c = real(floor(Z_top)) - 3.0
-                z_bot = 0.5
-                dz_bot = (Z_top_c-z_bot)/(snc_N-1)
+                if( Z_top_c < h_salt ) then
+                  PRINT *,'CANNOT INITIALIZE VERTICAL LEVELS OF FINE MESH AT I=',I,'J=',J
+                  STOP
+                endif
+
+                ! Log-spaced vertical discretization in the fine mesh
+                ! (distance bewteen h_salt and lowest fine level can be
+                ! reduced by increasing the number of fine levels)
+                logdz = (log10(Z_top_c) - log10(h_salt))/snc_N
                 do nz_c = 1,snc_N
-                   snc_Z(I,nz_c,J) = z_bot + (nz_c-1)*dz_bot  
+                   logzi = log10(h_salt) + nz_c*logdz
+                   snc_Z(I,nz_c,J) = 10**logzi
                 enddo
            enddo
         enddo
