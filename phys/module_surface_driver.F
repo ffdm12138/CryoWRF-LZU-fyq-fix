@@ -1455,11 +1455,11 @@ CONTAINS
    real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi,bs_qni
    real,dimension(ims:ime,jms:jme), intent(inout) :: in_hsalt,snpack_psi_s
    real,dimension(ims:ime,jms:jme), intent(inout) :: global_bs_bdg_div,global_bs_bdg_xch
-   real,dimension(ims:ime,snc_N,jms:jme) :: sfc_qi_drift,sfc_qni_drift
-   real,dimension(ims:ime,snc_N,jms:jme) :: bs_sfc_qi_advt,bs_sfc_qni_advt 
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_qi_drift,sfc_qni_drift
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: bs_sfc_qi_advt,bs_sfc_qni_advt 
 
-   real,dimension(ims:ime,jms:jme) :: sfc_u_angle,sfc_v_angle
-   real,dimension(ims:ime,jms:jme) :: Q2_snpack,T2_snpack
+   real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_u_angle,sfc_v_angle
+   real,dimension(ims:ime,jms:jme) :: Q2_snpack,T2_snpack,RMOL_OLD
    real,dimension(ims:ime,jms:jme) :: U10_snpack,V10_snpack
    real,intent(in) :: snpack_dt,snpack_write_dt
 
@@ -2000,6 +2000,12 @@ CONTAINS
        ENDDO
      ENDDO
      !$OMP END PARALLEL DO
+
+     ! Compute and store reciprocal Obukhov length using results of land surface scheme over land with ice
+     ! and over sea ice (for previous time step) before they are overwritten by surface layer scheme;
+     ! UST is always > 0, at least if using MYNN surface layer scheme (wind speed >= 0.1 m s-1 
+     ! over open water and sea ice) and SNOWPACK land surface scheme
+     RMOL_OLD = (-1.0) * 0.4 * 9.81 * HFX / ( RHO(:,kms,:)*1004.67 * TSK * UST**3.0 ) ! added by A. Sigmund, Apr 2024
 
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij, i, j, k )
@@ -3102,7 +3108,8 @@ CONTAINS
 
            !!!!!!!!!! CALL TO SNOWPACK LSM
 
-           call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold,t_phy,qv_curr,   &
+           call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold, &
+	                    FRACTIONAL_SEAICE,t_phy,qv_curr,   &
                             u_phy,v_phy,swdown,glw,p8w,rainbl,tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
                             znt,ids,ide,jds,jde,kds,kde,ims,ime,jms,jme,kms,kme,i_start(ij),i_end(ij),             &
                             j_start(ij),j_end(ij),kts,kte,          &
@@ -3119,7 +3126,7 @@ CONTAINS
                             sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,  &
                             NUM_SOIL_LAYERS,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s, &
                             Q2_snpack,T2_snpack,U10_snpack,V10_snpack,UST,loc_sza,tau_qc, & 
-                            tau_qi,tau_qc_tot,tau_qi_tot)
+                            tau_qi,tau_qc_tot,tau_qi_tot,RMOL_OLD,ZNT_SEA)
 
 
             !!! CALL TO SEAICE_NOAH to deal with sea_ice points

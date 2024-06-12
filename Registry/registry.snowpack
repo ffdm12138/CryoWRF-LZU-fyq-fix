@@ -14,7 +14,7 @@ state   real    bs_qni         ikjftb  scalar      1         -     \
 
 state   real    in_drift       ij      misc         1         -     i012rhd    "SNOW_DRIFT" "SNOW DRIFT" "kg m-1 s-1"
 state   real    in_conc        ij      misc         1         -     i012rhd    "SNOW_IN_AIR" "SNOW MASS in air" "kg m-2"
-state   real    in_csalt       ij      misc         1         -     i012rhd    "SNOW_CONC_SALTATION" "SNOW CONC at SALTATION HEIGHT" "kg m-3"
+state   real    in_csalt       ij      misc         1         -     i012rhd    "THRESHOLD_USTAR" "THRESHOLD FRICTION VELOCITY" "m s-1"
 state   real    in_q_lb        ij      misc         1         -     i012rhd    "SURFACE_SNOW_MIX_RATIO" "SNOW MIXING RATIO AT LB" "kg kg-1"
 state   real    in_N_lb        ij      misc         1         -     i012rhd    "SURFACE_SNOW_NUMBER_MIX_RATIO" "SNOW NUMBER MIXING RATIO AT LB" "1 kg-1"
 state   real    in_hsalt       ij      misc         1         -     i012rhd    "SALTATION_HEIGHT" "Height of saltation layer" "m"
@@ -98,8 +98,8 @@ state   real    bs_sublim  ij        misc         1         -     i012rhd=(inter
 state   real    global_bs_bdg_div ij misc         1         -     i012rhd=(interp_fcn_nn) "bs_div"  "accum. blowing snow divergence" "kg m-2"
 state   real    global_bs_bdg_xch ij misc         1         -     i012rhd=(interp_fcn_nn) "bs_xch"  "accum. blowing snow exchange" "kg m-2"
 
-state   real    sfc_qi_drift i{snc_N}j misc       1         -     i012rhd=(interp_fcn_nn) "bs_qi_drift" "blowing snow mass drift" "kg kg-1 m s-1"
-state   real    sfc_qni_drift i{snc_N}j misc      1         -     i012rhd=(interp_fcn_nn) "bs_qni_drift" "blowing snow number drift" "# kg-1 m s-1"
+state   real    sfc_qi_drift i{snc_N}j misc       1         -     i012rhd=(interp_fcn_nn) "bs_qi_drift" "blowing snow mass drift" "kg m-2 s-1"
+state   real    sfc_qni_drift i{snc_N}j misc      1         -     i012rhd=(interp_fcn_nn) "bs_qni_drift" "blowing snow number drift" "# m-2 s-1"
 state   real    bs_sfc_qi_advt i{snc_N}j misc     1         -     i012rhd=(interp_fcn_nn) "bs_qi_advect" "blowing snow mass advect" "kg kg-1 "
 state   real    bs_sfc_qni_advt i{snc_N}j misc    1         -     i012rhd=(interp_fcn_nn) "bs_qni_advect" "blowing snow number advect" "# kg-1"
 
@@ -136,8 +136,8 @@ state    real   ts_qi_profile  ?!k       misc      -         -      -        "TS
 state    real   ts_qni_profile  ?!k       misc      -         -      -        "TS_QNI_PROFILE"  "Blowing snow number mixing ratio" "# kg-1"
 state    real   ts_sfc_qi_profile  ?!{snc_N} misc      -         -      -        "TS_SFCQI_PROFILE"  "Surface blowing snow mixing ratio" "kg kg-1"
 state    real   ts_sfc_qni_profile ?!{snc_N} misc      -         -      -        "TS_SFCQNI_PROFILE"  "Surface blowing snow number concentration" "# kg-1"
-state    real   ts_sfc_qd_profile  ?!{snc_N} misc      -         -      -        "TS_SFCQD_PROFILE"  "snow drift mass" "kg m^-2 s-1"
-state    real   ts_sfc_nd_profile  ?!{snc_N} misc      -         -      -        "TS_SFCND_PROFILE"  "snow drift number" "# m^-2 s-1"
+state    real   ts_sfc_qd_profile  ?!{snc_N} misc      -         -      -        "TS_SFCQD_PROFILE"  "snow drift mass" "kg m-2 s-1"
+state    real   ts_sfc_nd_profile  ?!{snc_N} misc      -         -      -        "TS_SFCND_PROFILE"  "snow drift number" "# m-2 s-1"
 
 
 

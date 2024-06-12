@@ -681,7 +681,7 @@ SUBROUTINE write_ts( grid )
    INTEGER :: i, n, ix, iy, iunit, k
    REAL, ALLOCATABLE, DIMENSION(:,:) :: ts_buf
    CHARACTER (LEN=40) :: ts_profile_filename
-   CHARACTER (LEN=26) :: profile_format
+   CHARACTER (LEN=26) :: profile_format,profile_format_sfc,profile_format_sfc_N
 
    CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
@@ -937,7 +937,7 @@ SUBROUTINE write_ts( grid )
             IF ( model_config_rec%process_time_series == 1 ) THEN
                IF ( config_flags%sf_surface_physics == 18) THEN
                   ! If surface physics set to SNOWPACK
-                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,19(f13.5,1x))')  &
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,17(f13.5,1x),f13.2,1x,f13.5,1x)')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &
@@ -983,7 +983,7 @@ SUBROUTINE write_ts( grid )
                !!! WRF-Solar diagnostics
                IF ( config_flags%sf_surface_physics == 18 ) THEN
                   ! If surface physics set to SNOWPACK
-                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,44(f13.5,1x))')  &
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,17(f13.5,1x),f13.2,1x,26(f13.5,1x))')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &
@@ -999,12 +999,12 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_tslb(n,i),                         &
                                  grid%ts_rainc(n,i),                        &
                                  grid%ts_rainnc(n,i),                       &
+                                 grid%ts_clw(n,i),                          &
                                  grid%ts_snd(n,i),                          &
                                  grid%ts_hsalt(n,i),                        &
                                  grid%ts_q_lb(n,i),                         &
                                  grid%ts_N_lb(n,i),                         &
                                  grid%ts_uthresh(n,i),                      &
-                                 grid%ts_clw(n,i),                          &
                                  grid%ts_cldfrac2d(n,i),                    &
                                  grid%ts_wvp(n,i),                          &
                                  grid%ts_lwp(n,i),                          &
@@ -1094,7 +1094,12 @@ SUBROUTINE write_ts( grid )
 #if (EM_CORE == 1)   
          profile_format = '(f13.6,1x,000(f13.5,1x))'
          k= LEN_TRIM(profile_format)
-         WRITE(profile_format(12:14),'(I3.3)') grid%max_ts_level
+         WRITE(profile_format(11:13),'(I3.3)') grid%max_ts_level
+
+         profile_format_sfc   = '(f13.6,1x,000(f13.5,1x))'
+         profile_format_sfc_N = '(f13.6,1x,000(f13.2,1x))'
+         WRITE(profile_format_sfc(11:13),  '(I3.3)') config_flags%num_bs_sfc_layers
+         WRITE(profile_format_sfc_N(11:13),'(I3.3)') config_flags%num_bs_sfc_layers
 
          !Write u wind component profile to separate file
          iunit = get_unused_unit()
@@ -1309,7 +1314,7 @@ SUBROUTINE write_ts( grid )
 
             DO n=1,grid%next_ts_time - 1
 
-               WRITE(UNIT=iunit,FMT=profile_format)  &
+               WRITE(UNIT=iunit,FMT=profile_format_sfc)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_qi_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
@@ -1329,7 +1334,7 @@ SUBROUTINE write_ts( grid )
             
             DO n=1,grid%next_ts_time - 1
                
-               WRITE(UNIT=iunit,FMT=profile_format)  &
+               WRITE(UNIT=iunit,FMT=profile_format_sfc_N)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_qni_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
@@ -1350,7 +1355,7 @@ SUBROUTINE write_ts( grid )
             
             DO n=1,grid%next_ts_time - 1
                
-               WRITE(UNIT=iunit,FMT=profile_format)  &
+               WRITE(UNIT=iunit,FMT=profile_format_sfc)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_qd_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
@@ -1371,7 +1376,7 @@ SUBROUTINE write_ts( grid )
             
             DO n=1,grid%next_ts_time - 1
                
-               WRITE(UNIT=iunit,FMT=profile_format)  &
+               WRITE(UNIT=iunit,FMT=profile_format_sfc_N)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_nd_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO

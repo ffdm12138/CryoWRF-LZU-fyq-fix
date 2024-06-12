@@ -8,7 +8,7 @@ CONTAINS
   SUBROUTINE snowpacklsm(inest,ITIMESTEP,XLAT,XLONG, & ! IN : Time/Space-related
                   DZ8W,       DT,       DX,            & ! IN : Model configuration 
 	        IVGTYP,   ISLTYP,    & ! IN : Vegetation/Soil characteristics
-		 XLAND,     XICE,XICE_THRES,  & ! IN : Vegetation/Soil characteristics
+		 XLAND,     XICE,XICE_THRES,FRACTIONAL_SEAICE,  & ! IN : Vegetation/Soil characteristics
                    T3D,     QV3D,     U_PHY,    V_PHY,   SWDOWN,      GLW,  & ! IN : Forcing
 		 P8W3D,PRECIP_IN,        & ! IN : Forcing
                    TSK,      HFX,      QFX,        LH,   & ! IN/OUT LSM eqv
@@ -30,7 +30,8 @@ CONTAINS
                corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch, &
                sfc_qi_drift,sfc_qni_drift,sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt, &
                snpack_write_dt,NSOIL,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s,Q2_snpack,T2_snpack, &
-               U10_snpack,V10_snpack,UST_V,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot)
+               U10_snpack,V10_snpack,UST_V,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot, &
+               RMOL_OLD,ZNT_SEA)
 !----------------------------------------------------------------
 !!! ADDED FOR BLOWING SNOW ADVECTION    
     USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
@@ -65,6 +66,7 @@ CONTAINS
 
 
     INTEGER,                                         INTENT(IN   ) ::  ITIMESTEP ! timestep number
+    INTEGER,                                         INTENT(IN   ) ::  FRACTIONAL_SEAICE
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XLAT      ! latitude [rad]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XLONG     ! latitude [rad]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  DZ8W      ! thickness of atmo layers [m]
@@ -83,6 +85,8 @@ CONTAINS
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  PRECIP_IN ! total input precipitation [mm]
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  RMOL_OLD  ! reciprocal Obukhov length (m) before it got overwritten by surface layer scheme (MYNN)
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  ZNT_SEA   ! contains roughness length (m) of open-water fraction for grid cells with fractional sea ice
 
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TSK       ! surface radiative temperature [K]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  HFX       ! sensible heat flux [W m-2]
@@ -262,19 +266,14 @@ CONTAINS
     real,dimension(snc_N) :: z_loc,qi_loc,Ni_loc,lambda,VN,VQ,g,del_z_loc
     real,dimension(snc_N) :: mat_a,mat_b,mat_c,mat_d
     real,dimension(snc_N) :: qi_final,ni_final
-    real,dimension(snc_N) :: loc_sfc_T,loc_sfc_Q,loc_sfc_RH,loc_sfc_SQ,loc_sfc_SN
-    real,dimension(snc_N) :: loc_sfc_meanR
-    real,dimension(snc_N) :: loc_sfc_SQ_HFX
     real,dimension(snc_N) :: weight_h
     real :: weight_larger
     real :: z1,z2,z3,K1,K2,K_alpha
     real,parameter :: kappa = 0.4
-    real :: ust
     real :: a_loc,b_loc
     real :: mean_NBest,eta,N_top,N_salt,q_salt,del_time,del_t,Ni_top,qi_top,g_top
     real, parameter :: alpha = 3.0
     real :: h_salt,lambda_top,VN_top,VQ_top
-    real :: ici_TSK,ici_Q
     real, parameter :: Rv = 461.5
     real :: tmp_SQ,tmp_SN
     real :: total_sfc_SQ_HFX,total_sfc_SQ_QFX
@@ -298,10 +297,10 @@ CONTAINS
     real, dimension(ims:ime,jms:jme),intent(inout) :: sfc_u_angle,sfc_v_angle
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: sfc_qi_drift,sfc_qni_drift
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: bs_sfc_qi_advt,bs_sfc_qni_advt
-    real, dimension(snc_N) :: d_sn_qi_dt,d_sn_qni_dt
+    real, dimension(snc_N) :: d_sn_qi_dt,d_sn_qni_dt,psi_m_zsfc,psi_s_zsfc,ratio_log_m_sfc,ratio_log_s_sfc
 
     real,intent(in) :: snpack_dt,snpack_write_dt
-    real :: prof_const_a,prof_const_b
+    real :: rmol_old_loc,rmol_loc,psi_m_zref,psi_m_znew,psi_s_zref,psi_s_znew,ratio_log_m,ratio_log_s
     integer :: c_x,c_y,iii,jjj,ccci,cccj
     real :: min_d,d
 
@@ -416,27 +415,84 @@ endif
 
 
 
-bs_sfc_qi_advt(I,k,J)  = d_sn_qi_dt(k) / rho_v(I,k,J)
-bs_sfc_qni_advt(I,k,J) = d_sn_qni_dt(k) / rho_v(I,k,J)
+bs_sfc_qi_advt(I,k,J)  = d_sn_qi_dt(k) / rho_v(I,kms,J) ! use density at lowest WRF level for fine mesh (as in module_microphysics_driver.F)
+bs_sfc_qni_advt(I,k,J) = d_sn_qni_dt(k) / rho_v(I,kms,J)
 
-sn_qs(I,k,J) = sn_qs(I,k,J) + d_sn_qi_dt(k) / rho_v(I,k,J)
-sn_ns(I,k,J) = sn_ns(I,k,J) + d_sn_qni_dt(k) / rho_v(I,k,J)
+sn_qs(I,k,J) = sn_qs(I,k,J) + d_sn_qi_dt(k) / rho_v(I,kms,J)
+sn_ns(I,k,J) = sn_ns(I,k,J) + d_sn_qni_dt(k) / rho_v(I,kms,J)
+
+! Apply plausibility limits after horizontal advection
+sn_qs(I,k,J) = max(1.0E-12 , sn_qs(I,k,J))
+sn_ns(I,k,J) = max(1.0E-6  , sn_ns(I,k,J))
 enddo
 
 enddo
 enddo 
 
 
-!! GET U_SFC and V_SFC , i.e., getting surface layer wind speeds
+!! GET U_SFC and V_SFC , i.e., getting surface layer wind speeds using Monin-Obukhov similarity theory
 do j=jts,jte
 do i=its,ite
 
+    ! reciprocal Obukhov length
+    rmol_old_loc = RMOL_OLD(I,J)
+
+    ! Roughness length
+    IF (XICE(I,J) >= XICE_THRES) THEN ! sea ice
+
+       if (fractional_seaice == 1) then
+          Z0WRF = ZNT(I,J) * XICE(I,J) + (1.0-XICE(I,J)) * ZNT_SEA(I,J) ! weighted average
+       else
+          Z0WRF = ZNT(I,J) ! sea ice only
+       endif
+
+    ELSEIF ((XLAND(I,J)-1.5) >= 0.0) THEN ! open water
+
+       Z0WRF = ZNT(I,J)
+
+    ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
+ &          ( snpack_mode == 'land' )) THEN ! land (with ice)
+      
+       if ( SNOWH(I,J) .gt. 0 ) then
+          Z0WRF = 0.002
+       else
+          Z0WRF = Z0(I,J)
+       endif
+
+    ELSE ! should not happen
+      
+       PRINT *,'STOP AS THERE IS A LAND SURFACE WITHOUT ICE AT I=',I,'J=',J
+       STOP
+
+    ENDIF
+
      Z_ML = 0.5*dz8w(I,1,J)
+    ! stability correction terms
+    IF (ITIMESTEP > (3*snpack_dt/DT)) THEN
+       if(rmol_old_loc > 0.0) then ! stable
+          psi_m_zref = psi_holtslag( Z_ML * rmol_old_loc )
+          DO K = 1,snc_N
+             psi_m_zsfc(K) = psi_holtslag( snc_Z(I,K,J) * rmol_old_loc )
+          ENDDO
+       else ! unstable
+          psi_m_zref = psi_m_paulson( Z_ML * rmol_old_loc )
+          DO K = 1,snc_N
+             psi_m_zsfc(K) = psi_m_paulson( snc_Z(I,K,J) * rmol_old_loc )
+          ENDDO
+       endif 
+    ELSE ! initial phase: neglect stability correction as HFX and Obukhov length over land still depend strongly on initial conditions 
+       psi_m_zref = 0.0
+       psi_m_zsfc = 0.0
+    ENDIF
+
 do k=1,snc_N
-     U_SFC(i,k,j) = (U_PHY(I,1,J)/Z_ML) * snc_Z(I,k,J)
-     V_SFC(i,k,j) = (V_PHY(I,1,J)/Z_ML) * snc_Z(I,k,J)
+       ratio_log_m_sfc(K) = max( log( (snc_Z(I,K,J)+Z0WRF)/Z0WRF )-psi_m_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
+  &                         max( log( (Z_ML+Z0WRF)  / Z0WRF )     -psi_m_zref,    0.7 )      
+       ! Adding Z0WRF in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
 enddo
-    
+    ! Wind velocity components in fine mesh
+    U_SFC(i,:,j) = U_PHY(I,1,J) * ratio_log_m_sfc
+    V_SFC(i,:,j) = V_PHY(I,1,J) * ratio_log_m_sfc
 
 enddo
 enddo
@@ -772,18 +828,39 @@ endif
     EMISSI = 0.98
     SALB   = real(out_ALBEDO,4)
 
-    prof_const_a = (out_HFX /(l_rho_v*1004.67*IN_UST*0.4))
-    prof_const_b = (QFX(I,J)/(l_rho_v*IN_UST*0.4)) 
-  ! compute T2 and Q2
+    ! reconstruct reciprocal Obukhov length (m)
+    ! friction velocity is always > 0 as wind speed >= 0.3 m s-1 in Meteo.cc
+    rmol_loc = real( (-1.0) * 0.4 * 9.81 * out_HFX / ( l_rho_v*1004.67 * out_TSK * in_UST**3.0 ) , 4)
+    ! compute stability correction terms for various heights
+    if(rmol_loc > 0.0) then ! stable
+      psi_m_zref = psi_holtslag( Z_ML * rmol_loc )
+      psi_m_znew = psi_holtslag( 10.0 * rmol_loc )
+      psi_s_zref = psi_m_zref
+      psi_s_znew = psi_holtslag( 2.0 * rmol_loc )
+      DO K = 1,snc_N
+        psi_s_zsfc(K) = psi_holtslag( snc_Z(I,K,J) * rmol_loc )
+      ENDDO
+    else ! unstable
+      psi_m_zref = psi_m_paulson( Z_ML * rmol_loc )
+      psi_m_znew = psi_m_paulson( 10.0 * rmol_loc )
+      psi_s_zref = psi_s_stearns( Z_ML * rmol_loc )
+      psi_s_znew = psi_s_stearns( 2.0 * rmol_loc )
+      DO K = 1,snc_N
+        psi_s_zsfc(K) = psi_s_stearns( snc_Z(I,K,J) * rmol_loc )
+      ENDDO
+    endif
 
+  ! compute T2 and Q2 using Monin-Obukhov similarity theory
+    ratio_log_s = max( log(2.0/Z0WRF)  -psi_s_znew, 0.7 ) / &  ! numerator and denominator must be positive
+  &               max( real(log_z_z0,4)-psi_s_zref, 0.7 )
+    T2_snpack(I,J) = TRAD   + (T_ML - TRAD)   * ratio_log_s
+    Q2_snpack(I,J) = QSFC1D + (Q_ML - QSFC1D) * ratio_log_s
 
-
-    T2_snpack(I,J) = real(out_TSK  - prof_const_a*(max((log(2.0/Z0WRF)-real(l_psi_s,4)),0.7)),4)
-    Q2_snpack(I,J) = real(out_QSFC - prof_const_b*(max((log(2.0/Z0WRF)-real(l_psi_s,4)),0.7)),4)
-
-  ! compute U10 and V10
-    U10_snpack(I,J) = (real(in_UST,4)/real(0.4,4))*(max((log(10.0/Z0WRF)-real(l_psi_s,4)),0.7)) * U_ML/real(in_VW,4)
-    V10_snpack(I,J) = (real(in_UST,4)/real(0.4,4))*(max((log(10.0/Z0WRF)-real(l_psi_s,4)),0.7)) * V_ML/real(in_VW,4)
+  ! compute U10 and V10 using Monin-Obukhov similarity theory
+    ratio_log_m = max( log(10.0/Z0WRF) -psi_m_znew, 0.7 ) / &
+  &               max( real(log_z_z0,4)-psi_m_zref, 0.7 )
+    U10_snpack(I,J) = U_ML * ratio_log_m
+    V10_snpack(I,J) = V_ML * ratio_log_m
 
 !    if( (I .eq. 37) .and. (J .eq. 99)) then
 !
@@ -793,8 +870,13 @@ endif
 
 
   ! sfc_T,sfc_Q
-    sfc_T(I,1:snc_N,J) = real(TRAD  - prof_const_a*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)
-    sfc_Q(I,1:snc_N,J) = real(QSFC1D - prof_const_b*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)
+    DO K = 1,snc_N
+      ratio_log_s_sfc(K) = max( log( (snc_Z(I,K,J)+Z0WRF)/Z0WRF )-psi_s_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
+  &                        max( log( (Z_ML+Z0WRF) / Z0WRF )      -psi_s_zref,    0.7 )
+      ! Adding Z0WRF in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
+    ENDDO
+    sfc_T(I,1:snc_N,J) = TRAD   + (T_ML - TRAD)   * ratio_log_s_sfc
+    sfc_Q(I,1:snc_N,J) = QSFC1D + (Q_ML - QSFC1D) * ratio_log_s_sfc
    
    ENDIF ! glacial split ends 
 
@@ -1198,8 +1280,45 @@ SUBROUTINE Qsat_noah(T,p,es,qs)
     end subroutine Qsat_noah
 
 
+!------------------------------------------------------------------------------------------
+! integrated stability correction term for stable conditions (Holtslag and deBruin, 1988)
+! same implementation as in snpack_for_wrf/snowpack/snowpack/Meteo.cc
+FUNCTION psi_holtslag( zeta )
+  
+  real :: psi_holtslag
+  real, intent(in) :: zeta
+
+    psi_holtslag = (-1.0)*( 0.7*zeta + 0.75*(zeta - 14.28) * exp(-0.35 * zeta) + 10.71 )
+
+END FUNCTION psi_holtslag
 
 
+!------------------------------------------------------------------------------------------
+! integrated stability correction term for momentum in unstable conditions (Paulson - the original)
+! same implementation as in snpack_for_wrf/snowpack/snowpack/Meteo.cc
+FUNCTION psi_m_paulson( zeta )
+  
+  real :: psi_m_paulson, dummy
+  real, intent(in) :: zeta
+
+    dummy = (1.0 - 15.0 * zeta)**0.25
+    psi_m_paulson = 2.0*log(0.5*(1.0 + dummy)) + log(0.5*(1.0 + dummy**2)) - 2.0*atan(dummy) + 0.5 * 3.14159
+
+END FUNCTION psi_m_paulson
+
+
+!------------------------------------------------------------------------------------------
+! integrated stability correction term for temperature/humidity in unstable conditions (Stearns and Weidner, 1993)
+! same implementation as in snpack_for_wrf/snowpack/snowpack/Meteo.cc
+FUNCTION psi_s_stearns( zeta )
+  
+  real :: psi_s_stearns, dummy
+  real, intent(in) :: zeta
+
+    dummy = (1.0 - 22.5 * zeta)**0.33333
+    psi_s_stearns = log((1.0 + dummy + dummy**2)**1.5) - 1.732*atan(0.577 * (1.0 + 2.0*dummy)) + 0.1659
+
+END FUNCTION psi_s_stearns
 
 
 !------------------------------------------------------------------------------------------
