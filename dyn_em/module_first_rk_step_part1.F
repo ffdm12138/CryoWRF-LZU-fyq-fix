@@ -921,14 +921,15 @@ BENCH_START(surf_driver_tim)
      &        ,bs_bool = config_flags%blowing_snow, sn_nlayers = grid%sn_nlayers &
      &        ,snc_Z=grid%snc_Z,snc_N=config_flags%num_bs_sfc_layers,snpack_layers_to_save=config_flags%no_snpack_lay_to_sav &
      &        ,sn_qs=grid%sn_qs,sn_ns=grid%sn_ns &
-     &        ,sfc_T=grid%sfc_T,sfc_Q=grid%sfc_Q,sfc_RH=grid%sfc_RH,sfc_SQ=grid%sfc_SQ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR &
+     &        ,sfc_SQ=grid%sfc_SQ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR &
      &        ,sfc_SQ_HFX=grid%sfc_SQ_HFX,sfc_SQ_QFX=grid%sfc_SQ_QFX,corr_q_for_rad=grid%corr_q_for_rad,corr_N_for_rad=grid%corr_N_for_rad &
      &        ,exch_h=grid%exch_h,bs_qi=moist(ims,kms,jms,P_bs_qi),bs_qni=scalar(ims,kms,jms,P_bs_qni),in_hsalt=grid%in_hsalt &
      &        ,global_bs_bdg_div=grid%global_bs_bdg_div,global_bs_bdg_xch=grid%global_bs_bdg_xch,sfc_qi_drift=grid%sfc_qi_drift &
      &        ,sfc_qni_drift=grid%sfc_qni_drift,sfc_u_angle=grid%sfc_u_angle,sfc_v_angle=grid%sfc_v_angle &
      &        ,bs_sfc_qi_advt=grid%bs_sfc_qi_advt,bs_sfc_qni_advt=grid%bs_sfc_qni_advt,snpack_dt=config_flags%snpack_dt &
      &        ,snpack_write_dt = config_flags%snpack_write_dt,snpack_psi_s = grid%snpack_psi_s &
-     &        ,loc_sza = grid%sza, tau_qc = grid%tau_qc, tau_qi = grid%tau_qi, tau_qc_tot = grid%tau_qc_tot, tau_qi_tot = grid%tau_qi_tot )
+     &        ,loc_sza = grid%sza, tau_qc = grid%tau_qc, tau_qi = grid%tau_qi, tau_qc_tot = grid%tau_qc_tot, tau_qi_tot = grid%tau_qi_tot &
+     &        ,znt_mean=grid%znt_mean )
 
 #ifdef WRF_HYDRO
         if(HYDRO_dt .gt. 1 ) call wrf_drv_HYDRO(HYDRO_dt, grid,  &

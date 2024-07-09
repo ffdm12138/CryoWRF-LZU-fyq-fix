@@ -47,6 +47,9 @@ state   real    corr_q_for_rad ij      misc         1         -     i012rhd    "
 state   real    corr_N_for_rad ij      misc         1         -     i012rhd    "rad_correction_N" "blowing snow rad corr. for z=1" "# kg-1"
 state   real    snpack_psi_s   ij      misc         1         -     i012rhd    "snpack_stab"  "atmospheric stability" "-"
 
+# Aerodynamic roughness length (weighted average for fractional sea ice grid cells in contrast to ZNT)
+state   real    znt_mean       ij      misc         1         -     h          "ZNT_MEAN"  "weighted average of roughness length" "m"
+
 state   real    sn_T     i{snpacky}j   misc         1         Z     rhd=(interp_fcn_nn)     "snpack_T"  "snowpack temperature" "K"
 state   real    sn_thick i{snpacky}j   misc         1         Z     rhd=(interp_fcn_nn)     "sn_thick"  "snowpack thickness" "m"
 state   real    sn_volI  i{snpacky}j   misc         1         Z     rhd=(interp_fcn_nn)     "sn_volI"   "Ice volume fraction" "%"
@@ -83,9 +86,9 @@ state   integer sn_nlayers ij          misc         1         -     rhd=(interp_
 state   real    sn_qs    i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sn_qs" "sn surface_qs" "kg kg-1"
 state   real    sn_ns    i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sn_ns" "sn surface_ns" "# kg-1"
 state   real    snc_Z    i{snc_N}j   misc         1         Z     i012rhd=(interp_fcn_nn) "sn_c_height" "sn surface heights" "m"
-state   real    sfc_T    i{snc_N}j   misc         1         -     i012rhd={interp_fcn_nn) "sfc_T" "surface layer temperature" "K"
+state   real    sfc_T    i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_T" "surface layer temperature" "K"
 state   real    sfc_Q    i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_Q" "surface layer spec. humidity" "kg kg-1"
-state   real    sfc_RH   i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_RH" "surface layer RH" "%"
+state   real    sfc_RH   i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_RH" "surface layer RH" "-"
 state   real    sfc_SQ   i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_SQ" "surface layer source Q" "kg kg-1 s-1 "
 state   real    sfc_SN   i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sfc_SN" "surface layer source N" "s-1 "
 state   real    sfc_meanR i{snc_N}j  misc         1         -     i012rhd=(interp_fcn_nn) "sfc_meanR" "surface layer mean radius" "m"

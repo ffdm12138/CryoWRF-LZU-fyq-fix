@@ -152,6 +152,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,bs_meanR,corr_q_for_rad &
                       ,corr_N_for_rad,tsk,in_q_lb,in_N_lb,in_bs_sedi,bs_bool,bool_snow_sublimation &
                       ,bs_rad_effect,in_hsalt, bs_sublim, xkhv_LES, bs_qi_sublim3d,sn_qi_sublim3d  & 
+                      ,ZNT_MEAN, snpack_dt, HFX, UST, XICE, FRACTIONAL_SEAICE &
 !!! Added for CRYOWRF !!!
 )
 
@@ -662,21 +663,23 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 real,dimension(ims:ime,jms:jme), intent(inout) :: corr_q_for_rad,corr_N_for_rad
 logical,intent(in) :: bs_bool,bool_snow_sublimation,bs_rad_effect
 real,dimension(ims:ime,jms:jme), intent(inout) :: in_hsalt,bs_sublim
-integer,intent(in) :: snc_N
+integer,intent(in) :: snc_N, FRACTIONAL_SEAICE
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
-real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
+real,dimension(ims:ime,snc_N,jms:jme), intent(out)   :: sfc_T,sfc_Q,sfc_RH
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
 
 real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi,bs_qni,bs_meanR
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_rad,bs_qni_rad
 real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: xkhv_LES
-real,dimension(ims:ime,jms:jme), intent(in) :: tsk,in_q_lb,in_N_lb
+real,dimension(ims:ime,jms:jme), intent(in) :: tsk,in_q_lb,in_N_lb,ZNT_MEAN,HFX,UST,XICE
 real,dimension(ims:ime,jms:jme), intent(inout) :: in_bs_sedi
 
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublim3d
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d 
 
+real,intent(in) :: snpack_dt
+real            :: xice_threshold
 !!! Added for CRYOWRF !!!
                                                           
 #if ( WRF_CHEM == 1)
@@ -808,11 +811,23 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
    !!! ADDED FOR CRYOWRF !!!
    if(bs_bool) then
-
+            
+           if ( fractional_seaice == 0 ) then
+              xice_threshold = 0.5
+           else if ( fractional_seaice == 1 ) then
+              xice_threshold = 0.02
+           endif
 
            !$OMP PARALLEL DO &
            !$OMP PRIVATE (ij,i,j,k)
            do ij = 1,num_tiles
+           call sfc_profile_TQ(itimestep, dz8w(:,1,:), dt, snpack_dt                             &
+               &             , th(:,1,:),pi_phy(:,1,:),qv_curr(:,1,:),RHO(:,1,:),P(:,1,:) &
+               &             , tsk, HFX, ZNT_MEAN, UST                                    &
+               &             , XLAND, XICE, xice_threshold                                &
+               &             , ims,ime, jms,jme                                           &
+               &             , i_start(ij), i_end(ij), j_start(ij), j_end(ij)             &
+               &             , snc_Z, snc_N, sfc_T, sfc_Q )
            call blowing_snow(snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ         &
                &            ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,corr_q_for_rad     &
                &            ,corr_N_for_rad,bs_qi,bs_qni,bs_qi_rad,bs_qni_rad, bs_meanR &
@@ -2854,6 +2869,94 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
    END SUBROUTINE microphysics_driver
 
 !!! ADDED FOR CRYOWRF !!!
+! subroutine computing the diagnostic profiles of air temperature and specific humidity in the fine mesh (sfc_T, sfc_Q) using Monin-Obukhov similarity theory
+!------------------------------------------------------------------------------------------
+SUBROUTINE sfc_profile_TQ(ITIMESTEP, DZ8W_2D, DT, snpack_dt        & ! IN : Time/Space-related
+                        , th_2d, pii_2d, qv_curr_2d, RHO_2D, P_2D  & ! IN : Forcing at lowest WRF level
+                        , TSK, HFX, ZNT_MEAN, UST                  & ! IN : LSM eqv
+                        , XLAND, XICE, xice_threshold              &
+                        , ims, ime,  jms, jme                      &
+                        , its, ite,  jts, jte                      &
+                        , snc_Z, snc_N, sfc_T, sfc_Q )
+!----------------------------------------------------------------
+USE module_sf_snowpacklsm, ONLY : psi_holtslag, psi_s_stearns
+!----------------------------------------------------------------
+IMPLICIT NONE
+!----------------------------------------------------------------
+! INOUT
+real, dimension(ims:ime,snc_N,jms:jme), intent(out) :: sfc_T, sfc_Q
+! IN only
+INTEGER,                                INTENT(IN) :: ims,ime, jms,jme,   &  ! m -> memory
+  &                                                   its,ite, jts,jte       ! t -> tile
+integer,                                intent(in) :: ITIMESTEP, snc_N
+real, dimension(ims:ime,snc_N,jms:jme), intent(in) :: snc_Z
+real, dimension(ims:ime,jms:jme),       intent(in) :: RHO_2D, DZ8W_2D, th_2d, pii_2d, qv_curr_2d, P_2D, XLAND, XICE
+REAL,                                   INTENT(IN) :: DT, snpack_dt, xice_threshold
+REAL, DIMENSION(ims:ime,jms:jme),       INTENT(IN) :: TSK ! surface radiative temperature [K]
+REAL, DIMENSION(ims:ime,jms:jme),       INTENT(IN) :: HFX ! sensible heat flux [W m-2]
+REAL, DIMENSION(ims:ime,jms:jme),       INTENT(IN) :: ZNT_MEAN ! aerodynamic roughness length (m), weighted average for grid cells with fractional sea ice
+REAL, DIMENSION(ims:ime,jms:jme),       INTENT(IN) :: UST ! friction velocity [m s-1]
+! local
+REAL                   :: sfc_qv_spec, tmp_real, rmol_loc, Z_ML, T_ML, Q_ML, psi_s_zref, znt_scalar
+real, dimension(snc_N) :: ratio_log_s_sfc, psi_s_zsfc
+integer                :: i, j, K
+
+character*256 :: snpack_mode
+call nl_get_snpack_mode  (1, snpack_mode)
+! ----------------------------------------------------------------------
+
+do j=jts,jte
+   do i=its,ite
+      ! reconstruct air temperature (K)
+      T_ML = th_2d(i,j) * pii_2d(i,j)
+      ! convert mixing ratio to specific humidity (kg kg-1)
+      Q_ML = qv_curr_2d(i,j) / ( 1.0 + qv_curr_2d(i,j) )
+      ! saturation specific humidity at surface
+      call Qsat_noah(TSK(i,j),P_2D(i,j),tmp_real,sfc_qv_spec)
+      ! height of lowest WRF level
+      Z_ML = 0.5*DZ8W_2D(I,J)
+      ! reciprocal Obukhov length (note that UST is always > 0)
+      rmol_loc = (-1.0) * 0.4 * 9.81 * HFX(i,j) / ( RHO_2D(i,j)*1004.67 * TSK(i,j) * UST(i,j)**3.0 )
+      ! thermal or humidity roughness length
+      IF( (XICE(i,j) >= xice_threshold) .OR. ((XLAND(i,j)-1.5) >= 0.0) ) THEN  ! ocean (open water) or sea ice
+         znt_scalar = 0.01 * ZNT_MEAN(i,j) ! assume constant factor (0.01 is approx. representative for rather high u_* in MYNN sfclay scheme) although a more complicated parameterization is 
+                                           ! used in the sfclay scheme to compute the surface fluxes. Only needed to estimate sublimation and terminal fall velocities of blowing snow, which happens mostly over land.
+      ELSE       ! land (or other surfaces)
+         znt_scalar = ZNT_MEAN(i,j)        ! equal to aerodynamic roughness length as in SNOWPACK
+      ENDIF
+      ! compute stability correction terms for various heights
+      IF (ITIMESTEP > (3*snpack_dt/DT)) THEN
+         if(rmol_loc > 0.0) then ! stable
+            psi_s_zref = psi_holtslag( Z_ML * rmol_loc )
+            DO K = 1,snc_N
+              psi_s_zsfc(K) = psi_holtslag( snc_Z(I,K,J) * rmol_loc )
+            ENDDO
+         else ! unstable
+            psi_s_zref = psi_s_stearns( Z_ML * rmol_loc )
+            DO K = 1,snc_N
+              psi_s_zsfc(K) = psi_s_stearns( snc_Z(I,K,J) * rmol_loc )
+            ENDDO
+         endif
+      ELSE ! initial phase: neglect stability correction as HFX and Obukhov length over land still depend strongly on initial conditions 
+         psi_s_zref = 0.0
+         psi_s_zsfc = 0.0
+      ENDIF
+      ! air temperature (K) and specific humidity (kg kg-1) in the fine mesh (Monin-Obukhov similarity theory)
+      DO K = 1,snc_N
+         ratio_log_s_sfc(K) = max( log( (snc_Z(I,K,J)+znt_scalar)/znt_scalar )-psi_s_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
+   &                          max( log( (Z_ML+znt_scalar) / znt_scalar )      -psi_s_zref,    0.7 )
+         ! Adding the roughness length in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
+      ENDDO
+      sfc_T(I,1:snc_N,J) = TSK(i,j)    + (T_ML - TSK(i,j))    * ratio_log_s_sfc
+      sfc_Q(I,1:snc_N,J) = sfc_qv_spec + (Q_ML - sfc_qv_spec) * ratio_log_s_sfc
+   enddo
+enddo
+
+!------------------------------------------------------
+END SUBROUTINE sfc_profile_TQ
+!------------------------------------------------------
+
+
 !******************************************************
 ! Blowing snow routine
 ! Developed by Varun Sharma (vsharma.next@gmail.com)
@@ -2881,7 +2984,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
    logical,intent(in) :: bool_snow_sublimation
    logical,intent(in) :: bs_rad_effect
    real,dimension(ims:ime,1:snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
-   real,dimension(ims:ime,1:snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
+   real,dimension(ims:ime,1:snc_N,jms:jme), intent(in)    :: sfc_T,sfc_Q
+   real,dimension(ims:ime,1:snc_N,jms:jme), intent(out)   :: sfc_RH
    real,dimension(ims:ime,1:snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
    real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
    real,dimension(ims:ime,jms:jme), intent(inout) :: corr_q_for_rad,corr_N_for_rad
@@ -2918,14 +3022,14 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
     real,dimension(1:snc_N+1) :: bs_zm_sfclayer
     real,dimension(kts:kte)   :: tmp_bs_z
     real,dimension(snc_N+kte-kts+1)   :: bs_qi_loc,bs_qni_loc,bs_temp
-    real,dimension(snc_N+kte-kts+1)   :: bs_qv,bs_rh,bs_rho,bs_P
+    real,dimension(snc_N+kte-kts+1)   :: bs_qv_spec,bs_rho,bs_P
     real,dimension(snc_N+kte-kts+1)   :: bs_sublim_qi,bs_sublim_qni
     real,dimension(snc_N+kte-kts+1)   :: bs_undsat
     real,dimension(snc_N+kte-kts+1)   :: VQ,VN,loc_sfc_meanR
     real,dimension(snc_N+kte-kts+1)   :: mat_a,mat_b,mat_c,mat_d,qi_final,qni_final
     real,dimension(snc_N+kte-kts+1)   :: qv_corr,t_corr,lsub
     real,dimension(snc_N+kte-kts+1)   :: loc_w,loc_bs_RH
-    real                      :: tmp_real, sfc_qv, loc_qsat,tmp_SN,tmp_SQ
+    real                      :: tmp_real, loc_qsat,tmp_SN,tmp_SQ
     real,parameter            :: alpha = 3.0 ! parameter for blowing snow distribution
     real                      :: gamma_alpha3,gamma_alpha,gamma_alpha_ratio
     real                      :: lambda,mean_Nbest,a_loc,b_loc,g,eta,dyn_vis
@@ -3040,12 +3144,11 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! RECONSTRUCTING Temperature
     bs_temp(snc_N+1:bs_Ntot) = th(i,kts:kte,j) * pii(i,kts:kte,j)
-    bs_temp(1:snc_N) = tsk(i,j) + ( (bs_temp(snc_N+1) - tsk(i,j)) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)  
+    bs_temp(1:snc_N)         = sfc_T(I,:,J) 
 
-!!! RECONSTRUCTING Qv
-    bs_qv(snc_N+1:bs_Ntot) = QV(i,kts:kte,j)
-    call Qsat_noah(tsk(i,j),P(i,1,j),tmp_real,sfc_qv)
-    bs_qv(1:snc_N) = sfc_qv + ( (bs_qv(snc_N+1) - sfc_qv) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)  
+!!! RECONSTRUCTING specific humidity
+    bs_qv_spec(snc_N+1:bs_Ntot) = QV(i,kts:kte,j) / ( 1.0 + QV(i,kts:kte,j) ) ! convert mixing ratio to specific humidity
+    bs_qv_spec(1:snc_N)         = sfc_Q(I,:,J)  
 
 !!! RECONSTRUCTING rho_fluid ( air in this case )
     bs_rho(snc_N+1:bs_Ntot) = RHO(i,kts:kte,j)
@@ -3094,7 +3197,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! BOTTOM BC
     k=1
-    mat_a(k) = 0
+    mat_a(k) = 0.0
     mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
 &                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k)                     &
 &                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     
@@ -3191,7 +3294,7 @@ if(bool_snow_sublimation) then
     do k = 1,bs_Ntot
 
        call Qsat_noah(bs_temp(k),bs_P(k),tmp_real,loc_qsat)
-       loc_bs_RH(k) = bs_qv(k)/loc_qsat
+       loc_bs_RH(k) = bs_qv_spec(k)/loc_qsat
               
        tempc = bs_temp(k) - 273.15
        if (tempc .ge. 0.0) then
@@ -3226,9 +3329,9 @@ if(bool_snow_sublimation) then
 &                                             C * (gamma(1.0+1.5*b_loc + alpha)/gamma_alpha) / (lambda**(1+1.5*b_loc)) ) )
 
               if(tmp_SQ .le. 0) then
-                 bs_sublim_qi(k) = MAX(DBLE(-qi_final(k)/dt_in),tmp_SQ,DBLE((bs_qv(k)-loc_qsat)*0.999/dt_in))
+                 bs_sublim_qi(k) = MAX(DBLE(-qi_final(k)/dt_in),tmp_SQ,DBLE((bs_qv_spec(k)-loc_qsat)*0.999/dt_in))
               else
-                 bs_sublim_qi(k) = MIN(tmp_SQ,DBLE((bs_qv(k)-loc_qsat)*0.999/dt_in))
+                 bs_sublim_qi(k) = MIN(tmp_SQ,DBLE((bs_qv_spec(k)-loc_qsat)*0.999/dt_in))
               endif
               if (bs_sublim_qi(k) .le. 0) then
                 tmp_SN = (bs_sublim_qi(k)/qi_final(k))*qni_final(k)   
@@ -3255,6 +3358,9 @@ if(bool_snow_sublimation) then
 
     enddo ! END LOOP OVER K
 
+    ! store relative humidity (unitless) of fine mesh for output
+    sfc_RH(I,:,J) = loc_bs_RH(1:snc_N)
+
     !! VARUN HACK TO CHECK MASS BALANCE
     !! GETTING THE corrections for temperature and humidity due to sublimation/deposition
     do k=snc_N+2,bs_Ntot-1
@@ -3271,11 +3377,11 @@ if(bool_snow_sublimation) then
     qv_corr(snc_N+1) = sum( bs_sublim_qi(1:snc_N+1) * (-1.0) * bs_grid_height(1:snc_N+1) * dt_in ) / first_wrf_thickness 
 
     !!! correct local QV and TEMP
-    bs_qv   = bs_qv   + qv_corr
-    bs_temp = bs_temp +  t_corr
+    bs_qv_spec = bs_qv_spec + qv_corr
+    bs_temp    = bs_temp    +  t_corr
 
     !!! Sending feedback to vapor mass and potential temperature 
-    QV(I,kts:kte,J) = bs_qv(snc_N+1:bs_Ntot)
+    QV(I,kts:kte,J) = bs_qv_spec(snc_N+1:bs_Ntot) / ( 1.0 - bs_qv_spec(snc_N+1:bs_Ntot) ) ! convert specific humidity to mixing ratio
     TH(I,kts:kte,J) = bs_temp(snc_N+1:bs_Ntot) / pii(I,kts:kte,J)
 
     !!! sublimation/deposition rate for output

@@ -298,11 +298,11 @@ CONTAINS
      &          ,m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe,m_budg_melt,m_budg_refreeze &
      &          ,e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib,e_budg_latent,e_budg_low_bc,e_budg_raine &
      &          ,e_budg_totale,in_glo_counter,sn_T,sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd &
-     &          ,sn_graintype,sn_mk, bs_bool,sn_nlayers,snc_Z,snc_N,snpack_layers_to_save,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ,sfc_SN & 
+     &          ,sn_graintype,sn_mk, bs_bool,sn_nlayers,snc_Z,snc_N,snpack_layers_to_save,sn_qs,sn_ns,sfc_SQ,sfc_SN & 
      &          ,sfc_meanR,sfc_SQ_HFX ,sfc_SQ_QFX,corr_q_for_rad &
      &          ,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift &
      &          ,sfc_u_angle,sfc_v_angle, bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,snpack_psi_s &
-     &          ,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot )
+     &          ,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot,znt_mean )
                                                   
 
 #if ( ! NMM_CORE == 1 )
@@ -1447,7 +1447,6 @@ CONTAINS
 
    integer,intent(in) :: snc_N
    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
-   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
    real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
    real,dimension(ims:ime,jms:jme), intent(inout) :: corr_q_for_rad,corr_N_for_rad
@@ -1464,6 +1463,7 @@ CONTAINS
    real,intent(in) :: snpack_dt,snpack_write_dt
 
    real,dimension(ims:ime,jms:jme), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
+   real,dimension(ims:ime,jms:jme), intent(out) :: znt_mean
 
 
    character*256 :: snpack_mode
@@ -3120,13 +3120,13 @@ CONTAINS
                             e_budg_low_bc,e_budg_raine,e_budg_totale,in_glo_counter,sn_T,                          &
                             sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd,     &
                             sn_graintype,sn_mk, & 
-                            bs_bool,sn_nlayers, snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ,sfc_SN,         &
+                            bs_bool,sn_nlayers, snc_Z,snc_N,sn_qs,sn_ns,sfc_SQ,sfc_SN,         &
                             sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho,corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,     &
                             bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift,       &
                             sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,  &
                             NUM_SOIL_LAYERS,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s, &
                             Q2_snpack,T2_snpack,U10_snpack,V10_snpack,UST,loc_sza,tau_qc, & 
-                            tau_qi,tau_qc_tot,tau_qi_tot,RMOL_OLD,ZNT_SEA)
+                            tau_qi,tau_qc_tot,tau_qi_tot,RMOL_OLD,ZNT_SEA,znt_mean)
 
 
             !!! CALL TO SEAICE_NOAH to deal with sea_ice points

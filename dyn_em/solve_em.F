@@ -3840,7 +3840,9 @@ BENCH_START(micro_driver_tim)
      &        ,tsk=grid%tsk,in_q_lb = grid%in_q_lb, in_N_lb = grid%in_N_lb, in_bs_sedi = grid%bs_sedi &
      &        ,bs_bool=config_flags%blowing_snow,bool_snow_sublimation=config_flags%blowing_snow_sublimation &
      &        ,bs_rad_effect=config_flags%bs_rad_effect,in_hsalt=grid%in_hsalt,bs_sublim=grid%bs_sublim,xkhv_LES=grid%xkmv &
-     &        ,bs_qi_sublim3d=grid%bs_qi_sublim3d,sn_qi_sublim3d=grid%sn_qi_sublim3d ) !!!! ENDING FOR BLOWING SNOW BY VARUN)
+     &        ,bs_qi_sublim3d=grid%bs_qi_sublim3d,sn_qi_sublim3d=grid%sn_qi_sublim3d,znt_mean=grid%znt_mean &
+     &        ,snpack_dt=config_flags%snpack_dt,HFX=grid%hfx,UST=grid%ust,XICE=grid%xice &
+     &        ,FRACTIONAL_SEAICE=config_flags%fractional_seaice ) !!!! ENDING FOR BLOWING SNOW BY VARUN)
                                                                           
 BENCH_END(micro_driver_tim)
 

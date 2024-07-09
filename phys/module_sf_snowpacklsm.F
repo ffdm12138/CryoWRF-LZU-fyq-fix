@@ -26,12 +26,12 @@ CONTAINS
                ,e_budg_totale, in_glo_counter,sn_T &
                ,sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd,sn_graintype,sn_mk &
                ,bs_bool,sn_nlayers, &
-               snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho_v,  &
+               snc_Z,snc_N,sn_qs,sn_ns,sfc_SQ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho_v,  &
                corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch, &
                sfc_qi_drift,sfc_qni_drift,sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt, &
                snpack_write_dt,NSOIL,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s,Q2_snpack,T2_snpack, &
                U10_snpack,V10_snpack,UST_V,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot, &
-               RMOL_OLD,ZNT_SEA)
+               RMOL_OLD,ZNT_SEA,ZNT_MEAN)
 !----------------------------------------------------------------
 !!! ADDED FOR BLOWING SNOW ADVECTION    
     USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
@@ -53,7 +53,6 @@ CONTAINS
     integer, intent(in) :: inest
     integer,intent(in) :: snc_N
     real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
-    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
     real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
     real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
     real,dimension(ims:ime,jms:jme), intent(inout) :: corr_q_for_rad,corr_N_for_rad
@@ -105,6 +104,8 @@ CONTAINS
 
     real,    dimension( ims:ime,          jms:jme ), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
 
+    real,    dimension( ims:ime,          jms:jme ), intent(out) :: ZNT_MEAN ! z0 with weighted average for fractional sea ice grid cells in contrast to ZNT
+
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_melt,m_budg_refreeze 
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib
@@ -142,7 +143,7 @@ CONTAINS
     REAL                                :: LAT          ! latitude [rad]
     REAL                                :: Z_ML         ! model height [m]
     REAL                                :: T_ML         ! temperature valid at mid-levels [K]
-    REAL                                :: Q_ML         ! water vapor mixing ratio [kg/kg_dry]
+    REAL                                :: Q_ML         ! specific humidity [kg/kg]
     REAL                                :: U_ML         ! U wind component [m/s]
     REAL                                :: V_ML         ! V wind component [m/s]
     REAL                                :: SWDN         ! solar down at surface [W m-2]
@@ -297,7 +298,7 @@ CONTAINS
     real, dimension(ims:ime,jms:jme),intent(inout) :: sfc_u_angle,sfc_v_angle
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: sfc_qi_drift,sfc_qni_drift
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: bs_sfc_qi_advt,bs_sfc_qni_advt
-    real, dimension(snc_N) :: d_sn_qi_dt,d_sn_qni_dt,psi_m_zsfc,psi_s_zsfc,ratio_log_m_sfc,ratio_log_s_sfc
+    real, dimension(snc_N) :: d_sn_qi_dt,d_sn_qni_dt,psi_m_zsfc,ratio_log_m_sfc
 
     real,intent(in) :: snpack_dt,snpack_write_dt
     real :: rmol_old_loc,rmol_loc,psi_m_zref,psi_m_znew,psi_s_zref,psi_s_znew,ratio_log_m,ratio_log_s
@@ -314,8 +315,6 @@ CONTAINS
     in_N_lb = 0.0
     in_hsalt = 0.0
     snpack_psi_s = 0.0
-    sfc_T = 0.0
-    sfc_Q = 0.0
 do j = jts,jte
 do i = its,ite
 
@@ -441,22 +440,22 @@ do i=its,ite
     IF (XICE(I,J) >= XICE_THRES) THEN ! sea ice
 
        if (fractional_seaice == 1) then
-          Z0WRF = ZNT(I,J) * XICE(I,J) + (1.0-XICE(I,J)) * ZNT_SEA(I,J) ! weighted average
+          ZNT_MEAN(I,J) = ZNT(I,J) * XICE(I,J) + (1.0-XICE(I,J)) * ZNT_SEA(I,J) ! weighted average
        else
-          Z0WRF = ZNT(I,J) ! sea ice only
+          ZNT_MEAN(I,J) = ZNT(I,J) ! sea ice only
        endif
 
     ELSEIF ((XLAND(I,J)-1.5) >= 0.0) THEN ! open water
 
-       Z0WRF = ZNT(I,J)
+       ZNT_MEAN(I,J) = ZNT(I,J)
 
     ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
  &          ( snpack_mode == 'land' )) THEN ! land (with ice)
       
        if ( SNOWH(I,J) .gt. 0 ) then
-          Z0WRF = 0.002
+          ZNT_MEAN(I,J) = 0.002
        else
-          Z0WRF = Z0(I,J)
+          ZNT_MEAN(I,J) = Z0(I,J)
        endif
 
     ELSE ! should not happen
@@ -485,11 +484,11 @@ do i=its,ite
        psi_m_zsfc = 0.0
     ENDIF
 
-do k=1,snc_N
-       ratio_log_m_sfc(K) = max( log( (snc_Z(I,K,J)+Z0WRF)/Z0WRF )-psi_m_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
-  &                         max( log( (Z_ML+Z0WRF)  / Z0WRF )     -psi_m_zref,    0.7 )      
-       ! Adding Z0WRF in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
-enddo
+    do k=1,snc_N
+       ratio_log_m_sfc(K) = max( log( (snc_Z(I,K,J)+ZNT_MEAN(I,J))/ZNT_MEAN(I,J) )-psi_m_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
+  &                         max( log( (Z_ML+ZNT_MEAN(I,J))  / ZNT_MEAN(I,J) )     -psi_m_zref,    0.7 )      
+       ! Adding ZNT_MEAN(I,J) in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
+    enddo
     ! Wind velocity components in fine mesh
     U_SFC(i,:,j) = U_PHY(I,1,J) * ratio_log_m_sfc
     V_SFC(i,:,j) = V_PHY(I,1,J) * ratio_log_m_sfc
@@ -729,7 +728,7 @@ endif
 
     UST_V(I,J)    = real(in_UST,4)
     in_hsalt(I,J) = real(l_in_hsalt,4)
-    snpack_psi_s(I,J) = real(l_psi_s,4)
+    snpack_psi_s(I,J) = real(l_psi_s,4) ! only used for simulation output, probably identical to psi_s_zref below
 
     total_sfc_SQ_QFX = sfc_SQ_QFX(I,J)
     total_sfc_SQ_HFX = sfc_SQ_HFX(I,J)
@@ -837,17 +836,11 @@ endif
       psi_m_znew = psi_holtslag( 10.0 * rmol_loc )
       psi_s_zref = psi_m_zref
       psi_s_znew = psi_holtslag( 2.0 * rmol_loc )
-      DO K = 1,snc_N
-        psi_s_zsfc(K) = psi_holtslag( snc_Z(I,K,J) * rmol_loc )
-      ENDDO
     else ! unstable
       psi_m_zref = psi_m_paulson( Z_ML * rmol_loc )
       psi_m_znew = psi_m_paulson( 10.0 * rmol_loc )
       psi_s_zref = psi_s_stearns( Z_ML * rmol_loc )
       psi_s_znew = psi_s_stearns( 2.0 * rmol_loc )
-      DO K = 1,snc_N
-        psi_s_zsfc(K) = psi_s_stearns( snc_Z(I,K,J) * rmol_loc )
-      ENDDO
     endif
 
   ! compute T2 and Q2 using Monin-Obukhov similarity theory
@@ -868,16 +861,6 @@ endif
 !                    & Z0WRF,SNOWH(I,J),l_psi_s,T2_snpack(I,J),Q2_snpack(I,J),out_QSFC
 !    endif
 
-
-  ! sfc_T,sfc_Q
-    DO K = 1,snc_N
-      ratio_log_s_sfc(K) = max( log( (snc_Z(I,K,J)+Z0WRF)/Z0WRF )-psi_s_zsfc(K), 0.7 ) / &  ! numerator and denominator must be positive
-  &                        max( log( (Z_ML+Z0WRF) / Z0WRF )      -psi_s_zref,    0.7 )
-      ! Adding Z0WRF in numerator guarantees that the ratio is positive while having a negligible effect on results in most cases
-    ENDDO
-    sfc_T(I,1:snc_N,J) = TRAD   + (T_ML - TRAD)   * ratio_log_s_sfc
-    sfc_Q(I,1:snc_N,J) = QSFC1D + (Q_ML - QSFC1D) * ratio_log_s_sfc
-   
    ENDIF ! glacial split ends 
 
 ! INPUT/OUTPUT
@@ -896,6 +879,7 @@ endif
 
              Z0       (I,J)                = Z0WRF
              ZNT      (I,J)                = Z0WRF
+             ZNT_MEAN (I,J)                = Z0WRF ! update as change of snow height might have changed the roughness length
          
              in_drift(I,J) = real(l_in_drift,4)
              in_conc(I,J)  = real(l_in_conc,4)
