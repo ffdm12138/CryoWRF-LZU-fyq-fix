@@ -293,15 +293,13 @@ CONTAINS
      &          ,irr_start_hour,irr_num_hours,irr_start_julianday     &
      &          ,irr_end_julianday,irr_freq,irr_ph,irr_rand_field     &
      &          ,in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch,ice_fluxq,ice_fluxN &
-     &          ,ta_sn_avg,rh_sn_avg,vw_sn_avg,dw_sn_avg,iswr_sn_avg,ilwr_sn_avg,psum_sn_avg,qi_sn_avg,qni_sn_avg &
-     &          ,hfx_sn_avg,qfx_sn_avg,snow_sn_avg,snowh_sn_avg,albedo_sn_avg &
      &          ,m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe,m_budg_melt,m_budg_refreeze &
      &          ,e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib,e_budg_latent,e_budg_low_bc,e_budg_raine &
      &          ,e_budg_totale,in_glo_counter,sn_T,sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd &
      &          ,sn_graintype,sn_mk, bs_bool,sn_nlayers,snc_Z,snc_N,snpack_layers_to_save,sn_qs,sn_ns,sfc_SQ,sfc_SN & 
      &          ,sfc_meanR,sfc_SQ_HFX ,sfc_SQ_QFX,corr_q_for_rad &
      &          ,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift &
-     &          ,sfc_u_angle,sfc_v_angle, bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,snpack_psi_s &
+     &          ,sfc_u_angle,sfc_v_angle, bs_sfc_qi_advt,bs_sfc_qni_advt,VW_SFC,snpack_dt,snpack_write_dt,snpack_psi_s &
      &          ,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot,znt_mean )
                                                   
 
@@ -1418,9 +1416,6 @@ CONTAINS
 !!!!! ADDED BY VARUN   
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: ice_fluxq,ice_fluxN
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: ta_sn_avg,rh_sn_avg,vw_sn_avg,dw_sn_avg,iswr_sn_avg,ilwr_sn_avg
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: psum_sn_avg,qi_sn_avg,qni_sn_avg
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: hfx_sn_avg,qfx_sn_avg,snow_sn_avg,snowh_sn_avg,albedo_sn_avg
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_melt,m_budg_refreeze 
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib
@@ -1464,6 +1459,7 @@ CONTAINS
 
    real,dimension(ims:ime,jms:jme), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
    real,dimension(ims:ime,jms:jme), intent(out) :: znt_mean
+   real,dimension(ims:ime,snc_N,jms:jme), intent(out) :: VW_SFC
 
 
    character*256 :: snpack_mode
@@ -3123,10 +3119,10 @@ CONTAINS
                             bs_bool,sn_nlayers, snc_Z,snc_N,sn_qs,sn_ns,sfc_SQ,sfc_SN,         &
                             sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho,corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,     &
                             bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift,       &
-                            sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,  &
+                            sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,VW_SFC,snpack_dt,snpack_write_dt,  &
                             NUM_SOIL_LAYERS,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s, &
                             Q2_snpack,T2_snpack,U10_snpack,V10_snpack,UST,loc_sza,tau_qc, & 
-                            tau_qi,tau_qc_tot,tau_qi_tot,RMOL_OLD,ZNT_SEA,znt_mean)
+                            tau_qi,tau_qc_tot,tau_qi_tot,rmol,RMOL_OLD,ZNT_SEA,znt_mean)
 
 
             !!! CALL TO SEAICE_NOAH to deal with sea_ice points

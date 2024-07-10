@@ -28,10 +28,10 @@ CONTAINS
                ,bs_bool,sn_nlayers, &
                snc_Z,snc_N,sn_qs,sn_ns,sfc_SQ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho_v,  &
                corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch, &
-               sfc_qi_drift,sfc_qni_drift,sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt, &
+               sfc_qi_drift,sfc_qni_drift,sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,VW_SFC,snpack_dt, &
                snpack_write_dt,NSOIL,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s,Q2_snpack,T2_snpack, &
                U10_snpack,V10_snpack,UST_V,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot, &
-               RMOL_OLD,ZNT_SEA,ZNT_MEAN)
+               rmol,RMOL_OLD,ZNT_SEA,ZNT_MEAN)
 !----------------------------------------------------------------
 !!! ADDED FOR BLOWING SNOW ADVECTION    
     USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
@@ -84,7 +84,7 @@ CONTAINS
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  PRECIP_IN ! total input precipitation [mm]
-    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  RMOL_OLD  ! reciprocal Obukhov length (m) before it got overwritten by surface layer scheme (MYNN)
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  RMOL_OLD  ! reciprocal Obukhov length (m-1) before it got overwritten by surface layer scheme (MYNN)
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  ZNT_SEA   ! contains roughness length (m) of open-water fraction for grid cells with fractional sea ice
 
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  TSK       ! surface radiative temperature [K]
@@ -98,6 +98,7 @@ CONTAINS
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  QSFC      ! bulk surface specific humidity
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  Z0        ! combined z0 sent to coupled model
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ZNT       ! combined z0 sent to coupled model
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  rmol      ! reciprocal Obukhov length (m-1), can be part of output file
 
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(INOUT) ::  ice_fluxq, ice_fluxN, UST_V
@@ -294,7 +295,9 @@ CONTAINS
     double precision :: l_psi_s
     double precision :: l_loc_sza, l_tau_qc, l_tau_qi
     double precision :: l_tau_qc_tot, l_tau_qi_tot
-    real, dimension(ims:ime,snc_N,jms:jme)  :: U_SFC,V_SFC,VW_SFC
+    real, dimension(ims:ime,snc_N,jms:jme)  :: U_SFC,V_SFC
+    
+    real, dimension(ims:ime,snc_N,jms:jme),intent(out)   :: VW_SFC
     real, dimension(ims:ime,jms:jme),intent(inout) :: sfc_u_angle,sfc_v_angle
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: sfc_qi_drift,sfc_qni_drift
     real, dimension(ims:ime,snc_N,jms:jme),intent(inout) :: bs_sfc_qi_advt,bs_sfc_qni_advt
@@ -874,6 +877,7 @@ endif
              SNOWH    (I,J)                = SNDPTH
              EMISS    (I,J)                = EMISSI
              QSFC     (I,J)                = QSFC1D
+             rmol     (I,J)                = rmol_loc ! overwrite over land with ice
 
 ! OUTPUT
 

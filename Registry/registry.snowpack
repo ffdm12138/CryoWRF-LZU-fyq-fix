@@ -109,6 +109,7 @@ state   real    bs_sfc_qni_advt i{snc_N}j misc    1         -     i012rhd=(inter
 
 state   real    sfc_u_angle ij       misc         1         -     i012rhd=(interp_fcn_nn) "bs_u_angle" "blowing snow u angle " " "
 state   real    sfc_v_angle ij       misc         1         -     i012rhd=(interp_fcn_nn) "bs_v_angle" "blowing snow v angle " " "
+state   real    VW_SFC   i{snc_N}j   misc         1         -     h                       "VW_SFC"     "surface layer wind speed" "m s-1"
 
 state   real    bs_qi_rad  ikj       misc         1         -     i012rhd=(interp_fcn_nn) "bs_qi_rad"  "blowing snow mixing ratio for radiation" "kg kg-1"
 state   real    bs_qni_rad ikj       misc         1         -     i012rhd=(interp_fcn_nn) "bs_qni_rad" "blowing snow number ratio for radiation" "# kg -1"
