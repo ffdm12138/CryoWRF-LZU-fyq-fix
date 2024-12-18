@@ -3036,7 +3036,7 @@ END SUBROUTINE sfc_profile_TQ
     real,parameter            :: pi_v = 3.14159265 
     real :: A,B,C,diffu,tcond,undsat
     real,parameter :: Rv = 461.5
-    real :: tempc,qsalt,nsalt,loc_alt,bs_number_turb,bs_mass_turb
+    real :: tempc,qsalt,nsalt,loc_alt,bs_number_turb,bs_mass_turb,temp_salt,VQ_salt,VN_salt
     integer  :: nstep,ksedi,n
     real :: vti,delta_tp,onstep,odzq,orho
     real,dimension(snc_N+kte-kts)   :: bs_grid_height
@@ -3145,6 +3145,7 @@ END SUBROUTINE sfc_profile_TQ
 !!! RECONSTRUCTING Temperature
     bs_temp(snc_N+1:bs_Ntot) = th(i,kts:kte,j) * pii(i,kts:kte,j)
     bs_temp(1:snc_N)         = sfc_T(I,:,J) 
+    temp_salt                = bs_temp(1) ! assume temperature at saltation-suspension interface to equal that at first grid level of fine mesh as terminal fall velocity is not so sensitive to temperature
 
 !!! RECONSTRUCTING specific humidity
     bs_qv_spec(snc_N+1:bs_Ntot) = QV(i,kts:kte,j) / ( 1.0 + QV(i,kts:kte,j) ) ! convert mixing ratio to specific humidity
@@ -3193,16 +3194,46 @@ END SUBROUTINE sfc_profile_TQ
            
     enddo
 
+!!! compute terminal fall velocities at saltation-suspension interface
+    
+    tempc = temp_salt - 273.15
+    if (tempc .ge. 0.0) then
+       dyn_vis = (1.718+0.0049*tempc)*1.0E-5
+    else
+       dyn_vis = (1.718+0.0049*tempc-1.2E-5*tempc*tempc)*1.0E-5
+    endif
+
+    if ( (qsalt .gt. 1.0e-10) .and. (nsalt .gt. 1.0e-5) ) then
+        lambda = ((pi_v*918.0/6.0) * (nsalt/qsalt) * (gamma_alpha_ratio) )**(1.0/3.0)
+        g = (1.333 * bs_rho(1) *  ( 918.0 - bs_rho(1)) * 9.81 ) / ( dyn_vis * dyn_vis ) ! assume same air density as in fine mesh
+
+        mean_NBest = g * ( gamma_alpha_ratio ) * (1.0/(lambda * lambda * lambda))
+        call b_re(b_loc,mean_NBest)
+        call a_re(a_loc,mean_NBest,b_loc)
+
+        eta = a_loc * dyn_vis * (g ** (b_loc)) / bs_rho(1)
+        
+        VN_salt = eta * (gamma(3.0*b_loc-1.0+alpha)/gamma_alpha) * (lambda**(1.0-3.0*b_loc)) ! vertical wind velocity component is assumed to be zero
+
+        VQ_salt = eta * (gamma(3.0*b_loc+2.0+alpha)) * ((lambda**(1.0-3.0*b_loc)) / gamma_alpha3) ! vertical wind velocity component is assumed to be zero
+     else
+        VN_salt = 0.001
+        VQ_salt = 0.001
+    endif
+
 !!! SOLVING FOR BS_QI
+!   For the vertical gradient of the sedimentation flux, consider mixing ratios of blowing snow at the grid level of interest and the next higher level but
+!   terminal fall velocities at the level of interest and the next lower level, typically leading to an overestimation of the fall velocities, which compensates 
+!   partly for the underestimation of the mixing ratio gradient
 
 !!! BOTTOM BC
     k=1
     mat_a(k) = 0.0
     mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
-&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k)                     &
+&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ_salt                   &
 &                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     
 
-    mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VQ(k+1) )
+    mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VQ(k) )
 
     !bs_mass_turb = qsalt
     mat_d(k) = bs_qi_loc(k) + (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * (bs_Kmix(k)/bs_dz(k)) * qsalt
@@ -3214,9 +3245,9 @@ END SUBROUTINE sfc_profile_TQ
       
       mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
    &                  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     &
-   &                  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k)
+   &                  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k-1)
 
-      mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VQ(k+1) )
+      mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VQ(k) )
 
       mat_d(k) = bs_qi_loc(k)
 
@@ -3225,7 +3256,7 @@ END SUBROUTINE sfc_profile_TQ
 !!! TOP OF THE MATRIX
    k=bs_Ntot
    mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) 
-   mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VQ(k)
+   mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VQ(k-1)
    mat_c(k) =  0.0
    mat_d(k) = bs_qi_loc(k)        
 
@@ -3246,10 +3277,10 @@ END SUBROUTINE sfc_profile_TQ
     k=1
     mat_a(k) = 0
     mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
-&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN(k)                     &
+&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN_salt                   &
 &                   + (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))      
 
-    mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VN(k+1) )
+    mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VN(k) )
 
     mat_d(k) = bs_qni_loc(k) + (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * (bs_Kmix(k)/bs_dz(k)) * nsalt
 
@@ -3260,9 +3291,9 @@ END SUBROUTINE sfc_profile_TQ
       
       mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
                       +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     &
-                      +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN(k)
+                      +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN(k-1)
 
-      mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VN(k+1) )
+      mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VN(k) )
 
       mat_d(k) = bs_qni_loc(k)
 
@@ -3271,7 +3302,7 @@ END SUBROUTINE sfc_profile_TQ
 !!! TOP OF THE MATRIX
    k=bs_Ntot
    mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) 
-   mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VN(k)
+   mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VN(k-1)
    mat_c(k) =  0.0
    mat_d(k) = bs_qni_loc(k)        
 
