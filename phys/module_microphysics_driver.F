@@ -22,7 +22,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,ips,ipe, jps,jpe, kps,kpe                         &
                       ,i_start,i_end,j_start,j_end,kts,kte               &
                       ,num_tiles, naer                                   &
-                      ,irrigation,sf_surf_irr_scheme, irr_daily_amount   &   
+                      ,irrigation,sf_surf_irr_scheme, irr_daily_amount   &
                       ,irr_start_hour,irr_num_hours,julian_in            &
                       ,irr_start_julianday,irr_end_julianday             &
                       ,irr_freq,irr_ph,irr_rand_field                    &
@@ -42,7 +42,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,qme3d,prain3d,nevapr3d,rate1ord_cw2pr_st3d        &
                       ,dgnum4D,dgnumwet4D                                &
 #endif
-!======================                                   
+!======================
                       ,qv_curr,qc_curr,qr_curr,qi_curr,qs_curr,qg_curr   &
                       ,qic_curr,qip_curr,qid_curr &
                       ,qnic_curr,qnip_curr,qnid_curr &
@@ -58,7 +58,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,qvoli2_curr,qaoli2_curr                           & ! for Jensen ISHMAEL
                       ,qi3_curr,qni3_curr,qvoli3_curr,qaoli3_curr        & ! for Jensen ISHMAEL
                       ,effr_curr,ice_effr_curr,tot_effr_curr             &
-                      ,qic_effr_curr,qip_effr_curr,qid_effr_curr         &             
+                      ,qic_effr_curr,qip_effr_curr,qid_effr_curr         &
                       ,f_qv,f_qc,f_qr,f_qi,f_qs,f_qg,f_qndrop,f_qni      &
                       ,f_qns,f_qnr,f_qng,f_qnc,f_qnn,f_qh,f_qnh          &
                       ,            f_qzr,f_qzi,f_qzs,f_qzg,f_qzh         &
@@ -71,7 +71,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,f_qvoli2,f_qaoli2                                 & ! for Jensen ISHMAEL
                       ,f_qi3,f_qni3,f_qvoli3,f_qaoli3                    & ! for Jensen ISHMAEL
                       ,f_effr,f_ice_effr,f_tot_effr                      &
-                      ,f_qic_effr,f_qip_effr,f_qid_effr                  &                 
+                      ,f_qic_effr,f_qip_effr,f_qid_effr                  &
                       ,cu_used                                           &
                       ,qrcuten, qscuten, qicuten, qccuten                &
                       ,qt_curr,f_qt                                      &
@@ -91,7 +91,7 @@ SUBROUTINE microphysics_driver(                                          &
 #endif
 !NUWRF JJS 20110525 ^^^^^
 !                     ,ccntype                                           & ! for mp_milbrandt2mom
-                      ,u,v,w,z                                          &   
+                      ,u,v,w,z                                          &
                       ,rainnc,    rainncv                                &
                       ,snownc,    snowncv                                &
                       ,hailnc,    hailncv                                &
@@ -102,13 +102,13 @@ SUBROUTINE microphysics_driver(                                          &
 #endif
                       ,qnwfa2d, qnifa2d                                  & ! for water/ice-friendly aerosols
                       ,refl_10cm                                         & ! HM, 9/22/09, add for refl
-                      ,vmi3d                                             & ! for P3 
-                      ,di3d                                              & ! for P3 
-                      ,rhopo3d                                           & ! for P3 
+                      ,vmi3d                                             & ! for P3
+                      ,di3d                                              & ! for P3
+                      ,rhopo3d                                           & ! for P3
                       ,phii3d                                            & ! for Jensen ISHMAEL
-                      ,vmi3d_2                                           & ! for P3 
-                      ,di3d_2                                            & ! for P3 
-                      ,rhopo3d_2                                         & ! for P3 
+                      ,vmi3d_2                                           & ! for P3
+                      ,di3d_2                                            & ! for P3
+                      ,rhopo3d_2                                         & ! for P3
                       ,phii3d_2                                          & ! for Jensen ISHMAEL
                       ,vmi3d_3                                           & ! for Jensen ISHMAEL
                       ,di3d_3                                            & ! for Jensen ISHMAEL
@@ -146,13 +146,14 @@ SUBROUTINE microphysics_driver(                                          &
                       ,CCN3_GS,CCN4_GS,CCN5_GS,CCN6_GS,CCN7_GS           &
                       ,NR_CU,QR_CU,NS_CU,QS_CU,CU_UAF,mskf_refl_10cm     &
 # endif
-!!! Added for CRYOWRF !!!
-                      ,snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ &
-                      ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,bs_qi,bs_qni,bs_qi_rad,bs_qni_rad &
-                      ,bs_meanR,corr_q_for_rad &
-                      ,corr_N_for_rad,tsk,in_q_lb,in_N_lb,in_bs_sedi,bs_bool,bool_snow_sublimation &
-                      ,bs_rad_effect,in_hsalt, bs_sublim, xkhv_LES, bs_qi_sublim3d,sn_qi_sublim3d  & 
-!!! Added for CRYOWRF !!!
+                      ,snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ & ! CRYOWRF
+                      ,sfc_SN,sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,bs_qi      & ! CRYOWRF
+                      ,bs_qni,bs_qi_rad,bs_qni_rad                       & ! CRYOWRF
+                      ,bs_meanR,corr_q_for_rad                           & ! CRYOWRF
+                      ,corr_N_for_rad,tsk,in_q_lb,in_N_lb,in_bs_sedi     & ! CRYOWRF
+                      ,bs_bool,bool_snow_sublimation                     & ! CRYOWRF
+                      ,bs_rad_effect,in_hsalt,bs_sublim,xkhv_LES         & ! CRYOWRF
+                      ,bs_qi_sublim3d,sn_qi_sublim3d                     & ! CRYOWRF
 )
 
 ! Framework
@@ -163,8 +164,8 @@ SUBROUTINE microphysics_driver(                                          &
                     ,GSFCGCESCHEME, WDM5SCHEME, WDM6SCHEME, NSSL_2MOM, NSSL_2MOMCCN, NSSL_2MOMG  &
                     ,NSSL_1MOM,NSSL_1MOMLFO, FER_MP_HIRES_ADVECT &
                     ,WSM7SCHEME, WDM7SCHEME &
-                    ,NUWRF4ICESCHEME & 
-                    ,MILBRANDT2MOM, P3_1CATEGORY, P3_1CATEGORY_NC, JENSEN_ISHMAEL !, P3_2CATEGORY ,MILBRANDT3MOM 
+                    ,NUWRF4ICESCHEME &
+                    ,MILBRANDT2MOM, P3_1CATEGORY, P3_1CATEGORY_NC, JENSEN_ISHMAEL !, P3_2CATEGORY ,MILBRANDT3MOM
 #else
    USE module_state_description, ONLY :                                  &
                      KESSLERSCHEME, LINSCHEME, SBU_YLINSCHEME, WSM3SCHEME, WSM5SCHEME    &
@@ -186,7 +187,7 @@ SUBROUTINE microphysics_driver(                                          &
                     ,p_dust_1, p_dust_2, p_dust_3                       & !inline gocart
                     ,p_dust_4, p_dust_5                                 & !inline gocart
                     ,p_sulf, p_seas_1, p_seas_2                         & !inline gocart
-                    ,p_seas_3, p_seas_4 
+                    ,p_seas_3, p_seas_4
 
 #endif
 
@@ -199,9 +200,9 @@ SUBROUTINE microphysics_driver(                                          &
    USE module_model_constants
    USE module_wrf_error
    USE module_configure, only: grid_config_rec_type
-#if ( WRF_CHEM == 1 )   
+#if ( WRF_CHEM == 1 )
 !mchen   USE module_state_description, only: num_scalar               ! For CAMMGMP scheme Prognostic aerosols
-   USE module_state_description, only: num_chem               ! mchen 
+   USE module_state_description, only: num_chem               ! mchen
    USE modal_aero_data, only:  ntot_amode_cam_mam => ntot_amode ! For CAMMGMP scheme Prognostic aerosols
 #endif
 
@@ -487,17 +488,17 @@ SUBROUTINE microphysics_driver(                                          &
 
 !=================
 !Data for CAMMGMP scheme
-   REAL,INTENT(IN), OPTIONAL ::accum_mode,aitken_mode,coarse_mode  
+   REAL,INTENT(IN), OPTIONAL ::accum_mode,aitken_mode,coarse_mode
 !1D variables required for CAMMGMP scheme
    REAL , DIMENSION( kms:kme ) ,                                      &
         INTENT(IN   ) , OPTIONAL ::                                        fnm,  & !Factors for interpolation at "w" grid (interfaces)
-                                                                fnp     
+                                                                fnp
 !2D variables required for CAMMGMP scheme
    REAL, DIMENSION( ims:ime, jms:jme ),                               &
         INTENT(IN), OPTIONAL ::                                                 &
                                                                  qfx, &    !Moisture flux at surface (kg m-2 s-1)
                                                                  rliq      !Vertically-integrated reserved cloud condensate(m/s)
- 
+
  !3D variables required for CAMMGMP scheme
  REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
       INTENT(IN), OPTIONAL ::                                                   &
@@ -506,7 +507,7 @@ SUBROUTINE microphysics_driver(                                          &
                                                                t_phy, &    !Temprature at the mid points (K)
                                                                p_hyd, &    !Hydrostatic pressure(Pa)
                                                              p8w_hyd, &    !Hydrostatic Pressure at level interface (Pa)
-                                                              z_at_w, &    !Height above sea level at layer interfaces (m) 
+                                                              z_at_w, &    !Height above sea level at layer interfaces (m)
                                                              tke_pbl, &    !Turbulence kinetic energy
                                                           turbtype3d, &    !Turbulent interface types [ no unit ]
                                                               smaw3d, &    !Normalized Galperin instability function for momentum [no units]
@@ -521,7 +522,7 @@ SUBROUTINE microphysics_driver(                                          &
  REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme,ntot_amode_cam_mam ),     &
         INTENT(IN) ::                                                 &
                                                              dgnum4D, &
-                                                          dgnumwet4D 
+                                                          dgnumwet4D
 #endif
 !In-outs
  REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
@@ -533,19 +534,19 @@ SUBROUTINE microphysics_driver(                                          &
 #if ( WRF_CHEM == 1 )
  REAL, OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_chem),     &
       INTENT(INOUT) ::                                                &
-                                                                 chem      !Chem array for CAMMGMP scheme Prognostic aerosols      
+                                                                 chem      !Chem array for CAMMGMP scheme Prognostic aerosols
 #endif
 !outs
 REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
       INTENT(INOUT) , OPTIONAL::                                                 &
-                                                            wsedl3d, &    !Sedimentation velocity of stratiform liquid cloud droplet (m/s) 
+                                                            wsedl3d, &    !Sedimentation velocity of stratiform liquid cloud droplet (m/s)
                                                           cldfra_mp, &    !Old Cloud fraction for CAMMGMP microphysics only
                                                       cldfra_mp_all, &    !Old Cloud fraction for CAMMGMP microphysics only
                                                             cldfrai, &    !Old Cloud fraction for CAMMGMP microphysics only
                                                             cldfral, &    !Old Cloud fraction for CAMMGMP microphysics only
                                                             lradius, &    !Old Cloud fraction for CAMMGMP microphysics only
-                                                            iradius, &    !Old Cloud fraction for CAMMGMP microphysics only                                                            
-                                                        cldfra_conv 
+                                                            iradius, &    !Old Cloud fraction for CAMMGMP microphysics only
+                                                        cldfra_conv
 
 
 
@@ -666,19 +667,15 @@ integer,intent(in) :: snc_N
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
-
 real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi,bs_qni,bs_meanR
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_rad,bs_qni_rad
 real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: xkhv_LES
 real,dimension(ims:ime,jms:jme), intent(in) :: tsk,in_q_lb,in_N_lb
 real,dimension(ims:ime,jms:jme), intent(inout) :: in_bs_sedi
-
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublim3d
-real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d 
-
+real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 !!! Added for CRYOWRF !!!
-                                                          
 #if ( WRF_CHEM == 1)
 ! NUWRF JJS 20110525 vvvvv
 ! for inline Gocart coupling
@@ -689,7 +686,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
  REAL, DIMENSION( ims:ime, kms:kme, jms:jme), INTENT(OUT) :: nc_diag
  integer, intent(in) :: gsfcgce_gocart_coupling ! EMK
  REAL, PARAMETER :: frac(4)=(/ 0.01053,0.08421,0.25263,0.65263 /) !fraction for fine dust
- 
+
 ! NUWRF JJS 20110525 ^^^^^
 #endif
 
@@ -733,7 +730,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
   INTEGER, OPTIONAL, INTENT(IN   )    :: PBL
   INTEGER,           INTENT(IN   )    :: no_src_types_cu
   REAL,              INTENT(IN   )    :: aercu_fct
-  REAL,    OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme, no_src_types_cu), INTENT(INOUT) & 
+  REAL,    OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme, no_src_types_cu), INTENT(INOUT) &
                                       :: aerocu
   REAL,    OPTIONAL, DIMENSION( ims:ime, kms:kme, jms:jme), INTENT(INOUT) &
                                       :: EFCG,           &
@@ -806,9 +803,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
       CALL wrf_message ( wrf_err_message )
    ENDIF
 
-   !!! ADDED FOR CRYOWRF !!!
+   !! CRYOWRF
    if(bs_bool) then
-
 
            !$OMP PARALLEL DO &
            !$OMP PRIVATE (ij,i,j,k)
@@ -820,14 +816,13 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                &            ,ims,ime, jms,jme, kms,kme                                 &
                &            ,ips,ipe, jps,jpe, kps,kpe                                 &
                &            ,i_start(ij),i_end(ij),j_start(ij),j_end(ij),kts,kte                                   &
-               &            ,exch_h,z,pi_phy,th,dz8w,qv_curr,P,RHO,tsk,in_q_lb,in_N_lb & 
+               &            ,exch_h,z,pi_phy,th,dz8w,qv_curr,P,RHO,tsk,in_q_lb,in_N_lb &
                &            ,in_bs_sedi,ht,dt,itimestep,bool_snow_sublimation,bs_rad_effect &
                &            ,in_hsalt,bs_sublim,xkhv_LES,bs_qi_sublim3d,sn_qi_sublim3d,w   )
             enddo
             !$OMP END PARALLEL DO
    endif
-   !!! ADDED FOR CRYOWRF !!!
-
+   !! END CRYOWRF
 #ifdef XEON_OPTIMIZED_WSM5
    ! the OpenMP loops are inside the scheme when running on MIC
    IF ( mp_physics .EQ. WSM5SCHEME ) THEN
@@ -866,7 +861,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
             ,has_reqs=has_reqs                                 &
             ,re_cloud=re_cloud                                 &
             ,re_ice=re_ice                                     &
-            ,re_snow=re_snow                                   &  ! for radiation -  
+            ,re_snow=re_snow                                   &  ! for radiation -
             ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
             ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
             ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
@@ -892,9 +887,9 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 # if( EM_CORE==1 )
        sf_surf_irr: SELECT CASE(sf_surf_irr_scheme)
             CASE(SPRINKLER)
-             CALL sprinkler_irrigation(  julian_in                    & 
-     &          ,irrigation, irr_daily_amount,rho,dz8w                & 
-     &          ,irr_start_hour,irr_num_hours,irr_start_julianday     & 
+             CALL sprinkler_irrigation(  julian_in                    &
+     &          ,irrigation, irr_daily_amount,rho,dz8w                &
+     &          ,irr_start_hour,irr_num_hours,irr_start_julianday     &
      &          ,irr_end_julianday,irr_freq,irr_ph,qr_curr            &
      &          ,gmt,xtime,dt,irr_rand_field                          &
      &          ,ids,ide, jds,jde                                     & ! domain dims
@@ -914,7 +909,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !-----------
        IF( PRESENT(chem_opt) .AND. PRESENT(progn) ) THEN
-       
+
        ! ERM: check whether to use built-in droplet nucleation or use qndrop from CHEM
        IF ( mp_physics==NSSL_2MOMCCN .or. mp_physics==NSSL_2MOM .or. mp_physics==NSSL_2MOMG ) THEN
          IF ( progn > 0 ) THEN
@@ -923,7 +918,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
            nssl_progn = .false. ! use NUCOND for droplet nucleation
          ENDIF
        ENDIF
-       
+
        !Add pass for dust-only wrf-chem option - RAS
        IF( (chem_opt==0 .OR. chem_opt==401) .AND. progn==1 .AND. (mp_physics==LINSCHEME  .OR. mp_physics==MORR_TWO_MOMENT)) THEN
           IF( PRESENT( QNDROP_CURR ) ) THEN
@@ -1097,9 +1092,9 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                      has_reqc=has_reqc,                  & ! G. Thompson
                      has_reqi=has_reqi,                  & ! G. Thompson
                      has_reqs=has_reqs,                  & ! G. Thompson
-                     bs_qi_rad=bs_qi_rad,                & ! Added for CRYOWRF
-                     bs_qni_rad=bs_qni_rad,              & ! Added for CRYOWRF
-                     bs_rad_effect=bs_rad_effect,        & ! Added for CRYOWRF
+                     bs_qi_rad=bs_qi_rad,                & ! CRYOWRF
+                     bs_qni_rad=bs_qni_rad,              & ! CRYOWRF
+                     bs_rad_effect=bs_rad_effect,        & ! CRYOWRF
                  IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde, &
                  IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme, &
                  ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte)
@@ -1159,9 +1154,9 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                      has_reqc=has_reqc,                  & ! G. Thompson
                      has_reqi=has_reqi,                  & ! G. Thompson
                      has_reqs=has_reqs,                  & ! G. Thompson
-                     bs_qi_rad=bs_qi_rad,                & ! ADDED FOR CRYOWRF
-                     bs_qni_rad=bs_qni_rad,              & ! ADDED FOR CRYOWRF
-                     bs_rad_effect=bs_rad_effect,        & ! ADDED FOR CRYOWRF
+                     bs_qi_rad=bs_qi_rad,                & ! CRYOWRF
+                     bs_qni_rad=bs_qni_rad,              & ! CRYOWRF
+                     bs_rad_effect=bs_rad_effect,        & ! CRYOWRF
                  IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde, &
                  IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme, &
                  ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte)
@@ -1291,25 +1286,25 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
              PRESENT (QI3_CURR).AND. PRESENT (QNI3_CURR) .AND. &
              PRESENT (QVOLI3_CURR).AND. PRESENT (QAOLI3_CURR)) THEN
              CALL mp_jensen_ishmael(             &
-             ITIMESTEP=itimestep,                &  !*                                                                         
+             ITIMESTEP=itimestep,                &  !*
              DT_IN=dt,                           &  !*
-             P=p,                                &  !*                                                                         
+             P=p,                                &  !*
              DZ=dz8w,                            &  !* !
-             TH=th,                              &  !*                                                                         
-             QV=qv_curr,                         &  !*                                                                         
-             QC=qc_curr,                         &  !*                                                                         
-             QR=qr_curr,                         &  !*                                                                         
+             TH=th,                              &  !*
+             QV=qv_curr,                         &  !*
+             QC=qc_curr,                         &  !*
+             QR=qr_curr,                         &  !*
              NR=qnr_curr,                        &  !* !
-             QI1=qi_curr,                        &  !*                                                                         
-             NI1=qni_curr,                       &  !*                                                                         
+             QI1=qi_curr,                        &  !*
+             NI1=qni_curr,                       &  !*
              AI1=qvoli_curr,                     &  !*
              CI1=qaoli_curr,                     &  !*
-             QI2=qi2_curr,                       &  !*                                                                         
-             NI2=qni2_curr,                      &  !*                                                                         
+             QI2=qi2_curr,                       &  !*
+             NI2=qni2_curr,                      &  !*
              AI2=qvoli2_curr,                    &  !*
              CI2=qaoli2_curr,                    &  !*
-             QI3=qi3_curr,                       &  !*                                                                         
-             NI3=qni3_curr,                      &  !*                                                                         
+             QI3=qi3_curr,                       &  !*
+             NI3=qni3_curr,                      &  !*
              AI3=qvoli3_curr,                    &  !*
              CI3=qaoli3_curr,                    &  !*
              IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde, &
@@ -1753,7 +1748,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 #endif
              PRESENT ( W      )  .AND. &
              PRESENT (QVOLG_CURR) ) THEN
-             
+
 
          CALL nssl_2mom_driver(                          &
                      ITIMESTEP=itimestep,                &
@@ -1813,7 +1808,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
              PRESENT (GRAUPELNC).AND.PRESENT (GRAUPELNCV).AND. &
 #endif
              PRESENT ( W      )  ) THEN
-             
+
 
          CALL nssl_2mom_driver(                          &
                      ITIMESTEP=itimestep,                &
@@ -1866,7 +1861,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
              PRESENT ( W      )  .AND. &
              PRESENT (QVOLG_CURR) .AND. F_QVOLG  .AND.         &
              PRESENT (QVOLH_CURR) .AND. F_QVOLH ) THEN
-             
+
 
          CALL nssl_2mom_driver(                          &
                      ITIMESTEP=itimestep,                &
@@ -1945,7 +1940,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 #endif
              PRESENT ( W      )  .AND. &
              PRESENT (QVOLG_CURR) .AND. F_QVOLG  ) THEN
-             
+
 
          CALL nssl_2mom_driver(                          &
                      ITIMESTEP=itimestep,                &
@@ -2023,7 +2018,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
              PRESENT (QVOLG_CURR) .AND. F_QVOLG  .AND.         &
              PRESENT (QVOLH_CURR) .AND. F_QVOLH  .AND.         &
              PRESENT( QNN_CURR )                          ) THEN
-             
+
 
          CALL nssl_2mom_driver(                          &
                      ITIMESTEP=itimestep,                &
@@ -2163,7 +2158,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,F_QG=f_qg                                         &
                  ,QG=qg_curr                                        &
 !                 ,IHAIL=hail, ICE4=ice2                             & ! hardcoded in the 4ice scheme
-                                                                       ! ihail = 0, ice4=4 
+                                                                       ! ihail = 0, ice4=4
 !NUWRF JJS 20110525 vvvvv
                  ,PHYSC=physc, PHYSE=physe, PHYSD=physd             &
                  ,PHYSS=physs, PHYSM=physm, PHYSF=physf             &
@@ -2197,7 +2192,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                         acphys_tot(i,k,j) = acphysc(i,k,j) + acphyse(i,k,j) + &
                              acphysd(i,k,j) + acphyss(i,k,j) + acphysm(i,k,j) + &
                              acphysf(i,k,j)
-                        
+
                      end do
                   end do
                end do
@@ -2315,7 +2310,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,has_reqs=has_reqs                                 &
                  ,re_cloud=re_cloud                                 &
                  ,re_ice=re_ice                                     &
-                 ,re_snow=re_snow                                   &  ! for radiation -  
+                 ,re_snow=re_snow                                   &  ! for radiation -
 # endif
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
@@ -2358,7 +2353,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,has_reqs=has_reqs                                 &
                  ,re_cloud=re_cloud                                 &
                  ,re_ice=re_ice                                     &
-                 ,re_snow=re_snow                                   &  ! for radiation -  
+                 ,re_snow=re_snow                                   &  ! for radiation -
 # endif
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
@@ -2402,7 +2397,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,has_reqs=has_reqs                                 &
                  ,re_cloud=re_cloud                                 &
                  ,re_ice=re_ice                                     &
-                 ,re_snow=re_snow                                   &  ! for radiation -  
+                 ,re_snow=re_snow                                   &  ! for radiation -
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
@@ -2494,8 +2489,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,has_reqs=has_reqs                                 &
                  ,re_cloud=re_cloud                                 &
                  ,re_ice=re_ice                                     &
-                 ,re_snow=re_snow                                   &  ! for radiation -       
-                 ,ITIMESTEP=itimestep                               & 
+                 ,re_snow=re_snow                                   &  ! for radiation -
+                 ,ITIMESTEP=itimestep                               &
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
@@ -2538,13 +2533,13 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                  ,diagflag=diagflag                                 &  ! added for radar reflectivity
                  ,do_radar_ref=do_radar_ref                         &  ! added for radar reflectivity
                  ,GRAUPEL=graupelnc ,GRAUPELNCV=graupelncv          &
-                 ,ITIMESTEP=itimestep                               & 
+                 ,ITIMESTEP=itimestep                               &
                  ,has_reqc=has_reqc                                 &  ! for radiation +
                  ,has_reqi=has_reqi                                 &
                  ,has_reqs=has_reqs                                 &
                  ,re_cloud=re_cloud                                 &
-                 ,re_ice=re_ice                                     & 
-                 ,re_snow=re_snow                                   &  ! for radiation -  
+                 ,re_ice=re_ice                                     &
+                 ,re_snow=re_snow                                   &  ! for radiation -
                  ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde &
                  ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
@@ -2734,7 +2729,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                   PRESENT( qs_curr    ) .AND.                              &
                   PRESENT( qv_curr    ) .AND. PRESENT( qc_curr     ) .AND. &
                   PRESENT( qi_curr    ) .AND. PRESENT( f_qc        ) .AND. &
-                  PRESENT( qr_curr    ) .AND. PRESENT( qndrop_curr ) .AND. &                  
+                  PRESENT( qr_curr    ) .AND. PRESENT( qndrop_curr ) .AND. &
                   PRESENT( f_qi       ) .AND. PRESENT( qnc_curr    ) .AND. &
                   PRESENT( RAINNCV    ) .AND. PRESENT( SNOWNCV     ) .AND. &
                   PRESENT( qns_curr   ) .AND. PRESENT( qnr_curr    ) .AND. &
@@ -2749,7 +2744,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                 qi_b4mp(its:ite,kts:kte,jts:jte) = qi_curr(its:ite,kts:kte,jts:jte)
                 qs_b4mp(its:ite,kts:kte,jts:jte) = qs_curr(its:ite,kts:kte,jts:jte)
 #endif
-                  
+
                 CALL CAMMGMP(ITIMESTEP=itimestep,DT=dt,P8W=p8w_hyd,P_HYD=p_hyd    &
                      ,T_PHY=t_phy,PI_PHY=pi_phy,Z_AT_W=z_at_w,QFX=qfx             &
                      ,TKE_PBL=tke_pbl,TURBTYPE3D=turbtype3d,SMAW3D=smaw3d     &
@@ -2793,14 +2788,14 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
              CALL wrf_debug ( 100 , 'microphysics_driver: calling lscond' )
              IF ( PRESENT( QV_CURR ) .AND.                          &
                   PRESENT( RAINNC  ) .AND. PRESENT ( RAINNCV )) THEN
-                                          
+
                CALL lscond(                                         &
                   TH=th                                              &
-                 ,P=p                                               & 
+                 ,P=p                                               &
                  ,QV=qv_curr                                        &
-                 ,RHO=rho, PII=pi_phy, XLV=xlv, CP=cp               &  
+                 ,RHO=rho, PII=pi_phy, XLV=xlv, CP=cp               &
                  ,EP2=ep_2,SVP1=svp1,SVP2=svp2                      &
-                 ,SVP3=svp3,SVPT0=svpt0                             & 
+                 ,SVP3=svp3,SVPT0=svpt0                             &
                  ,R_V= R_v                                          & ! added
                  ,DZ8W=dz8w                                         &
                  ,RAINNC=rainnc,RAINNCV=rainncv                     &
@@ -2853,12 +2848,11 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
    END SUBROUTINE microphysics_driver
 
-!!! ADDED FOR CRYOWRF !!!
 !******************************************************
 ! Blowing snow routine
 ! Developed by Varun Sharma (vsharma.next@gmail.com)
 ! Released with CRYOWRF v1.0
-! Publication : 
+! Publication :
 !******************************************************
 
    SUBROUTINE blowing_snow(snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ            &
@@ -2875,7 +2869,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
    IMPLICIT NONE
 
-!!! IN/OUT Variables 
+!!! IN/OUT Variables
    integer,intent(in) :: snc_N
    integer,intent(in) :: itimestep
    logical,intent(in) :: bool_snow_sublimation
@@ -2893,7 +2887,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
    real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: z_at_half
    real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: xkhv_LES
 
-   real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: w  
+   real,dimension(ims:ime,kms:kme,jms:jme), intent(in) :: w
 
    real,dimension(ims:ime,jms:jme), intent(in) :: tsk,in_q_lb,in_N_lb
    real,dimension(ims:ime,jms:jme), intent(inout) :: in_bs_sedi
@@ -2903,7 +2897,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
    real,intent(in) :: DT_IN
 
    real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublim3d
-   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d 
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 
    integer, intent(in)    ::       ids,ide, jds,jde, kds,kde
@@ -2913,7 +2907,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
    integer, intent(in)    ::       its,ite,jts,jte
 !! Local variables
     integer                   :: i,j,k
-    integer                   :: bs_Ntot 
+    integer                   :: bs_Ntot
     real,dimension(snc_N+kte-kts+1)   :: bs_Z,bs_Kmix,bs_dz
     real,dimension(1:snc_N+1) :: bs_zm_sfclayer
     real,dimension(kts:kte)   :: tmp_bs_z
@@ -2929,7 +2923,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
     real,parameter            :: alpha = 3.0 ! parameter for blowing snow distribution
     real                      :: gamma_alpha3,gamma_alpha,gamma_alpha_ratio
     real                      :: lambda,mean_Nbest,a_loc,b_loc,g,eta,dyn_vis
-    real,parameter            :: pi_v = 3.14159265 
+    real,parameter            :: pi_v = 3.14159265
     real :: A,B,C,diffu,tcond,undsat
     real,parameter :: Rv = 461.5
     real :: tempc,qsalt,nsalt,loc_alt,bs_number_turb,bs_mass_turb
@@ -2967,8 +2961,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
       QFX_corr = 0.
 
       qv_corr = 0.
-      t_corr = 0.     
- 
+      t_corr = 0.
+
       ksedi = 0
 ! SALTATION DATA COMING FROM SNOWPACK
       qsalt = in_q_lb(I,J)
@@ -3004,22 +2998,22 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! bs_Z is the height of the "U" levels for all the blowing snow points including surface layer points
     bs_Z(1:snc_N)              = snc_Z(I,:,J)
-    bs_Z(snc_N+1 : bs_Ntot  )  = z_at_half(I,kts:kte,J)-loc_alt        
+    bs_Z(snc_N+1 : bs_Ntot  )  = z_at_half(I,kts:kte,J)-loc_alt
 
 !    write(*,*) 'I,J,bs_Z: ',I,J,bs_Z
 !!! bs_dz is the dz between the blowing snow points
     bs_dz(1) = bs_Z(1) - h_salt
-    bs_dz( 2 : bs_Ntot) = bs_Z( 2 : bs_Ntot)-bs_Z( 1:bs_Ntot-1) 
+    bs_dz( 2 : bs_Ntot) = bs_Z( 2 : bs_Ntot)-bs_Z( 1:bs_Ntot-1)
 !    write(*,*) 'I,J,bs_dz: ',I,J,bs_dz
 
-!!! bs_grid_height is the height associated with each grid point  
+!!! bs_grid_height is the height associated with each grid point
     bs_grid_height = 0.5 * ( bs_dz(1:bs_Ntot-1) + bs_dz(2:bs_Ntot) )
 
 !!! bs_zm_sfclayer is the height of the "W" levels in the surface layer only
     bs_zm_sfclayer(1) = (bs_Z(1)+h_salt) * 0.5
     bs_zm_sfclayer(2:snc_N+1) = (bs_Z(2:snc_N+1) + bs_Z(1:snc_N)) * 0.5
 
-!!!! Reconstruct the diffusivity (m2/s) 
+!!!! Reconstruct the diffusivity (m2/s)
 !!!! in the surface layer, bs_Kmix is linearly scaled between zero and exch_h(2)
 !!!! bs_Kmix is defined on "W" levels
 
@@ -3040,16 +3034,16 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! RECONSTRUCTING Temperature
     bs_temp(snc_N+1:bs_Ntot) = th(i,kts:kte,j) * pii(i,kts:kte,j)
-    bs_temp(1:snc_N) = tsk(i,j) + ( (bs_temp(snc_N+1) - tsk(i,j)) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)  
+    bs_temp(1:snc_N) = tsk(i,j) + ( (bs_temp(snc_N+1) - tsk(i,j)) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)
 
 !!! RECONSTRUCTING Qv
     bs_qv(snc_N+1:bs_Ntot) = QV(i,kts:kte,j)
     call Qsat_noah(tsk(i,j),P(i,1,j),tmp_real,sfc_qv)
-    bs_qv(1:snc_N) = sfc_qv + ( (bs_qv(snc_N+1) - sfc_qv) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)  
+    bs_qv(1:snc_N) = sfc_qv + ( (bs_qv(snc_N+1) - sfc_qv) * bs_Z(1:snc_N) )/bs_Z(snc_N+1)
 
 !!! RECONSTRUCTING rho_fluid ( air in this case )
     bs_rho(snc_N+1:bs_Ntot) = RHO(i,kts:kte,j)
-    bs_rho(1:snc_N) = bs_rho(snc_N+1) 
+    bs_rho(1:snc_N) = bs_rho(snc_N+1)
 
 !!! RECONSTRUCTING Pressure in the air
     bs_P(snc_N+1:bs_Ntot) = P(i,kts:kte,j)
@@ -3071,7 +3065,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
         if ( (bs_qi_loc(k) .gt. 1.0e-10) .and. (bs_qni_loc(k) .gt. 1.0e-5) ) then
             lambda = ((pi_v*918.0/6.0) * (bs_qni_loc(k)/bs_qi_loc(k)) * (gamma_alpha_ratio) )**(1.0/3.0)
             g = (1.333 * bs_rho(k) *  ( 918.0 - bs_rho(k)) * 9.81 ) / ( dyn_vis * dyn_vis )
-            
+
             mean_NBest = g * ( gamma_alpha_ratio ) * (1.0/(lambda * lambda * lambda))
             call b_re(b_loc,mean_NBest)
             call a_re(a_loc,mean_NBest,b_loc)
@@ -3087,7 +3081,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
             VN(k) = 0.001
             VQ(k) = 0.001
         endif
-           
+
     enddo
 
 !!! SOLVING FOR BS_QI
@@ -3097,7 +3091,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
     mat_a(k) = 0
     mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
 &                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k)                     &
-&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     
+&                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))
 
     mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VQ(k+1) )
 
@@ -3107,8 +3101,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 !!! MIDDLE OF THE MATRIX
     do k=2,bs_Ntot-1
 
-      mat_a(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * bs_Kmix(k) / bs_dz(k) 
-      
+      mat_a(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * bs_Kmix(k) / bs_dz(k)
+
       mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
    &                  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     &
    &                  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VQ(k)
@@ -3121,10 +3115,10 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! TOP OF THE MATRIX
    k=bs_Ntot
-   mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) 
+   mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k))
    mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VQ(k)
    mat_c(k) =  0.0
-   mat_d(k) = bs_qi_loc(k)        
+   mat_d(k) = bs_qi_loc(k)
 
 
    call tridiag3(bs_Ntot,mat_a,mat_b,mat_c,mat_d,qi_final)
@@ -3144,7 +3138,7 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
     mat_a(k) = 0
     mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
 &                   +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN(k)                     &
-&                   + (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))      
+&                   + (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))
 
     mat_c(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * ( (bs_Kmix(k+1)/bs_dz(k+1)) + VN(k+1) )
 
@@ -3153,8 +3147,8 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 !!! MIDDLE OF THE MATRIX
     do k=2,bs_Ntot-1
 
-      mat_a(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * bs_Kmix(k) / bs_dz(k) 
-      
+      mat_a(k) = -1.0 * (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k))) * bs_Kmix(k) / bs_dz(k)
+
       mat_b(k) = 1.0  +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k+1)/bs_dz(k+1)) &
                       +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*(bs_Kmix(k)/bs_dz(k))     &
                       +  (2.0*DT_IN/(bs_dz(k+1)+bs_dz(k)))*VN(k)
@@ -3167,10 +3161,10 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
 
 !!! TOP OF THE MATRIX
    k=bs_Ntot
-   mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) 
+   mat_a(k) = -1.0 * (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k))
    mat_b(k) =  1.0 + (DT_IN/bs_dz(k)) * (bs_Kmix(k)/bs_dz(k)) + (DT_IN/bs_dz(k)) * VN(k)
    mat_c(k) =  0.0
-   mat_d(k) = bs_qni_loc(k)        
+   mat_d(k) = bs_qni_loc(k)
 
    call tridiag3(bs_Ntot,mat_a,mat_b,mat_c,mat_d,qni_final)
 
@@ -3187,12 +3181,12 @@ qni_final = max(1.0E-6  , qni_final)
 
 !!!!!!! SUBLIMATION
 if(bool_snow_sublimation) then
- 
+
     do k = 1,bs_Ntot
 
        call Qsat_noah(bs_temp(k),bs_P(k),tmp_real,loc_qsat)
        loc_bs_RH(k) = bs_qv(k)/loc_qsat
-              
+
        tempc = bs_temp(k) - 273.15
        if (tempc .ge. 0.0) then
            dyn_vis = (1.718+0.0049*tempc)*1.0E-5
@@ -3231,10 +3225,10 @@ if(bool_snow_sublimation) then
                  bs_sublim_qi(k) = MIN(tmp_SQ,DBLE((bs_qv(k)-loc_qsat)*0.999/dt_in))
               endif
               if (bs_sublim_qi(k) .le. 0) then
-                tmp_SN = (bs_sublim_qi(k)/qi_final(k))*qni_final(k)   
+                tmp_SN = (bs_sublim_qi(k)/qi_final(k))*qni_final(k)
               else
                 tmp_SN = 0.0
-              endif 
+              endif
               bs_sublim_qni(k) = MAX(DBLE(-qni_final(k)/dt_in),tmp_SN)
 
               !bs_HFX(k) = lsub * bs_sublim_qi(k) ! units [ J/m3/s ]
@@ -3251,7 +3245,7 @@ if(bool_snow_sublimation) then
              bs_sublim_qi(k) = 0.0
              bs_sublim_qni(k) = 0.0
        endif
- 
+
 
     enddo ! END LOOP OVER K
 
@@ -3259,22 +3253,22 @@ if(bool_snow_sublimation) then
     !! GETTING THE corrections for temperature and humidity due to sublimation/deposition
     do k=snc_N+2,bs_Ntot-1
        qv_corr(k) = dt_in * bs_sublim_qi(k) * (-1.0)
-       t_corr(k)  = dt_in * bs_sublim_qi(k) *  1.0 * lsub(k) / Cp_air 
+       t_corr(k)  = dt_in * bs_sublim_qi(k) *  1.0 * lsub(k) / Cp_air
     enddo
 
 
     first_wrf_thickness = 0.5 * ( bs_Z(snc_N+1) + bs_Z(snc_N+2) )
     !! TEST: putting fine mesh heat and mass at the first 'WRF' grid point
-    !t_fm_corr  = sum( lsub(1:snc_N+1) * bs_sublim_qi(1:snc_N+1) * bs_grid_height(1:snc_N+1) * dt_in) / ( Cp_air * first_wrf_thickness  ) 
-    !qv_fm_corr = sum( bs_sublim_qi(1:snc_N+1) * (-1.0) * bs_grid_height(1:snc_N+1) * dt_in ) / first_wrf_thickness 
-     t_corr(snc_N+1) = sum( lsub(1:snc_N+1) * bs_sublim_qi(1:snc_N+1) * bs_grid_height(1:snc_N+1) * dt_in) / ( Cp_air * first_wrf_thickness  ) 
-    qv_corr(snc_N+1) = sum( bs_sublim_qi(1:snc_N+1) * (-1.0) * bs_grid_height(1:snc_N+1) * dt_in ) / first_wrf_thickness 
+    !t_fm_corr  = sum( lsub(1:snc_N+1) * bs_sublim_qi(1:snc_N+1) * bs_grid_height(1:snc_N+1) * dt_in) / ( Cp_air * first_wrf_thickness  )
+    !qv_fm_corr = sum( bs_sublim_qi(1:snc_N+1) * (-1.0) * bs_grid_height(1:snc_N+1) * dt_in ) / first_wrf_thickness
+     t_corr(snc_N+1) = sum( lsub(1:snc_N+1) * bs_sublim_qi(1:snc_N+1) * bs_grid_height(1:snc_N+1) * dt_in) / ( Cp_air * first_wrf_thickness  )
+    qv_corr(snc_N+1) = sum( bs_sublim_qi(1:snc_N+1) * (-1.0) * bs_grid_height(1:snc_N+1) * dt_in ) / first_wrf_thickness
 
     !!! correct local QV and TEMP
     bs_qv   = bs_qv   + qv_corr
     bs_temp = bs_temp +  t_corr
 
-    !!! Sending feedback to vapor mass and potential temperature 
+    !!! Sending feedback to vapor mass and potential temperature
     QV(I,kts:kte,J) = bs_qv(snc_N+1:bs_Ntot)
     TH(I,kts:kte,J) = bs_temp(snc_N+1:bs_Ntot) / pii(I,kts:kte,J)
 
@@ -3283,11 +3277,11 @@ if(bool_snow_sublimation) then
     sn_qi_sublim3d(I,1:snc_N,J) = bs_sublim_qi(1:snc_N)
 
 
-    !!! correcting the surface heat flux and the vapor flux 
+    !!! correcting the surface heat flux and the vapor flux
     HFX_corr = 0.0 ! sum(lsub(1:snc_N) * bs_sublim_qi(1:snc_N) * bs_grid_height(1:snc_N) * bs_rho(1:snc_N))
     QFX_corr = 0.0 ! sum(bs_sublim_qi(1:snc_N) * bs_grid_height(1:snc_N) * (-1.0) * bs_rho(1:snc_N))
 
-   !!! calculating the total mass sublimated (kg/m2) in air column 
+   !!! calculating the total mass sublimated (kg/m2) in air column
     bs_sublim(I,J) = bs_sublim(I,J) + sum( (-1.0) * bs_sublim_qi(1:bs_Ntot-1) * &
 &                                          bs_grid_height(1:bs_Ntot-1) * dt_in * bs_rho(1:bs_Ntot-1) )
 
@@ -3298,7 +3292,7 @@ if(bool_snow_sublimation) then
 !          enddo
 !    endif
 
- !UPDATING the qi_final and qni_final arrays to account for sublimation  
+ !UPDATING the qi_final and qni_final arrays to account for sublimation
 do k=1,bs_Ntot
    qi_final(k)  = qi_final(k) + dt_in * bs_sublim_qi(k)
    qni_final(k) = qni_final(k) + dt_in * bs_sublim_qni(k)
@@ -3318,7 +3312,7 @@ QFX_corr = 0.0
 endif ! END OF BLOWING SNOW SUBLIMATION
 
 
-if(bs_rad_effect) then 
+if(bs_rad_effect) then
 
    bs_qi_rad_loc(kts:kte)  = qi_final(snc_N+1:bs_Ntot)
    bs_qni_rad_loc(kts:kte) = qni_final(snc_N+1:bs_Ntot)
@@ -3335,18 +3329,18 @@ if(bs_rad_effect) then
 endif
 
 
- !!!! Transfer values to main matrix  
-  
+ !!!! Transfer values to main matrix
+
     sn_qs(I,1:snc_N,J)         =  qi_final(1:snc_N)
     bs_qi(I,kts:kte,J)         =  qi_final(snc_N+1:bs_Ntot)
-  
+
     sn_ns(I,1:snc_N,J)         =  qni_final(1:snc_N)
     bs_qni(I,kts:kte,J)        =  qni_final(snc_N+1:bs_Ntot)
 
     sfc_meanR(I,1:snc_N,J)     = loc_sfc_meanR(1:snc_N)
     bs_meanR(I,kts:kte,J)      = loc_sfc_meanR(snc_N+1:bs_Ntot)
- 
- !! Transfering the heat flux and vapor flux corrections so that sf_noahmpdrv.F can take care of it 
+
+ !! Transfering the heat flux and vapor flux corrections so that sf_noahmpdrv.F can take care of it
 
     sfc_SQ_HFX(I,J) = sign( max(1e-12,abs(HFX_corr)),HFX_corr)
     sfc_SQ_QFX(I,J) = sign( max(1e-12,abs(QFX_corr)),QFX_corr)
@@ -3356,7 +3350,7 @@ endif
     bs_qi_rad(I,kts:kte,J)  = bs_qi_rad_loc(kts:kte)
     bs_qni_rad(I,kts:kte,J) = bs_qni_rad_loc(kts:kte)
 
-     
+
    ENDDO                                                           ! of I loop
    ENDDO                                                           ! of J loop
 
@@ -3369,7 +3363,7 @@ endif
      real, intent(in) :: X,b
      real,parameter :: del_0 = 5.83
      real,parameter :: c0 = 0.6
-     real,parameter :: c1 = 0.1519 
+     real,parameter :: c1 = 0.1519
      real, intent(out) :: a
 
      a = (((del_0**2.0)/4.0) * ( sqrt(1+c1*sqrt(X)) - 1.0 )**(2.0) ) / (X**b)
@@ -3383,7 +3377,7 @@ endif
      real, intent(in) :: X
      real,parameter :: del_0 = 5.83
      real,parameter :: c0 = 0.6
-     real,parameter :: c1 = 0.1519 
+     real,parameter :: c1 = 0.1519
      real, intent(out) :: b
      real :: denom
 
@@ -3399,20 +3393,20 @@ endif
 
 !!! ADDED BY CRYOWRF !!!
 ! Subroutine related to the blowing_snow subroutine
-! BORROWED FROM module_bl_mynn.F 
+! BORROWED FROM module_bl_mynn.F
     subroutine tridiag3(kte,a,b,c,d,x)
 
-!ccccccccccccccccccccccccccccccc                                                                   
-! Aim: Inversion and resolution of a tridiagonal matrix                                            
-!          A X = D                                                                                 
-! Input:                                                                                           
-!  a(*) lower diagonal (Ai,i-1)                                                                  
-!  b(*) principal diagonal (Ai,i)                                                                
-!  c(*) upper diagonal (Ai,i+1)                                                                  
-!  d                                                                                               
-! Output                                                                                           
-!  x     results                                                                                   
-!ccccccccccccccccccccccccccccccc                                                                   
+!ccccccccccccccccccccccccccccccc
+! Aim: Inversion and resolution of a tridiagonal matrix
+!          A X = D
+! Input:
+!  a(*) lower diagonal (Ai,i-1)
+!  b(*) principal diagonal (Ai,i)
+!  c(*) upper diagonal (Ai,i+1)
+!  d
+! Output
+!  x     results
+!ccccccccccccccccccccccccccccccc
 
        implicit none
         integer,intent(in)   :: kte
@@ -3510,7 +3504,6 @@ SUBROUTINE Qsat_noah(T,p,es,qs)
       real, parameter :: d7 =  0.394116744e-13
       real, parameter :: d8 =  0.498070196e-16
 
-
       T_limit = T - 273.15
       if (T_limit > 100.0) T_limit=100.0
       if (T_limit < -75.0) T_limit=-75.0
@@ -3535,8 +3528,4 @@ SUBROUTINE Qsat_noah(T,p,es,qs)
 !      write(*,*) 'in Qsat_noah: ', es
 
     end subroutine Qsat_noah
-
-
-
-
 END MODULE module_microphysics_driver

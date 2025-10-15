@@ -985,7 +985,7 @@
                               refl_10cm, diagflag, ke_diag, do_radar_ref,      &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
-                              bs_qi_rad,bs_qni_rad,bs_rad_effect,     &! ADDED FOR CRYOWRF
+                              bs_qi_rad,bs_qni_rad,bs_rad_effect,     &! CRYOWRF
                               ids,ide, jds,jde, kds,kde, &             ! domain dims
                               ims,ime, jms,jme, kms,kme, &             ! memory dims
                               its,ite, jts,jte, kts,kte)               ! tile dims
@@ -1019,12 +1019,12 @@
       REAL, INTENT(IN):: dt_in
       INTEGER, INTENT(IN):: itimestep
 
-      !!! ADDED FOR CRYOWRF !!!
+      !! CRYOWRF
       real, dimension(ims:ime,kms:kme,jms:jme), intent(in) :: bs_qi_rad,bs_qni_rad
       real, dimension(kts:kte) :: bs_qi_rad_loc,bs_qni_rad_loc
       logical,intent(in) :: bs_rad_effect
       real, dimension(kts:kte) :: qi1d_rad,ni1d_rad
-      !!! ADDED FOR CRYOWRF !!!
+      !! END CRYOWRF !!!
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
@@ -1047,7 +1047,7 @@
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref, ke_diag
       CHARACTER*256:: mp_debug
-      
+
       integer :: kediagloc
 
 !+---+
@@ -1067,7 +1067,7 @@
 !     endif
 
       dt = dt_in
-   
+
       qc_max = 0.
       qr_max = 0.
       qs_max = 0.
@@ -1136,10 +1136,8 @@
             ni1d(k) = ni(i,k,j)
             nr1d(k) = nr(i,k,j)
             rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
-
             bs_qi_rad_loc(k)  = bs_qi_rad(i,k,j)
             bs_qni_rad_loc(k) = bs_qni_rad(i,k,j)
-
          enddo
          if (is_aerosol_aware) then
             do k = kts, kte
@@ -1298,13 +1296,13 @@
 
          IF ( PRESENT (diagflag) ) THEN
          if (diagflag .and. do_radar_ref == 1) then
-          
+
           IF ( present(ke_diag) ) THEN
             kediagloc = ke_diag
           ELSE
             kediagloc = kte
           ENDIF
-          
+
           call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,       &
                       t1d, p1d, dBZ, kts, kte, i, j, kediagloc)
           do k = kts, kte
@@ -1312,15 +1310,13 @@
           enddo
          endif
          ENDIF
-
          qi1d_rad = qi1d
          ni1d_rad = ni1d
 
          if(bs_rad_effect) then
-            qi1d_rad  = qi1d + bs_qi_rad_loc 
+            qi1d_rad  = qi1d + bs_qi_rad_loc
             ni1d_rad  = ni1d + bs_qni_rad_loc
          endif
-
 
          IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
           do k = kts, kte
@@ -2816,7 +2812,7 @@
          if ((qi1d(k) + qiten(k)*DT) .gt. R1) then
             ri(k) = (qi1d(k) + qiten(k)*DT)*rho(k)
             ni(k) = MAX(R2, (ni1d(k) + niten(k)*DT)*rho(k))
-            L_qi(k) = .true. 
+            L_qi(k) = .true.
          else
             ri(k) = R1
             ni(k) = R2
@@ -2843,7 +2839,7 @@
             nr(k) = R2
             L_qr(k) = .false.
          endif
-               
+
          if ((qs1d(k) + qsten(k)*DT) .gt. R1) then
             rs(k) = (qs1d(k) + qsten(k)*DT)*rho(k)
             L_qs(k) = .true.
@@ -3949,7 +3945,7 @@
                   massr = am_r * Dr(n2)**bm_r
                   do n = 1, nbs
                      masss = am_s * Ds(n)**bm_s
-      
+
                      dvs = 0.5d0*((vr(n2) - vs(n)) + DABS(vr(n2)-vs(n)))
                      dvr = 0.5d0*((vs(n) - vr(n2)) + DABS(vs(n)-vr(n2)))
 
@@ -4746,7 +4742,7 @@
 !+---+-----------------------------------------------------------------+
       SUBROUTINE GSER(GAMSER,A,X,GLN)
 !     --- RETURNS THE INCOMPLETE GAMMA FUNCTION P(A,X) EVALUATED BY ITS
-!     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A)) 
+!     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A))
 !     --- AS GLN.
 !     --- USES GAMMLN
       IMPLICIT NONE
@@ -5015,7 +5011,7 @@
       a2  = -A*(y1+y2)*0.5
       a3  = A/3.
 
-      if (yy.le.y1) then 
+      if (yy.le.y1) then
          dab = aa
       else if (yy.ge.y2) then
          dab = bb
@@ -5023,15 +5019,15 @@
          dab = a0+(a1*yy)+(a2*yy*yy)+(a3*yy*yy*yy)
       endif
 
-      if (dab.lt.aa) then 
+      if (dab.lt.aa) then
          dab = aa
       endif
-      if (dab.gt.bb) then 
+      if (dab.gt.bb) then
          dab = bb
       endif
       delta_p = dab
 
-      END FUNCTION delta_p 
+      END FUNCTION delta_p
 
 !+---+-----------------------------------------------------------------+
 !ctrlL

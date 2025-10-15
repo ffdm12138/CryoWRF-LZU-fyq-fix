@@ -192,8 +192,8 @@ MODULES = \
 	module_wind_fitch.o \
 	module_sf_lake.o \
 	module_diagnostics_driver.o \
-	module_irrigation.o \
-        module_sf_snowpacklsm.o
+	module_sf_snowpacklsm.o \
+	module_irrigation.o
 
 FIRE_MODULES = \
         module_fr_fire_driver.o \
@@ -216,13 +216,13 @@ DIAGNOSTIC_MODULES_EM = \
 	module_diag_zld.o \
 	module_diag_trad_fields.o \
         module_diag_solar.o
-  
+
 DIAGNOSTIC_MODULES_NMM = \
 	module_diag_refl.o
 
 OBJS    =
 
-NMM_MODULES =  
+NMM_MODULES =
 
 LIBTARGET    =  physics
 TARGETDIR    =  ./
