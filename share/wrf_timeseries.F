@@ -1052,7 +1052,6 @@ SUBROUTINE write_ts( grid )
 
             ELSE
                !!! WRF-Solar diagnostics
-               WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,49(f13.5,1x))')  &
                IF ( config_flags%sf_surface_physics == 18 ) THEN
                   ! If surface physics set to SNOWPACK
                   WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,44(f13.5,1x))')  &
@@ -1103,6 +1102,7 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_clrnidx(n,i),                      &
                                  grid%ts_sza(n,i)
                ELSE
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,49(f13.5,1x))')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &

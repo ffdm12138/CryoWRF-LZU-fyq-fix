@@ -818,7 +818,6 @@ print *,'WATER CHANGE = ',change_water
                                  its , ite , jts , jte , kts , kte )
 
       ELSE IF ( ( sf_surface_physics .EQ. SNOWPACKSCHEME ) .AND. ( num_soil_layers .GT. 1 ) ) THEN
-      !! END CRYOWRF
          CALL init_soil_depth_2 ( zs , dzs , num_soil_layers )
          CALL init_soil_2_real ( tsk , tmn , smois , sh2o , tslb , &
                                  st_input , sm_input , sw_input , landmask , sst , &
@@ -3133,28 +3132,3 @@ FUNCTION skip_middle_points_t ( ids , ide , jds , jde , &
    END IF
 
 END FUNCTION skip_middle_points_t
-      !! CRYOWRF
-      ELSE IF ( ( sf_surface_physics .EQ. SNOWPACKSCHEME                     ) .AND. &
-                ( num_soil_layers .GT. 1 ) ) THEN
-         CALL init_soil_depth_2 ( zs , dzs , num_soil_layers )
-         CALL init_soil_2_real ( tsk , tmn , smois , sh2o , tslb , &
-                                 st_input , sm_input , sw_input , landmask , sst , &
-                                 zs , dzs , &
-                                 st_levels_input , sm_levels_input , sw_levels_input ,&
-                                 num_soil_layers , num_st_levels_input , num_sm_levels_input , num_sw_levels_input , &
-                                 num_st_levels_alloc , num_sm_levels_alloc , num_sw_levels_alloc , &
-                                 flag_sst , flag_soilt000 , flag_soilm000 , &
-                                 ids , ide , jds , jde , kds , kde , &
-                                 ims , ime , jms , jme , kms , kme , &
-                                 its , ite , jts , jte , kts , kte )
-      !! END CRYOWRF
-      !! CRYOWRF
-      ELSE IF ( ( sf_surface_physics .EQ. SNOWPACKSCHEME ) .AND. ( num_soil_layers .GT. 1 ) ) THEN
-         CALL init_soil_depth_2 ( zs , dzs , num_soil_layers )
-         CALL init_soil_2_ideal ( xland,xice,vegfra,snow,canwat,         &
-                                  ivgtyp,isltyp,tslb,smois,tmn,          &
-                                  num_soil_layers,                       &
-                                  ids,ide, jds,jde, kds,kde,             &
-                                  ims,ime, jms,jme, kms,kme,             &
-                                  its,ite, jts,jte, kts,kte              )
-      !! END CRYOWRF

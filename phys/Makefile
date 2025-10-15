@@ -210,7 +210,9 @@ MODULES = \
 	module_sf_lake.o \
 	module_diagnostics_driver.o \
 	module_sf_snowpacklsm.o \
-	module_irrigation.o
+	module_irrigation.o \
+	cryowrf_coupler_mod.o \
+	cryowrf_funcs.o
 
 FIRE_MODULES = \
         module_fr_fire_driver.o \

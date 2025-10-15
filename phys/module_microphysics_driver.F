@@ -1239,6 +1239,9 @@ real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
                      has_reqc=has_reqc,                  & ! G. Thompson
                      has_reqi=has_reqi,                  & ! G. Thompson
                      has_reqs=has_reqs,                  & ! G. Thompson
+                     bs_qi_rad=bs_qi_rad,                & ! CRYOWRF
+                     bs_qni_rad=bs_qni_rad,              & ! CRYOWRF
+                     bs_rad_effect=bs_rad_effect,        & ! CRYOWRF
                  IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde, &
                  IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme, &
                  ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte)

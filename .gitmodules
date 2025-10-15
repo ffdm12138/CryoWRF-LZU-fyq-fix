@@ -7,3 +7,6 @@
 [submodule "phys/MYNN-EDMF"]
 	path = phys/MYNN-EDMF
 	url = https://github.com/NCAR/MYNN-EDMF
+[submodule "phys/cryowrf"]
+	path = phys/cryowrf
+	url = https://git.wsl.ch/atmospheric-models/CRYOWRF.git
