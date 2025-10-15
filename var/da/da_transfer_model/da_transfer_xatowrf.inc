@@ -19,12 +19,19 @@ subroutine da_transfer_xatowrf(grid, config_flags)
    !
    !---------------------------------------------------------------------------
 
+#if (WRF_CHEM == 1)
+   USE module_state_description, ONLY : num_chem
+#endif
+
    implicit none
 
    type(domain), intent(inout)            :: grid
    type(grid_config_rec_type), intent(in) :: config_flags
 
    integer :: i, j, k
+#if (WRF_CHEM == 1)
+   integer :: ic
+#endif
 
    real    :: sdmd, s1md
 
@@ -258,6 +265,7 @@ subroutine da_transfer_xatowrf(grid, config_flags)
             ! The analysis perturbation = Hydro_ph - base_ph + nonhydro_xb_ph:
             grid%ph_2(i,j,k+1) = ph_full - grid%phb(i,j,k+1) &
                             + (grid%xb%hf(i,j,k+1)*gravity - ph_xb_hd)
+            grid%t_iau(i,j,k) = grid%xa%t(i,j,k)
          end do
       end do
    end do
@@ -296,6 +304,7 @@ subroutine da_transfer_xatowrf(grid, config_flags)
           phm = mu_full*c3h(k)   + c4h(k)   + grid%p_top
           ph(k+1) = ph(k) + ald(k)*phm*LOG(pfd/pfu) 
           grid%ph_2(i,j,k+1) = ph(k+1) - grid%phb(i,j,k+1)
+          grid%t_iau(i,j,k) = grid%xa%t(i,j,k)
        END DO
 
       ! Update geopotential perturbation
@@ -316,6 +325,7 @@ subroutine da_transfer_xatowrf(grid, config_flags)
      do j=jts,jte
         do i=its,ite
            ph_cgrid(i,j,k) = grid%ph_2(i,j,k) - ph_cgrid(i,j,k)
+           grid%ph_iau(i,j,k) = ph_cgrid(i,j,k)
         end do
      end do
    end do
@@ -422,6 +432,7 @@ subroutine da_transfer_xatowrf(grid, config_flags)
          grid%mu_2(i,j) = grid%mu_2(i,j) + mu_cgrid(i,j)
          grid%w_2(i,j,kte+1)=  grid%w_2(i,j,kte+1) + grid%xa%w(i,j,kte+1)
          grid%psfc(i,j) = grid%psfc(i,j) + grid%xa%psfc(i,j)
+         grid%mu_iau(i,j) = mu_cgrid(i,j)
       end do
 
       do k=kts,kte
@@ -430,6 +441,9 @@ subroutine da_transfer_xatowrf(grid, config_flags)
             grid%u_2(i,j,k) = grid%u_2(i,j,k) + u_cgrid(i,j,k)
             grid%v_2(i,j,k) = grid%v_2(i,j,k) + v_cgrid(i,j,k)
 #endif
+            grid%u_iau(i,j,k) = u_cgrid(i,j,k)
+            grid%v_iau(i,j,k) = v_cgrid(i,j,k)
+            grid%w_iau(i,j,k) = grid%xa%w(i,j,k)
             grid%w_2(i,j,k) = grid%w_2(i,j,k) + grid%xa%w(i,j,k)
 
             ! (xb%q+xa%q in specific humidity) >= 0.0
@@ -441,19 +455,25 @@ subroutine da_transfer_xatowrf(grid, config_flags)
             else
                grid%moist(i,j,k,P_QV) = grid%moist(i,j,k,P_QV)+q_cgrid(i,j,k)
             end if
+            grid%qv_iau(i,j,k) = q_cgrid(i,j,k)
 
             if (size(grid%moist,dim=4) >= 4 .and. cloud_cv_options >= 1) then
                grid%moist(i,j,k,p_qc) = max(grid%moist(i,j,k,p_qc) + grid%xa%qcw(i,j,k), 0.0)
                grid%moist(i,j,k,p_qr) = max(grid%moist(i,j,k,p_qr) + grid%xa%qrn(i,j,k), 0.0)
+               grid%qc_iau(i,j,k) = grid%xa%qcw(i,j,k)
+               grid%qr_iau(i,j,k) = grid%xa%qrn(i,j,k)
             end if
 
             if (size(grid%moist,dim=4) >= 6 .and. cloud_cv_options >= 2) then
                grid%moist(i,j,k,p_qi) = max(grid%moist(i,j,k,p_qi) + grid%xa%qci(i,j,k), 0.0)
                grid%moist(i,j,k,p_qs) = max(grid%moist(i,j,k,p_qs) + grid%xa%qsn(i,j,k), 0.0)
+               grid%qi_iau(i,j,k) = grid%xa%qci(i,j,k)
+               grid%qs_iau(i,j,k) = grid%xa%qsn(i,j,k)
             end if
 
             if (size(grid%moist,dim=4) >= 7 .and. cloud_cv_options >= 2) then
                grid%moist(i,j,k,p_qg) = max(grid%moist(i,j,k,p_qg) + grid%xa%qgr(i,j,k), 0.0)
+               grid%qg_iau(i,j,k) = grid%xa%qgr(i,j,k)
             end if
          end do
       end do
@@ -705,7 +725,27 @@ subroutine da_transfer_xatowrf(grid, config_flags)
       grid%moist_btye = grid%moist_btye + model_grid%g_moist_btye
 
    ENDIF
+#else !! not var4d !!
+
+#if (WRF_CHEM == 1)
+      do ic = PARAM_FIRST_SCALAR, num_chem
+         do j=jts,jte
+            do i=its,ite
+               do k=kts, kte
+		if (grid%xbchem%chem_ic(i,j,k,ic) + grid%xachem%chem_ic(i,j,k,ic).lt.0.0) then
+                  grid%chem(i,j,k,ic) = grid%xbchem%chem_ic(i,j,k,ic)
+		else
+                  grid%chem(i,j,k,ic) = grid%xbchem%chem_ic(i,j,k,ic) + grid%xachem%chem_ic(i,j,k,ic)
+		end if
+               end do
+            end do
+         end do
+      end do
+
 #endif
+
+#endif
+
    if (trace_use) call da_trace_exit("da_transfer_xatowrf")
 
 end subroutine da_transfer_xatowrf

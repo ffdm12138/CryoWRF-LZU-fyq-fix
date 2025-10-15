@@ -1,19 +1,19 @@
 MODULE module_sf_fogdes
 
   USE module_model_constants
-!JOE - add for consistent vdfg calc when grav_settling=1
-  USE module_bl_mynn, only: qcgmin, gno, gpw
-!JOE-end
+
 !-------------------------------------------------------------------
   IMPLICIT NONE
 !-------------------------------------------------------------------
-   REAL, PARAMETER :: myu = 1.8e-5  ! air viscosity (m^2/s)
+  REAL, PARAMETER :: myu = 1.8e-5  ! air viscosity (m^2/s)
+  REAL, PARAMETER :: gno=1.0  !original value seems too aggressive: 4.64158883361278196
+  REAL, PARAMETER :: gpw=5./3., qcgmin=1.e-8
 
 CONTAINS
 
   SUBROUTINE sf_fogdes(&
                vdfg,fgdp,dfgdp,ivgtyp,lai,wspd,qc_curr,            &
-               dtbl,rho,dz8w,grav_settling,nlcat,                  &
+               dtbl,rho,dz8w,grav_settling,nlcat,mminlu,           &
                ids,ide, jds,jde, kds,kde,                          &
                ims,ime, jms,jme, kms,kme,                          &
                its,ite, jts,jte, kts,kte                           &
@@ -81,7 +81,7 @@ CONTAINS
                                                ,ids,ide,jds,jde,kds,kde
 
    INTEGER, INTENT(IN)                       :: grav_settling,nlcat
-
+   CHARACTER (LEN=*), INTENT(IN)::  mminlu
    INTEGER,DIMENSION( ims:ime , jms:jme ),INTENT(INOUT)       :: ivgtyp
 
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
@@ -105,18 +105,20 @@ CONTAINS
 !JOE-end
 
 ! Local variables
+   CHARACTER*512 :: message
    INTEGER :: i,j
    REAL    :: lad, spcfct, vegh, ftmp1, ftmp2, dp_fog, lwc
    CHARACTER (LEN=25) :: land_use_type, lu_fogdes
 
 !------------------------------------------------------------------
 
-   IF     ((nlcat .eq. 20).or.(nlcat .eq. 21)) THEN ! includes lake category
+   IF     (mminlu .eq. 'MODIFIED_IGBP_MODIS_NOAH') THEN ! includes lake category
      land_use_type = 'MODIS'
-   ELSEIF ((nlcat .eq. 24).or.(nlcat .eq. 28)) THEN ! includes lake category
+   ELSEIF (mminlu .eq. 'USGS') THEN ! includes lake category
      land_use_type = 'USGS'
    ELSE
-     PRINT *, 'Unknown landuse category (sf_fogdes.F): num_land_cat=',nlcat
+     write ( message, * ) "Unknown land category for grav_settling (sf_fogdes.F) Landuse type = ",mminlu," and number of land categories= ",nlcat
+     CALL wrf_error_fatal ( message ) 
      STOP
    END IF
 
