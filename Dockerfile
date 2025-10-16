@@ -20,7 +20,7 @@ ENV DIR=${BASE_DIR}/libs \
     INCLUDE_DIR=${BASE_DIR}/libs/include \
     BIN_DIR=${BASE_DIR}/libs/bin \
     RUN_DIR=${BASE_DIR}/run \
-    LD_LIBRARY_PATH="${BASE_DIR}/libs/lib:${BASE_DIR}/libs/netcdf/lib:${BASE_DIR}/libs/grib2/lib:${BASE_DIR}/WRF/phys/cryowrf/src:${BASE_DIR}/WRF/phys/cryowrf/external/snowpack/lib:${BASE_DIR}/WRF/phys/cryowrf/external/meteoio/lib" \
+    LD_LIBRARY_PATH="${BASE_DIR}/libs/lib:${BASE_DIR}/libs/netcdf/lib:${BASE_DIR}/libs/grib2/lib" \
     PATH=".:/home/wrfuser/.local/bin:${BASE_DIR}/libs/netcdf/bin:${BASE_DIR}/libs/bin:${PATH}"
  # ${BASE_DIR}/WRF/phys/cryowrf/snowpack/lib:${BASE_DIR}/WRF/phys/cryowrf/meteoio/lib" \
 
@@ -197,21 +197,7 @@ RUN cd ${BASE_DIR}/WRF && \
     test -d Registry && \
     test -d phys
 
-# Build CRYOWRF external libraries and coupler
-RUN cd ${BASE_DIR}/WRF/phys/cryowrf && \
-    git submodule update --init --recursive && \
-    cd external/snowpack && \
-    mkdir -p build && \
-    cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=${BASE_DIR}/WRF/phys/cryowrf/external/snowpack \
-              -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-              -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
-              -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON \
-              -DMETEOIO_BASE=${BASE_DIR}/WRF/phys/cryowrf/external/meteoio && \
-    make -j$(nproc) && make install && \
-    cd ../../src && \
-    make libcoupler.a && \
-    cp libcoupler.a ${BASE_DIR}/libs/lib/
+# CRYOWRF libraries will be built as part of WRF build process
 
 # Stage 3: Configure and build WRF
 FROM wrf-source AS wrf-build-attempt
