@@ -265,7 +265,7 @@ cryowrf_lib :
 	@echo Building CRYOWRF external libraries
 	@( cd cryowrf && if [ ! -f external/meteoio/lib/libmeteoio.a ]; then \
 		mkdir -p external/meteoio/build && cd external/meteoio/build && \
-		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
 			-DENABLE_DBO=OFF -DENABLE_IMIS=OFF -DENABLE_MYSQL=OFF -DENABLE_ODBC=OFF -DENABLE_ORACLE=OFF \
 			-DENABLE_POSTGRESQL=OFF -DENABLE_SQLITE=OFF -DENABLE_SMET=ON -DENABLE_GSN=ON -DENABLE_BORMA=ON \
 			-DENABLE_GRASS=ON -DENABLE_GEOTOP=ON -DENABLE_PROJ=ON -DENABLE_CURL=ON && \
@@ -273,7 +273,7 @@ cryowrf_lib :
 	fi )
 	@( cd cryowrf && if [ ! -f external/snowpack/lib/libsnowpack.a ]; then \
 		mkdir -p external/snowpack/build && cd external/snowpack/build && \
-		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
 			-DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON -DMETEOIO_BASE=../meteoio/lib && \
 		make -j$(nproc) && make install; \
 	fi )
@@ -308,7 +308,7 @@ submodules :
 	@echo Building CRYOWRF external libraries
 	@( cd cryowrf && if [ ! -f external/meteoio/lib/libmeteoio.a ]; then \
 		mkdir -p external/meteoio/build && cd external/meteoio/build && \
-		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
 			-DENABLE_DBO=OFF -DENABLE_IMIS=OFF -DENABLE_MYSQL=OFF -DENABLE_ODBC=OFF -DENABLE_ORACLE=OFF \
 			-DENABLE_POSTGRESQL=OFF -DENABLE_SQLITE=OFF -DENABLE_SMET=ON -DENABLE_GSN=ON -DENABLE_BORMA=ON \
 			-DENABLE_GRASS=ON -DENABLE_GEOTOP=ON -DENABLE_PROJ=ON -DENABLE_CURL=ON && \
@@ -316,7 +316,7 @@ submodules :
 	fi )
 	@( cd cryowrf && if [ ! -f external/snowpack/lib/libsnowpack.a ]; then \
 		mkdir -p external/snowpack/build && cd external/snowpack/build && \
-		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
 			-DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON -DMETEOIO_BASE=../meteoio/lib && \
 		make -j$(nproc) && make install; \
 	fi )
