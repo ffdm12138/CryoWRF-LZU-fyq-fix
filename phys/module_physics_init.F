@@ -1483,7 +1483,6 @@ CHARACTER(LEN=8) :: name
                 SFCEVP,GRDFLX,                                  &
                 TRIM (MMINLU_LOC),                              &
                 XLAT, XLONG,                                    &
-                XLONG,                                          &
                 ISNOWXY, ZSNSOXY, TSNOXY,                       &
                 SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,         &
                 CANLIQXY, EAHXY, TAHXY, CMXY,                   &
@@ -2527,7 +2526,6 @@ CHARACTER(LEN=8) :: name
                 QKE, SFCEVP,GRDFLX,                             &
                 MMINLU,                                         &
                 XLAT, XLONG,                                    &
-                XLONG,                                          & ! CRYOWRF
                 ISNOWXY, ZSNSOXY, TSNOXY,                       &
                 SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,         &
                 CANLIQXY, EAHXY, TAHXY, CMXY,                   &
@@ -2835,8 +2833,7 @@ CHARACTER(LEN=8) :: name
 
 !Noah-MP
 
-   REAL,    DIMENSION(ims:ime, jms:jme) :: XLAT
-   REAL,    DIMENSION(ims:ime, jms:jme) :: XLONG
+   REAL,    DIMENSION(ims:ime, jms:jme) :: XLAT, XLONG
    INTEGER, OPTIONAL, DIMENSION(ims:ime,jms:jme) :: ISNOWXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,-2:num_soil_layers, jms:jme) :: ZSNSOXY
    REAL,    OPTIONAL, DIMENSION(ims:ime,-2:0, jms:jme) :: TSNOXY
@@ -3184,8 +3181,6 @@ CHARACTER(LEN=8) :: name
    REAL, DIMENSION(ims:ime,jms:jme),intent(in) :: z_firstlev
    integer, intent(in) :: snc_N
    real, dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z
-
-   real, dimension(ims:ime,jms:jme) :: XLONG
 
    !! END CRYOWRF
 

@@ -378,6 +378,9 @@ CONTAINS
    USE module_sf_noahlsm,   only : LCZ_1,LCZ_2,LCZ_3,LCZ_4,LCZ_5,LCZ_6,LCZ_7,LCZ_8,LCZ_9,LCZ_10,LCZ_11
    USE noahmp_tables, only : LCZ_1_TABLE,LCZ_2_TABLE,LCZ_3_TABLE,LCZ_4_TABLE,LCZ_5_TABLE,LCZ_6_TABLE,LCZ_7_TABLE,LCZ_8_TABLE,LCZ_9_TABLE,LCZ_10_TABLE,LCZ_11_TABLE
    USE module_sf_noahmpdrv, only : noahmplsm, noahmp_urban
+!   USE noahmp_tables, only : LOW_DENSITY_RESIDENTIAL_TABLE, &
+!                                   HIGH_DENSITY_RESIDENTIAL_TABLE,&
+!                                   HIGH_INTENSITY_INDUSTRIAL_TABLE
    USE module_sf_noahmp_groundwater
    USE module_sf_noah_seaice_drv
 #ifdef WRF_USE_CLM
@@ -1536,11 +1539,11 @@ CONTAINS
 
    real,dimension(ims:ime,jms:jme), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
    character*256 :: snpack_mode
-
-   call nl_get_snpack_mode(1,snpack_mode)
 ! To accommodate shared physics
    character*256 :: errmsg
    integer :: errflg
+
+   call nl_get_snpack_mode(1,snpack_mode)
 !
 !------------------------------------------------------------------
 ! Initialize local variables
@@ -3249,9 +3252,9 @@ if( snpack_mode == 'antarctica' ) then
                  TH2_SEA(I,J) = T2_SEA(I,J)*(1.E5/PSFC(I,J))**RCP
 
               ELSEIF (IVGTYP(I,J) == ISURBAN                   .or. &
-                      IVGTYP(I,J) == LOW_DENSITY_RESIDENTIAL   .or. & !urban
-                      IVGTYP(I,J) == HIGH_DENSITY_RESIDENTIAL  .or. & !urban
-                      IVGTYP(I,J) == HIGH_INTENSITY_INDUSTRIAL .or. & !urban
+!                     IVGTYP(I,J) == LOW_DENSITY_RESIDENTIAL_TABLE   .or. & !urban
+!                     IVGTYP(I,J) == HIGH_DENSITY_RESIDENTIAL_TABLE  .or. & !urban
+!                     IVGTYP(I,J) == HIGH_INTENSITY_INDUSTRIAL_TABLE .or. & !urban
                       (IVGTYP(I,J) == ISICE .AND. XICE(I,J) .LT. XICE_THRESHOLD)) THEN
                    Q2(I,J)  = Q2_snpack(I,J)
                    T2(I,J)  = T2_snpack(I,J)
@@ -3629,10 +3632,10 @@ endif
                  TH2(I,J) = T2(I,J)*(1.E5/PSFC(I,J))**RCP
                  TH2_SEA(I,J) = T2_SEA(I,J)*(1.E5/PSFC(I,J))**RCP
 
-              ELSEIF (IVGTYP(I,J) == ISURBAN                   .or. &
-                      IVGTYP(I,J) == LOW_DENSITY_RESIDENTIAL   .or. & !urban
-                      IVGTYP(I,J) == HIGH_DENSITY_RESIDENTIAL  .or. & !urban
-                      IVGTYP(I,J) == HIGH_INTENSITY_INDUSTRIAL .or. & !urban
+              ELSEIF (IVGTYP(I,J) == ISURBAN                       .or. &
+!                     IVGTYP(I,J) == LOW_DENSITY_RESIDENTIAL_TABLE   .or. & !urban
+!                     IVGTYP(I,J) == HIGH_DENSITY_RESIDENTIAL_TABLE  .or. & !urban
+!                     IVGTYP(I,J) == HIGH_INTENSITY_INDUSTRIAL_TABLE .or. & !urban
                       (IVGTYP(I,J) == ISICE .AND. XICE(I,J) .LT. XICE_THRESHOLD)) THEN
                    Q2(I,J)  = Q2MBXY(I,J)
                    T2(I,J)  = T2MBXY(I,J)
