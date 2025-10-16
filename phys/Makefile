@@ -278,7 +278,7 @@ cryowrf_lib :
 		make -j$(nproc) && make install; \
 	fi )
 	@echo Building CRYOWRF coupler library
-	@( cd cryowrf/src && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
+	@( cd cryowrf/src && make clean && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
 
 submodules :
 	@if [ \( ! -f module_sf_noahmpdrv.F \) -o \( ! -f module_sf_noahmp_glacier.F \) -o \
@@ -321,7 +321,7 @@ submodules :
 		make -j$(nproc) && make install; \
 	fi )
 	@echo Building CRYOWRF coupler library
-	@( cd cryowrf/src && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
+	@( cd cryowrf/src && make clean && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
 	
 clean:
 	@ echo 'use the clean script'
