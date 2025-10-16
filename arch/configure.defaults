@@ -80,7 +80,8 @@ FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lcoupler \
                         -lstdc++ \
-                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lmeteoio -lsnowpack
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
 LIB_EXTERNAL    =       -L/usr/lib/x86_64-linux-gnu
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
@@ -812,7 +813,8 @@ FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/src -lcoupler \
                         -lstdc++ \
-                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lmeteoio -lsnowpack
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
@@ -1398,7 +1400,8 @@ FCBASEOPTS_NO_G =       -w -ftz -fno-alias -align all -fp-model precise $(FORMAT
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lcoupler \
                         -lstdc++ \
-                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lmeteoio -lsnowpack
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
 CFLAGS_LOCAL    =       -w -O3 -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars
 LDFLAGS_LOCAL   =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
 MODULE_SRCH_FLAG =
