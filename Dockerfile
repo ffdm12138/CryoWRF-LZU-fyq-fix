@@ -232,6 +232,9 @@ RUN ln -sf ${BASE_DIR}/WRF/main/wrf.exe ${RUN_DIR}/ 2>/dev/null || true && \
     ln -sf ${BASE_DIR}/WPS/ungrib/src/ungrib.exe ${RUN_DIR}/ 2>/dev/null || true && \
     ln -sf ${BASE_DIR}/WPS/metgrid/src/metgrid.exe ${RUN_DIR}/ 2>/dev/null || true
 
+# Set LD_LIBRARY_PATH permanently for CRYOWRF libraries
+RUN echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/home/wrfuser/wrf-build/WRF/phys/cryowrf/external/snowpack/lib:/home/wrfuser/wrf-build/WRF/phys/cryowrf/external/meteoio/lib/lib"' >> /home/wrfuser/.bashrc
+
 # Set up working directory and entrypoint
 WORKDIR /home/wrfuser
 ENTRYPOINT ["/bin/bash"]
