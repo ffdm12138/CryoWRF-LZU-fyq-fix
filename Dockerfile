@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
     # Build essentials
     build-essential \
     gfortran \
-    gcc \
+    gcc gdb nano \
     g++ \
     make \
     cmake \
