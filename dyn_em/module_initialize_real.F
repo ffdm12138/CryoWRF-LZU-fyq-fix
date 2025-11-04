@@ -2957,7 +2957,7 @@ integer::oops1,oops2
 
       probs_with_nlcd : SELECT CASE ( model_config_rec%sf_surface_physics(grid%id) )
 
-         CASE ( RUCLSMSCHEME, NOAHMPSCHEME, CLMSCHEME, SSIBSCHEME )
+         CASE ( RUCLSMSCHEME, NOAHMPSCHEME, CLMSCHEME, SSIBSCHEME, SNOWPACKSCHEME )
             IF ( TRIM(mminlu) .EQ. 'NLCD40' ) THEN
                CALL wrf_message ( 'NLCD40 data may be used with SLABSCHEME, LSMSCHEME, PXLSMSCHEME' )
                CALL wrf_message ( 'Re-run geogrid and choose a different land cover source, or select a different sf_surface_physics option' )
@@ -2973,7 +2973,7 @@ integer::oops1,oops2
 
       enough_data : SELECT CASE ( model_config_rec%sf_surface_physics(grid%id) )
 
-         CASE ( LSMSCHEME, NOAHMPSCHEME )
+         CASE ( LSMSCHEME, NOAHMPSCHEME, SNOWPACKSCHEME )
             IF ( num_st_levels_input .LT. 2 ) THEN
                CALL wrf_error_fatal ( 'Not enough soil temperature data for Noah LSM scheme.')
             END IF
@@ -3005,7 +3005,7 @@ integer::oops1,oops2
 
       interpolate_soil_tmw : SELECT CASE ( model_config_rec%sf_surface_physics(grid%id) )
 
-         CASE ( SLABSCHEME,LSMSCHEME,NOAHMPSCHEME,RUCLSMSCHEME,PXLSMSCHEME,CLMSCHEME,SSIBSCHEME )
+         CASE ( SLABSCHEME,LSMSCHEME,NOAHMPSCHEME,RUCLSMSCHEME,PXLSMSCHEME,CLMSCHEME,SSIBSCHEME,SNOWPACKSCHEME )
             CALL process_soil_real ( grid%tsk , grid%tmn , grid%tavgsfc,  &
                                   grid%landmask , grid%sst , grid%ht, grid%toposoil, &
                                   st_input , sm_input , sw_input , &
@@ -3265,7 +3265,7 @@ integer::oops1,oops2
 
       fix_tsk_tmn : SELECT CASE ( model_config_rec%sf_surface_physics(grid%id) )
 
-         CASE ( SLABSCHEME , LSMSCHEME , NOAHMPSCHEME , RUCLSMSCHEME, PXLSMSCHEME,CLMSCHEME, CTSMSCHEME, SSIBSCHEME )
+         CASE ( SLABSCHEME , LSMSCHEME , NOAHMPSCHEME , RUCLSMSCHEME, PXLSMSCHEME,CLMSCHEME, CTSMSCHEME, SSIBSCHEME, SNOWPACKSCHEME )
             DO j = jts, MIN(jde-1,jte)
                DO i = its, MIN(ide-1,ite)
                   IF ( skip_middle_points_t ( ids , ide , jds , jde , i , j , em_width , hold_ups ) ) CYCLE
@@ -3320,7 +3320,8 @@ integer::oops1,oops2
             IF ( ( ( grid%tmn(i,j) .LT. 170. ) .OR. ( grid%tmn(i,j) .GT. 400. ) ) &
                .AND. ( grid%landmask(i,j) .GT. 0.5 ) ) THEN
                IF ( ( model_config_rec%sf_surface_physics(grid%id) .NE. LSMSCHEME ) .and. &
-                    ( model_config_rec%sf_surface_physics(grid%id) .NE. NOAHMPSCHEME ) ) THEN
+                    ( model_config_rec%sf_surface_physics(grid%id) .NE. NOAHMPSCHEME ) .and. &
+                    ( model_config_rec%sf_surface_physics(grid%id) .NE. SNOWPACKSCHEME )   ) THEN
                   print *,'error in the grid%tmn'
                   print *,'i,j=',i,j
                   print *,'grid%landmask=',grid%landmask(i,j)
@@ -3365,7 +3366,7 @@ integer::oops1,oops2
       IF ( domain_ClockIsStartTime(grid) ) THEN
          account_for_zero_soil_moisture : SELECT CASE ( model_config_rec%sf_surface_physics(grid%id) )
 
-            CASE ( LSMSCHEME , NOAHMPSCHEME )
+            CASE ( LSMSCHEME , NOAHMPSCHEME , SNOWPACKSCHEME )
                iicount = 0
                IF      ( flag_soil_layers == 1 ) THEN
                   DO j = jts, MIN(jde-1,jte)
@@ -3544,7 +3545,8 @@ integer::oops1,oops2
                           ( model_config_rec%sf_surface_physics(grid%id) .NE. SSIBSCHEME ).AND. & !fds
                           ( model_config_rec%sf_surface_physics(grid%id) .NE. CLMSCHEME ).AND. &
                           ( model_config_rec%sf_surface_physics(grid%id) .NE. CTSMSCHEME ).AND. &
-                          ( model_config_rec%sf_surface_physics(grid%id) .NE. PXLSMSCHEME ) ) THEN
+                          ( model_config_rec%sf_surface_physics(grid%id) .NE. PXLSMSCHEME ) .AND. &
+                          ( model_config_rec%sf_surface_physics(grid%id) .NE. SNOWPACKSCHEME )  ) THEN
                         print *,'error in the grid%tslb'
                         print *,'i,j=',i,j
                         print *,'grid%landmask=',grid%landmask(i,j)
@@ -3565,7 +3567,7 @@ integer::oops1,oops2
                                  grid%tslb(i,ns,j) = ( grid%tsk(i,j)*(3.0 - grid%zs(ns)) + &
                                                        grid%tmn(i,j)*(0.0 - grid%zs(ns)) ) /(3.0 - 0.0)
                               END DO
-                           CASE ( LSMSCHEME , NOAHMPSCHEME , RUCLSMSCHEME, PXLSMSCHEME,CLMSCHEME, CTSMSCHEME, SSIBSCHEME )
+                           CASE ( LSMSCHEME , NOAHMPSCHEME , RUCLSMSCHEME, PXLSMSCHEME,CLMSCHEME, CTSMSCHEME, SSIBSCHEME, SNOWPACKSCHEME )
 !                             CALL wrf_error_fatal ( 'Assigned constant soil moisture to 0.3, stopping')
                               DO ns = 1 , model_config_rec%num_soil_layers
                                  grid%tslb(i,ns,j) = ( grid%tsk(i,j)*(3.0 - grid%zs(ns)) + &

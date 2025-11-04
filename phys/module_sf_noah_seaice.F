@@ -293,6 +293,7 @@ CONTAINS
       ENDIF
       CALL CSNOW (SNCOND,SNDENS)
 
+      SNCOND = 0.3
 ! ----------------------------------------------------------------------
 ! DETERMINE IF IT'S PRECIPITATING AND WHAT KIND OF PRECIP IT IS.
 ! IF IT'S PRCPING AND THE AIR TEMP IS COLDER THAN 0 C, IT'S SNOWING!
@@ -340,6 +341,7 @@ CONTAINS
          ENDIF
 
          CALL CSNOW (SNCOND,SNDENS)
+         SNCOND = 0.3
 
       END IF
 

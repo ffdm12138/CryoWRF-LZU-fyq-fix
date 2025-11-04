@@ -170,6 +170,12 @@
     call nl_get_sf_lake_physics    ( grid%id,  sf_lake_physics    )
     call nl_get_nproc_x            ( 1,        ntasks_x           )
     call nl_get_nproc_y            ( 1,        ntasks_y           )
+    call nl_get_simulation_start_year   ( 1, simulation_start_year   )
+    call nl_get_simulation_start_month  ( 1, simulation_start_month  )
+    call nl_get_simulation_start_day    ( 1, simulation_start_day    )
+    call nl_get_simulation_start_hour   ( 1, simulation_start_hour   )
+    call nl_get_simulation_start_minute ( 1, simulation_start_minute )
+    call nl_get_simulation_start_second ( 1, simulation_start_second )
 
 #if (EM_CORE == 1)
     dt = grid%dt
@@ -503,10 +509,10 @@ endif
        end if
        if( grid%flag_mf_xy .eq. 1) then
            CALL wrf_put_dom_ti_integer ( fid , 'FLAG_MF_XY' ,  ibuf , 1 , ierr )
-       end if   
+       end if
        if(grid%flag_psfc .eq. 1) then
           CALL wrf_put_dom_ti_integer ( fid , 'FLAG_PSFC' ,  ibuf , 1 , ierr )
-       end if    
+       end if
 
        if(grid%flag_slp .eq. 1) then
           CALL wrf_put_dom_ti_integer ( fid , 'FLAG_SLP' ,  ibuf , 1 , ierr )
@@ -684,8 +690,8 @@ endif
     ibuf(1) = gwd_opt
     CALL wrf_put_dom_ti_integer ( fid, 'GWD_OPT' ,  ibuf , 1 , ierr )
     CALL wrf_put_dom_ti_integer ( fid, 'SF_URBAN_PHYSICS', sf_urban_physics , 1 , ierr )
-    CALL wrf_put_dom_ti_integer ( fid, 'SF_SURFACE_MOSAIC', config_flags%sf_surface_mosaic     , 1 , ierr ) 
-    CALL wrf_put_dom_ti_integer ( fid, 'SF_OCEAN_PHYSICS', config_flags%sf_ocean_physics     , 1 , ierr ) 
+    CALL wrf_put_dom_ti_integer ( fid, 'SF_SURFACE_MOSAIC', config_flags%sf_surface_mosaic     , 1 , ierr )
+    CALL wrf_put_dom_ti_integer ( fid, 'SF_OCEAN_PHYSICS', config_flags%sf_ocean_physics     , 1 , ierr )
     CALL wrf_put_dom_ti_logical ( fid, 'SLUCM_DISTRIBUTED_DRAG', config_flags%slucm_distributed_drag, 1, ierr)
     CALL wrf_put_dom_ti_integer ( fid, 'DISTRIBUTED_AHE_OPT', config_flags%distributed_ahe_opt, 1, ierr)
 #endif
@@ -1615,4 +1621,3 @@ endif
     ENDDO
     RETURN
   END SUBROUTINE traverse_statevars_debug
-

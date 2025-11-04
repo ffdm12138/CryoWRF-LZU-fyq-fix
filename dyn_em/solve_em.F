@@ -122,7 +122,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    LOGICAL                         :: specified_bdy, channel_bdy
 
    REAL                            :: t_new, time_duration_of_lbcs
-   
+
 ! begin WRF-CMAQ twoway coupled model block
    integer       :: twoway_jdate,    &  ! CMAQ current job date
                     twoway_jtime,    &  ! CMAQ current job time
@@ -149,15 +149,15 @@ SUBROUTINE solve_em ( grid , config_flags  &
    ! Changes in tendency at this timestep
    real ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33) :: h_tendency, &
                                                                                    z_tendency
-                                                                                   
+
    ! Whether advection should produce decoupled horizontal and vertical advective tendency outputs
    LOGICAL                        :: tenddec
-   
+
    ! Flag for producing diagnostic fields (e.g., radar reflectivity)
    LOGICAL                        :: diag_flag
    INTEGER                        :: ke_diag ! tells reflectivity calculation whether to do full depth or only k=1
    LOGICAL                        :: restart_flag !  tells if it is a restart timestep to write restart files. 
-   
+
 #if (WRF_CHEM == 1)
    ! Index cross-referencing array for tendency accumulation
    INTEGER, DIMENSION( num_chem ) :: adv_ct_indices
@@ -172,7 +172,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
 ! time.  Potential problem on stack-limited architectures: increases
 ! amount of data on program stack by making these automatic arrays.
 
-   INTEGER :: rc 
+   INTEGER :: rc
    INTEGER :: number_of_small_timesteps, rk_step
    INTEGER :: klevel,ijm,ijp,i,j,k,size1,size2    ! for prints/plots only
    INTEGER :: idum1, idum2, dynamics_option
@@ -235,27 +235,27 @@ SUBROUTINE solve_em ( grid , config_flags  &
 !<DESCRIPTION>
 !<pre>
 ! solve_em is the main driver for advancing a grid a single timestep.
-! It is a mediation-layer routine -> DM and SM calls are made where 
-! needed for parallel processing.  
+! It is a mediation-layer routine -> DM and SM calls are made where
+! needed for parallel processing.
 !
 ! solve_em can integrate the equations using 3 time-integration methods
-!      
+!
 !    - 3rd order Runge-Kutta time integration (recommended)
-!      
+!
 !    - 2nd order Runge-Kutta time integration
-!      
+!
 ! The main sections of solve_em are
-!     
+!
 ! (1) Runge-Kutta (RK) loop
-!     
+!
 ! (2) Non-timesplit physics (i.e., tendencies computed for updating
 !     model state variables during the first RK sub-step (loop)
-!     
+!
 ! (3) Small (acoustic, sound) timestep loop - within the RK sub-steps
-!     
+!
 ! (4) scalar advance for moist and chem scalar variables (and TKE)
 !     within the RK sub-steps.
-!     
+!
 ! (5) time-split physics (after the RK step), currently this includes
 !     only microphyics
 !
@@ -293,7 +293,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
                              ipsx, ipex, jpsx, jpex, kpsx, kpex,    &
                              imsy, imey, jmsy, jmey, kmsy, kmey,    &
                              ipsy, ipey, jpsy, jpey, kpsy, kpey )
- 
+
    CALL get_ijk_from_subgrid (  grid ,                   &
                              sids, side, sjds, sjde, skds, skde,    &
                              sims, sime, sjms, sjme, skms, skme,    &
@@ -465,7 +465,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    dts = grid%dt/float(num_sound_steps)
 
    IF (config_flags%use_adaptive_time_step) THEN
-  
+
      CALL get_wrf_debug_level( debug_level )
      IF ((config_flags%time_step < 0) .AND. (debug_level.GE.50)) THEN
 #ifdef DM_PARALLEL
@@ -528,7 +528,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
      !$OMP END PARALLEL DO
 
      !  Now that we have initialized the moist_old values with P_Qv for
-     !  computing a moist t_tendf after rk_step part2, fill in the halo 
+     !  computing a moist t_tendf after rk_step part2, fill in the halo
      !  and period boundaries.
 
 #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
@@ -581,7 +581,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    !  each part of the timestep
 
      dtm = grid%dt
-     IF ( rk_order == 1 ) THEN   
+     IF ( rk_order == 1 ) THEN
 
        write(wrf_err_message,*)' leapfrog removed, error exit for dynamics_option = ',dynamics_option
        CALL wrf_error_fatal( wrf_err_message )
@@ -622,7 +622,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
      END IF
 
 !  Ensure that polar meridional velocity is zero
-     IF (config_flags%polar) THEN 
+     IF (config_flags%polar) THEN
        !$OMP PARALLEL DO   &
        !$OMP PRIVATE ( ij )
        DO ij = 1 , grid%num_tiles
@@ -642,7 +642,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
        !$OMP END PARALLEL DO
      END IF
 !
-!  Time level t is in the *_2 variable in the first part 
+!  Time level t is in the *_2 variable in the first part
 !  of the step, and in the *_1 variable after the predictor.
 !  the latest predicted values are stored in the *_2 variables.
 !
@@ -677,15 +677,15 @@ BENCH_END(step_prep_tim)
 #ifdef DM_PARALLEL
 !-----------------------------------------------------------------------
 !  Stencils for patch communications  (WCS, 29 June 2001)
-!  Note:  the small size of this halo exchange reflects the 
-!         fact that we are carrying the uncoupled variables 
+!  Note:  the small size of this halo exchange reflects the
+!         fact that we are carrying the uncoupled variables
 !         as state variables in the mass coordinate model, as
 !         opposed to the coupled variables as in the height
 !         coordinate model.
 !
 !                           * * * * *
 !         *        * * *    * * * * *
-!       * + *      * + *    * * + * * 
+!       * + *      * + *    * * + * *
 !         *        * * *    * * * * *
 !                           * * * * *
 !
@@ -708,7 +708,7 @@ BENCH_END(step_prep_tim)
 #    include "HALO_EM_A.inc"
 #endif
 
-! set boundary conditions on variables 
+! set boundary conditions on variables
 ! from big_step_prep for use in big_step_proc
 
 #ifdef DM_PARALLEL
@@ -723,7 +723,7 @@ BENCH_START(set_phys_bc_tim)
 
        CALL wrf_debug ( 200 , ' call rk_phys_bc_dry_1' )
 
-       CALL rk_phys_bc_dry_1( config_flags, grid%ru, grid%rv, grid%rw, grid%ww,      & 
+       CALL rk_phys_bc_dry_1( config_flags, grid%ru, grid%rv, grid%rw, grid%ww,      &
                               grid%muu, grid%muv, grid%mut, grid%php, grid%alt, grid%p,        &
                               ids, ide, jds, jde, kds, kde,      &
                               ims, ime, jms, jme, kms, kme,      &
@@ -753,7 +753,7 @@ BENCH_START(set_phys_bc_tim)
                               grid%j_start(ij), grid%j_end(ij),        &
                               k_start, k_end                )
 
-       IF (config_flags%polar) THEN 
+       IF (config_flags%polar) THEN
 
 !-------------------------------------------------------
 ! lat-lon grid pole-point (v) specification (extrapolate v, rv to the pole)
@@ -765,14 +765,14 @@ BENCH_START(set_phys_bc_tim)
                               grid%i_start(ij), grid%i_end(ij), &
                               grid%j_start(ij), grid%j_end(ij), &
                               k_start, k_end                   )
- 
+
          CALL pole_point_bc ( grid%v_2,                      &
                               ids, ide, jds, jde, kds, kde,     &
                               ims, ime, jms, jme, kms, kme,     &
                               grid%i_start(ij), grid%i_end(ij), &
                               grid%j_start(ij), grid%j_end(ij), &
                               k_start, k_end                   )
- 
+
 !-------------------------------------------------------
 ! end lat-lon grid pole-point (v) specification
 !-------------------------------------------------------
@@ -858,8 +858,8 @@ BENCH_START(calc_p_rho_tim)
                              , cu_act_flag , hol , th_phy       &
                              , pi_phy , p_phy , grid%t_phy      &
                              , dz8w , p8w , t8w                 &
-                             , nba_mij, num_nba_mij             & !JDM 
-                             , nba_rij, num_nba_rij             & !JDM 
+                             , nba_mij, num_nba_mij             & !JDM
+                             , nba_rij, num_nba_rij             & !JDM
                              , ids, ide, jds, jde, kds, kde     &
                              , ims, ime, jms, jme, kms, kme     &
                              , ips, ipe, jps, jpe, kps, kpe     &
@@ -920,7 +920,7 @@ BENCH_END(rk_tend_tim)
            grid%max_vert_cfl = max_vert_cfl_tmp(ij)
          ENDIF
        END DO
-     
+
        IF (grid%max_horiz_cfl .GT. grid%max_cfl_val) THEN
          grid%max_cfl_val = grid%max_horiz_cfl
        ENDIF
@@ -934,7 +934,7 @@ BENCH_START(relax_bdy_dry_tim)
      !$OMP PRIVATE ( ij )
      DO ij = 1 , grid%num_tiles
 
-       IF ( (config_flags%specified .or. config_flags%nested) .and. ( rk_step == 1 ) ) THEN 
+       IF ( (config_flags%specified .or. config_flags%nested) .and. ( rk_step == 1 ) ) THEN
 
          CALL relax_bdy_dry ( config_flags,                                &
                               grid%u_save, grid%v_save, ph_save, grid%t_save,             &
@@ -979,7 +979,7 @@ BENCH_START(relax_bdy_dry_tim)
                             grid%j_start(ij), grid%j_end(ij),                &
                             k_start, k_end                                  )
 
-       IF( config_flags%specified .or. config_flags%nested ) THEN 
+       IF( config_flags%specified .or. config_flags%nested ) THEN
          CALL spec_bdy_dry ( config_flags,                                    &
                              grid%ru_tend, grid%rv_tend, ph_tend, t_tend,               &
                              rw_tend, mu_tend,                                &
@@ -1007,11 +1007,11 @@ BENCH_START(relax_bdy_dry_tim)
        ENDIF
 
 !---------------------------------------------------------------------------------------------
-! KRS 9/12/2012: Inserted new IF block calls to spec_bdy_dry_perturb. If peturb_bdy=1, SKEBS 
+! KRS 9/12/2012: Inserted new IF block calls to spec_bdy_dry_perturb. If peturb_bdy=1, SKEBS
 ! pattern passed in for perturbing the specified boundry conditions.  If peturb_bdy=2, user
 ! must provide pattern.  mu_2, mub, msf* also passed in for coupling needed for tendecies.
 !---------------------------------------------------------------------------------------------
-       IF( config_flags%specified .and. config_flags%perturb_bdy==1 ) THEN 
+       IF( config_flags%specified .and. config_flags%perturb_bdy==1 ) THEN
          CALL spec_bdy_dry_perturb ( config_flags,                                 &
                              grid%ru_tend, grid%rv_tend, t_tend,                   &
                              grid%mu_2, grid%mub, grid%c1h, grid%c2h,              &
@@ -1025,7 +1025,7 @@ BENCH_START(relax_bdy_dry_tim)
                              grid%i_start(ij), grid%i_end(ij),                &
                              grid%j_start(ij), grid%j_end(ij),                &
                              k_start, k_end                                  )
-     
+
        ENDIF
 
        IF( config_flags%specified .and. config_flags%perturb_bdy==2 ) THEN
@@ -1042,7 +1042,7 @@ BENCH_START(relax_bdy_dry_tim)
                              grid%i_start(ij), grid%i_end(ij),                &
                              grid%j_start(ij), grid%j_end(ij),                &
                              k_start, k_end                                  )
-  
+
        ENDIF
 
      END DO
@@ -1053,15 +1053,15 @@ BENCH_END(relax_bdy_dry_tim)
 !<pre>
 ! (3) Small (acoustic,sound) steps.
 !
-!    Several acoustic steps are taken each RK pass.  A small step 
-!    sequence begins with calculating perturbation variables 
-!    and coupling them to the column dry-air-mass mu 
+!    Several acoustic steps are taken each RK pass.  A small step
+!    sequence begins with calculating perturbation variables
+!    and coupling them to the column dry-air-mass mu
 !    (call to small_step_prep).  This is followed by computing
 !    coefficients for the vertically implicit part of the
-!    small timestep (call to calc_coef_w).  
+!    small timestep (call to calc_coef_w).
 !
 !    The small steps are taken
-!    in the named loop "small_steps:".  In the small_steps loop, first 
+!    in the named loop "small_steps:".  In the small_steps loop, first
 !    the horizontal momentum (u and v) are advanced (call to advance_uv),
 !    next mu and theta are advanced (call to advance_mu_t) followed by
 !    advancing w and the geopotential (call to advance_w).  Diagnostic
@@ -1081,7 +1081,7 @@ BENCH_START(small_step_prep_tim)
     ! Calculate coefficients for the vertically implicit acoustic/gravity wave
     ! integration.  We only need calculate these for the first pass through -
     ! the predictor step.  They are reused as is for the corrector step.
-    ! For third-order RK, we need to recompute these after the first 
+    ! For third-order RK, we need to recompute these after the first
     ! predictor because we may have changed the small timestep -> grid%dts.
 
        CALL wrf_debug ( 200 , ' call small_step_prep ' )
@@ -1105,7 +1105,7 @@ BENCH_START(small_step_prep_tim)
                              grid%i_start(ij), grid%i_end(ij),                        &
                              grid%j_start(ij), grid%j_end(ij),                        &
                              k_start    , k_end                                       )
- 
+
        CALL calc_p_rho( grid%al, grid%p, grid%ph_2,                 &
                         grid%alt, grid%t_2, grid%t_save, c2a, pm1,  &
                         grid%mu_2, grid%muts,                       &
@@ -1142,15 +1142,15 @@ BENCH_END(small_step_prep_tim)
 #ifdef DM_PARALLEL
 !-----------------------------------------------------------------------
 !  Stencils for patch communications  (WCS, 29 June 2001)
-!  Note:  the small size of this halo exchange reflects the 
-!         fact that we are carrying the uncoupled variables 
+!  Note:  the small size of this halo exchange reflects the
+!         fact that we are carrying the uncoupled variables
 !         as state variables in the mass coordinate model, as
 !         opposed to the coupled variables as in the height
 !         coordinate model.
 !
 !                              * * * * *
 !            *        * * *    * * * * *
-!          * + *      * + *    * * + * * 
+!          * + *      * + *    * * + * *
 !            *        * * *    * * * * *
 !                              * * * * *
 !
@@ -1265,7 +1265,7 @@ BENCH_START(set_phys_bc2_tim)
 BENCH_END(set_phys_bc2_tim)
      small_steps : DO iteration = 1 , number_of_small_timesteps
 
-       ! Boundary condition time (or communication time).  
+       ! Boundary condition time (or communication time).
 #ifdef DM_PARALLEL
 #      include "PERIOD_BDY_EM_B.inc"
 #endif
@@ -1443,7 +1443,7 @@ BENCH_END(advance_mu_t_tim)
                 ,ipsx=ipsx,ipex=ipex,jpsx=jmsx,jpex=jpex,kpsx=kpsx,kpex=kpex )
 
          grid%muts = grid%mut + grid%mu_2  ! reset muts using filtered mu_2
- 
+
        END IF
 
 !-----------------------------------------------------------
@@ -1724,7 +1724,7 @@ BENCH_END(phys_bc_tim)
 
        CALL wrf_debug ( 200 , ' call rk_small_finish' )
 
-      ! change time-perturbation variables back to 
+      ! change time-perturbation variables back to
       ! full perturbation variables.
       ! first get updated mu at u and v points
 
@@ -1741,7 +1741,7 @@ BENCH_START(small_step_finish_tim)
        CALL small_step_finish( grid%u_2, grid%u_1, grid%v_2, grid%v_1, grid%w_2, grid%w_1,     &
                                grid%t_2, grid%t_1, grid%ph_2, grid%ph_1, grid%ww, ww1,    &
                                grid%mu_2, grid%mu_1,                       &
-                               grid%mut, grid%muts, grid%muu, grid%muus, grid%muv, grid%muvs,  & 
+                               grid%mut, grid%muts, grid%muu, grid%muus, grid%muv, grid%muvs,  &
                                grid%c1h, grid%c2h, grid%c1f, grid%c2f, &
                                grid%c3h, grid%c4h, grid%c3f, grid%c4f, &
                                grid%u_save, grid%v_save, w_save,           &
@@ -1796,7 +1796,7 @@ BENCH_START(small_step_finish_tim)
                                  ips, ipe, jps, jpe,                &
                                  grid%i_start(ij), grid%i_end(ij),  &
                                  grid%j_start(ij), grid%j_end(ij) )
- 
+
        END IF
 
 BENCH_END(small_step_finish_tim)
@@ -1805,7 +1805,7 @@ BENCH_END(small_step_finish_tim)
      !$OMP END PARALLEL DO
 
 !-----------------------------------------------------------
-!  polar filter for full dynamics variables and time-averaged mass fluxes 
+!  polar filter for full dynamics variables and time-averaged mass fluxes
 !-----------------------------------------------------------
 
      IF (config_flags%polar) THEN
@@ -1838,7 +1838,7 @@ BENCH_END(small_step_finish_tim)
      END IF
 
 !-----------------------------------------------------------
-!  end polar filter for full dynamics variables and time-averaged mass fluxes 
+!  end polar filter for full dynamics variables and time-averaged mass fluxes
 !-----------------------------------------------------------
 
 !-----------------------------------------------------------------------
@@ -1949,7 +1949,7 @@ BENCH_END(small_step_finish_tim)
 #else
          WRITE(wrf_err_message,*)'cannot use pd scheme with RSL - use RSL-LITE'
          CALL wrf_error_fatal(TRIM(wrf_err_message))
-#endif   
+#endif
   endif
 #endif
 
@@ -2031,7 +2031,7 @@ BENCH_END(small_step_finish_tim)
                                         grid%i_start(ij), grid%i_end(ij),                &
                                         grid%j_start(ij), grid%j_end(ij),                &
                                         k_start    , k_end                              )
-             END DO 
+             END DO
            ENDIF
          END DO
          !$OMP END PARALLEL DO
@@ -2093,7 +2093,7 @@ BENCH_END(small_step_finish_tim)
                                         grid%i_start(ij), grid%i_end(ij),                &
                                         grid%j_start(ij), grid%j_end(ij),                &
                                         k_start    , k_end                              )
-             END DO 
+             END DO
            ENDIF
          END DO
          !$OMP END PARALLEL DO
@@ -2163,11 +2163,11 @@ BENCH_END(small_step_finish_tim)
 !
 !  Stencils for patch communications  (WCS, 29 June 2001)
 !
-!          * * * * *            
-!          * * * * *            
-!          * * + * *            
-!          * * * * *            
-!          * * * * *            
+!          * * * * *
+!          * * * * *
+!          * * + * *
+!          * * * * *
+!          * * * * *
 !
 ! ru_m         x
 ! rv_m         x
@@ -2188,7 +2188,7 @@ BENCH_END(small_step_finish_tim)
 !    For the moist and chem variables, each one is advanced
 !    individually, using named loops "moist_variable_loop:"
 !    and "chem_variable_loop:".  Each RK substep begins by
-!    calculating the advective tendency, and, for the first RK step, 
+!    calculating the advective tendency, and, for the first RK step,
 !    3D mixing (calling rk_scalar_tend) followed by an update
 !    of the scalar (calling rk_update_scalar).
 !</pre>
@@ -2212,7 +2212,7 @@ BENCH_END(small_step_finish_tim)
                tenddec = .false.
 
 BENCH_START(rk_scalar_tend_tim)
-               CALL rk_scalar_tend (  im, im, config_flags, tenddec,         & 
+               CALL rk_scalar_tend (  im, im, config_flags, tenddec,         &
                            rk_step, dt_rk,                                   &
                            grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,        &
                            grid%u_1, grid%v_1,                               &  
@@ -2222,10 +2222,10 @@ BENCH_START(rk_scalar_tend_tim)
                            moist_old(ims,kms,jms,im),                        &
                            moist(ims,kms,jms,im),                            &
                            moist_tend(ims,kms,jms,im),                       &
-                           advect_tend,h_tendency,z_tendency,grid%rqvften,   & 
+                           advect_tend,h_tendency,z_tendency,grid%rqvften,   &
                            grid%qv_base, .true., grid%fnm, grid%fnp,         &
                            grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,&
-                           grid%msfvy, grid%msftx,grid%msfty,                & 
+                           grid%msfvy, grid%msftx,grid%msfty,                &
                            grid%rdx, grid%rdy, grid%rdn, grid%rdnw, grid%khdif, &
                            grid%kvdif, grid%xkhh,                            &
                            grid%diff_6th_opt, grid%diff_6th_factor,          &
@@ -2241,7 +2241,7 @@ BENCH_START(rk_scalar_tend_tim)
 
                IF( rk_step == 1 .AND. config_flags%use_q_diabatic == 1 )THEN
                IF( im.eq.p_qv .or. im.eq.p_qc )THEN
-                   CALL q_diabatic_add  ( im, im,            & 
+                   CALL q_diabatic_add  ( im, im,            &
                            dt_rk, grid%mut,                  &
                            grid%c1h, grid%c2h,               &
                            grid%qv_diabatic,                 &
@@ -2258,10 +2258,10 @@ BENCH_START(rk_scalar_tend_tim)
 BENCH_END(rk_scalar_tend_tim)
 
 BENCH_START(rlx_bdy_scalar_tim)
-               IF( ( config_flags%specified .or. config_flags%nested ) .and. rk_step == 1 ) THEN 
+               IF( ( config_flags%specified .or. config_flags%nested ) .and. rk_step == 1 ) THEN
                  IF ( im .EQ. P_QV .OR. config_flags%nested .OR. &
                     ( config_flags%specified .AND. config_flags%have_bcs_moist ) ) THEN
-                   CALL relax_bdy_scalar ( moist_tend(ims,kms,jms,im),            & 
+                   CALL relax_bdy_scalar ( moist_tend(ims,kms,jms,im),            &
                                      moist(ims,kms,jms,im),  grid%mut,         &
                                      grid%c1h, grid%c2h,                       &
                                      moist_bxs(jms,kms,1,im),moist_bxe(jms,kms,1,im), &
@@ -2311,12 +2311,12 @@ BENCH_START(update_scal_tim)
                                scalar_2=moist(ims,kms,jms,im),                         &
                                sc_tend=moist_tend(ims,kms,jms,im),                     &
                                advect_tend=advect_tend,                                &
-                               h_tendency=h_tendency, z_tendency=z_tendency,           & 
+                               h_tendency=h_tendency, z_tendency=z_tendency,           &
                                msftx=grid%msftx,msfty=grid%msfty,                      &
                                c1=grid%c1h, c2=grid%c2h,                               &
                                mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
                                rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                               config_flags=config_flags, tenddec=tenddec,             & 
+                               config_flags=config_flags, tenddec=tenddec,             &
                                ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
                                ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
                                its=grid%i_start(ij), ite=grid%i_end(ij),               &
@@ -2324,7 +2324,7 @@ BENCH_START(update_scal_tim)
                                kts=k_start    , kte=k_end                              )
                IF( rk_step == rk_order .AND. config_flags%use_q_diabatic == 1 )THEN
                IF( im.eq.p_qv .or. im.eq.p_qc )THEN
-                   CALL q_diabatic_subtr( im, im,            & 
+                   CALL q_diabatic_subtr( im, im,            &
                            dt_rk,                            &
                            grid%qv_diabatic,                 &
                            grid%qc_diabatic,                 &
@@ -2381,7 +2381,7 @@ BENCH_START(tke_adv_tim)
 
            CALL wrf_debug ( 200 , ' call rk_scalar_tend for tke' )
            tenddec = .false.
-           CALL rk_scalar_tend ( 1, 1, config_flags, tenddec,                      & 
+           CALL rk_scalar_tend ( 1, 1, config_flags, tenddec,                      &
                             rk_step, dt_rk,                                        &
                             grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,             &
                             grid%u_1, grid%v_1,                                    &  
@@ -2391,7 +2391,7 @@ BENCH_START(tke_adv_tim)
                             grid%tke_1,                                            &
                             grid%tke_2,                                            &
                             tke_tend(ims,kms,jms),                                 &
-                            advect_tend,h_tendency,z_tendency,grid%rqvften,        & 
+                            advect_tend,h_tendency,z_tendency,grid%rqvften,        &
                             grid%qv_base, .false., grid%fnm, grid%fnp,             &
                             grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,     &
                             grid%msfvy, grid%msftx,grid%msfty,                     &
@@ -2422,12 +2422,12 @@ BENCH_START(tke_adv_tim)
                                   scalar_2=grid%tke_2,                                    &
                                   sc_tend=tke_tend(ims,kms,jms),                          &
                                   advect_tend=advect_tend,                                &
-                                  h_tendency=h_tendency, z_tendency=z_tendency,           & 
+                                  h_tendency=h_tendency, z_tendency=z_tendency,           &
                                   msftx=grid%msftx,msfty=grid%msfty,                      &
                                   c1=grid%c1h, c2=grid%c2h,                               &
                                   mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
                                   rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                                  config_flags=config_flags, tenddec=tenddec,             & 
+                                  config_flags=config_flags, tenddec=tenddec,             &
                                   ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
                                   ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
                                   its=grid%i_start(ij), ite=grid%i_end(ij),               &
@@ -2474,7 +2474,7 @@ BENCH_START(chem_adv_tim)
              CALL wrf_debug ( 200 , ' call rk_scalar_tend in chem_tile_loop_1' )
              tenddec = (( config_flags%chemdiag == USECHEMDIAG ) .and. &
                         ( adv_ct_indices(ic) >= PARAM_FIRST_SCALAR ))
-             CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                & 
+             CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                &
                               rk_step, dt_rk,                                    &
                               grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,         &
                               grid%u_1, grid%v_1,                                &  
@@ -2484,7 +2484,7 @@ BENCH_START(chem_adv_tim)
                               chem_old(ims,kms,jms,ic),                          &
                               chem(ims,kms,jms,ic),                              &
                               chem_tend(ims,kms,jms,ic),                         &
-                              advect_tend,h_tendency,z_tendency,grid%rqvften,    & 
+                              advect_tend,h_tendency,z_tendency,grid%rqvften,    &
                               grid%qv_base, .false., grid%fnm, grid%fnp,         &
                               grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                               grid%msfvy, grid%msftx,grid%msfty,                 &
@@ -2504,7 +2504,7 @@ BENCH_START(chem_adv_tim)
 ! Currently, chemistry species with specified boundaries (i.e. the mother
 ! domain)  are being over written by flow_dep_bdy_chem. So, relax_bdy and
 ! spec_bdy are only called for nests. For boundary conditions from global model or larger domain,
-! chem is uncoupled, and only used for one row/column on inflow (if have_bcs_chem=.true.) 
+! chem is uncoupled, and only used for one row/column on inflow (if have_bcs_chem=.true.)
 !
            IF( ( config_flags%nested ) .and. rk_step == 1 ) THEN
              IF(ic.eq.1)CALL wrf_debug ( 10 , ' have_bcs_chem' )
@@ -2563,12 +2563,12 @@ end if
                                   advh_t=advh_ct(ims,kms,jms,adv_ct_indices(ic)),         &
                                   advz_t=advz_ct(ims,kms,jms,adv_ct_indices(ic)),         &
                                   advect_tend=advect_tend,                                &
-                                  h_tendency=h_tendency, z_tendency=z_tendency,           & 
+                                  h_tendency=h_tendency, z_tendency=z_tendency,           &
                                   msftx=grid%msftx,msfty=grid%msfty,                      &
                                   c1=grid%c1h, c2=grid%c2h,                               &
                                   mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
                                   rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                                  config_flags=config_flags, tenddec=tenddec,             & 
+                                  config_flags=config_flags, tenddec=tenddec,             &
                                   ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
                                   ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
                                   its=grid%i_start(ij), ite=grid%i_end(ij),               &
@@ -2636,7 +2636,7 @@ BENCH_START(tracer_adv_tim)
 
              CALL wrf_debug ( 15 , ' call rk_scalar_tend in tracer_tile_loop_1' )
              tenddec = .false.
-             CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                & 
+             CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                &
                               rk_step, dt_rk,                                    &
                               grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,         &
                               grid%u_1, grid%v_1,                                &  
@@ -2646,7 +2646,7 @@ BENCH_START(tracer_adv_tim)
                               tracer_old(ims,kms,jms,ic),                        &
                               tracer(ims,kms,jms,ic),                            &
                               tracer_tend(ims,kms,jms,ic),                       &
-                              advect_tend,h_tendency,z_tendency,grid%rqvften,    & 
+                              advect_tend,h_tendency,z_tendency,grid%rqvften,    &
                               grid%qv_base, .false., grid%fnm, grid%fnp,         &
                               grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                               grid%msfvy, grid%msftx,grid%msfty,                 &
@@ -2666,7 +2666,7 @@ BENCH_START(tracer_adv_tim)
 ! Currently, chemistry species with specified boundaries (i.e. the mother
 ! domain)  are being over written by flow_dep_bdy_chem. So, relax_bdy and
 ! spec_bdy are only called for nests. For boundary conditions from global model or larger domain,
-! chem is uncoupled, and only used for one row/column on inflow (if have_bcs_chem=.true.) 
+! chem is uncoupled, and only used for one row/column on inflow (if have_bcs_chem=.true.)
 !
            IF( ( config_flags%nested ) .and. rk_step == 1 ) THEN
              IF(ic.eq.1)CALL wrf_debug ( 10 , ' have_bcs_tracer' )
@@ -2715,15 +2715,15 @@ BENCH_START(tracer_adv_tim)
                                   scalar_1=tracer_old(ims,kms,jms,ic),                    &
                                   scalar_2=tracer(ims,kms,jms,ic),                        &
                                   sc_tend=tracer_tend(ims,kms,jms,ic),                    &
-!                                 advh_t=advh_t(ims,kms,jms,1),                           & 
-!                                 advz_t=advz_t(ims,kms,jms,1),                           & 
+!                                 advh_t=advh_t(ims,kms,jms,1),                           &
+!                                 advz_t=advz_t(ims,kms,jms,1),                           &
                                   advect_tend=advect_tend,                                &
-                                  h_tendency=h_tendency, z_tendency=z_tendency,           & 
+                                  h_tendency=h_tendency, z_tendency=z_tendency,           &
                                   msftx=grid%msftx,msfty=grid%msfty,                      &
                                   c1=grid%c1h, c2=grid%c2h,                               &
                                   mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
                                   rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                                  config_flags=config_flags, tenddec=tenddec,             & 
+                                  config_flags=config_flags, tenddec=tenddec,             &
                                   ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
                                   ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
                                   its=grid%i_start(ij), ite=grid%i_end(ij),               &
@@ -2778,7 +2778,7 @@ BENCH_END(tracer_adv_tim)
 
            CALL wrf_debug ( 200 , ' call rk_scalar_tend' )
            tenddec = .false.
-           CALL rk_scalar_tend ( is, is, config_flags, tenddec,                   & 
+           CALL rk_scalar_tend ( is, is, config_flags, tenddec,                   &
                                  rk_step, dt_rk,                                  &
                                  grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,       &
                                  grid%u_1, grid%v_1,                              &  
@@ -2788,7 +2788,7 @@ BENCH_END(tracer_adv_tim)
                                  scalar_old(ims,kms,jms,is),                      &
                                  scalar(ims,kms,jms,is),                          &
                                  scalar_tend(ims,kms,jms,is),                     &
-                                 advect_tend,h_tendency,z_tendency,grid%rqvften,  & 
+                                 advect_tend,h_tendency,z_tendency,grid%rqvften,  &
                                  grid%qv_base, .false., grid%fnm, grid%fnp,       &
                                  grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                                  grid%msfvy, grid%msftx,grid%msfty,               &
@@ -2857,15 +2857,15 @@ BENCH_END(tracer_adv_tim)
                                   scalar_1=scalar_old(ims,kms,jms,is),                    &
                                   scalar_2=scalar(ims,kms,jms,is),                        &
                                   sc_tend=scalar_tend(ims,kms,jms,is),                    &
-!                                 advh_t=advh_t(ims,kms,jms,1),                           & 
-!                                 advz_t=advz_t(ims,kms,jms,1),                           & 
+!                                 advh_t=advh_t(ims,kms,jms,1),                           &
+!                                 advz_t=advz_t(ims,kms,jms,1),                           &
                                   advect_tend=advect_tend,                                &
-                                  h_tendency=h_tendency, z_tendency=z_tendency,           & 
+                                  h_tendency=h_tendency, z_tendency=z_tendency,           &
                                   msftx=grid%msftx,msfty=grid%msfty,                      &
                                   c1=grid%c1h, c2=grid%c2h,                               &
                                   mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
                                   rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                                  config_flags=config_flags, tenddec=tenddec,             & 
+                                  config_flags=config_flags, tenddec=tenddec,             &
                                   ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
                                   ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
                                   its=grid%i_start(ij), ite=grid%i_end(ij),               &
@@ -2916,7 +2916,7 @@ BENCH_END(tracer_adv_tim)
 !     B = config_flags%aer_init_opt .GT. 0
 !     C = config_glags%have_bcs_scalar
 
-! Test| A  | B  | C | ( A AND NOT B ) OR ( NOT A AND NOT C ) 
+! Test| A  | B  | C | ( A AND NOT B ) OR ( NOT A AND NOT C )
 ! ----+----+----+---+-----------------------------------------------
 !  1  | T  | T  | T |                 F = DO NOT CALL flow_dep_bdy
 !  2  | T  | T  | F |                 F = DO NOT CALL flow_dep_bdy
@@ -2930,7 +2930,7 @@ BENCH_END(tracer_adv_tim)
 
 !  If this is     the special friendly fields AND are to use the aero icbc, then NO calls to flow dep: tests 1 and 2
 !  If this is     the special friendly fields AND do not use the aero icbc, then    call     flow dep: tests 3 and 4
-!  If this is not the special friendly fields AND: 
+!  If this is not the special friendly fields AND:
 !           If we        have bcs for scalars, do not call flow dep: tests 5 and 7
 !           If we do not have bcs for scalars,        call flow dep: tests 6 and 8
 
@@ -2989,7 +2989,7 @@ BENCH_END(calc_p_rho_tim)
 !  rk3 substep polar filter for scalars (moist,chem,scalar)
 !-----------------------------------------------------------
 
-       IF (config_flags%polar) THEN 
+       IF (config_flags%polar) THEN
          IF ( num_3d_m >= PARAM_FIRST_SCALAR ) THEN
            CALL wrf_debug ( 200 , ' call filter moist ' )
            DO im = PARAM_FIRST_SCALAR, num_3d_m
@@ -3035,7 +3035,7 @@ BENCH_END(calc_p_rho_tim)
              END IF
            END DO
          END IF
-   
+
          IF ( num_3d_c >= PARAM_FIRST_SCALAR ) THEN
            CALL wrf_debug ( 200 , ' call filter chem ' )
            DO im = PARAM_FIRST_SCALAR, num_3d_c
@@ -3126,7 +3126,7 @@ BENCH_END(calc_p_rho_tim)
              END IF
            END DO
          END IF
-   
+
          IF ( num_3d_s >= PARAM_FIRST_SCALAR ) THEN
            CALL wrf_debug ( 200 , ' call filter scalar ' )
            DO im = PARAM_FIRST_SCALAR, num_3d_s
@@ -3181,7 +3181,7 @@ BENCH_END(calc_p_rho_tim)
 !-----------------------------------------------------------
 !  Stencils for patch communications  (WCS, 29 June 2001)
 !
-!  here's where we need a wide comm stencil - these are the 
+!  here's where we need a wide comm stencil - these are the
 !  uncoupled variables so are used for high order calc in
 !  advection and mixong routines.
 !
@@ -3223,7 +3223,7 @@ BENCH_END(calc_p_rho_tim)
 #    include "HALO_EM_D2_3.inc"
        ELSE IF ( config_flags%h_mom_adv_order <= 6 .and. config_flags%h_sca_adv_order <= 6 ) THEN
 #    include "HALO_EM_D2_5.inc"
-       ELSE 
+       ELSE
          WRITE(wrf_err_message,*)'solve_em: invalid h_mom_adv_order or h_sca_adv_order = ', &
                config_flags%h_mom_adv_order, config_flags%h_sca_adv_order
          CALL wrf_error_fatal(TRIM(wrf_err_message))
@@ -3269,7 +3269,7 @@ BENCH_END(diag_w_tim)
          IF (num_3d_m >= PARAM_FIRST_SCALAR) THEN
 
            moisture_loop_bdy_1 : DO im = PARAM_FIRST_SCALAR , num_3d_m
-  
+
              CALL set_physical_bc3d( moist(ims,kms,jms,im), 'p', config_flags,   &
                                      ids, ide, jds, jde, kds, kde,             &
                                      ims, ime, jms, jme, kms, kme,             &
@@ -3513,7 +3513,7 @@ BENCH_END(bc_end_tim)
       IF (CurrTime .lt. temp_time + dtInterval) THEN
          WRITE ( message , FMT = '("solve_em: initializing avgflx at time ",A," on domain ",I3)' ) &
               & TRIM(message2), grid%id
-         CALL wrf_message(trim(message)) 
+         CALL wrf_message(trim(message))
          grid%avgflx_count = 0
 !tile-loop for zero_avgflx
    !$OMP PARALLEL DO   &
@@ -3550,7 +3550,7 @@ BENCH_END(bc_end_tim)
               &   grid%avgflx_cfu1,grid%avgflx_cfd1,grid%avgflx_dfu1, &
               &   grid%avgflx_efu1,grid%avgflx_dfd1,grid%avgflx_efd1 )
          CALL wrf_debug(200,'In solve_em, after upd_avgflx call')
-         
+
       ENDDO
       !$OMP END PARALLEL DO
       grid%avgflx_count = grid%avgflx_count + 1
@@ -3610,10 +3610,10 @@ BENCH_END(advance_ppt_tim)
 !<pre>
 ! (5) time-split physics.
 !
-!     Microphysics are the only time  split physics in the WRF model 
+!     Microphysics are the only time  split physics in the WRF model
 !     at this time.  Split-physics begins with the calculation of
 !     needed diagnostic quantities (pressure, temperature, etc.)
-!     followed by a call to the microphysics driver, 
+!     followed by a call to the microphysics driver,
 !     and finishes with a clean-up, storing off of a diabatic tendency
 !     from the moist physics, and a re-calulation of the  diagnostic
 !     quantities pressure and density.
@@ -3700,7 +3700,7 @@ BENCH_END(moist_physics_prep_tim)
 BENCH_START(micro_driver_tim)
 
 !
-! WRFU_AlarmIsRinging always returned false, so using an alternate  method to find out if it is time 
+! WRFU_AlarmIsRinging always returned false, so using an alternate  method to find out if it is time
 ! to dump history/restart files so microphysics can be told to calculate things like radar reflectivity.
 !
 !     diagflag = .false.
@@ -3780,7 +3780,7 @@ BENCH_START(micro_driver_tim)
 !===================== IRRIGATION =========================
       &        ,IRRIGATION=grid%irrigation                                &
       &        ,SF_SURF_IRR_SCHEME=config_flags%sf_surf_irr_scheme        &
-      &        ,IRR_DAILY_AMOUNT=config_flags%irr_daily_amount            & 
+      &        ,IRR_DAILY_AMOUNT=config_flags%irr_daily_amount            &
       &        ,IRR_START_HOUR=config_flags%irr_start_hour                &
       &        ,IRR_NUM_HOURS=config_flags%irr_num_hours                  &
       &        ,JULIAN_IN=grid%julian                                     &
@@ -3788,7 +3788,7 @@ BENCH_START(micro_driver_tim)
       &        ,IRR_END_JULIANDAY=config_flags%irr_end_julianday          &
       &        ,IRR_FREQ=config_flags%irr_freq,IRR_PH=config_flags%irr_ph &
       &        ,IRR_RAND_FIELD=grid%irr_rand_field                        &
-      &        ,GMT=grid%gmt,XTIME=grid%xtime                             & 
+      &        ,GMT=grid%gmt,XTIME=grid%xtime                             &
 !======================
       ! Variables required for CAMMGMP Scheme
       &        ,DLF=grid%dlf,DLF2=grid%dlf2,T_PHY=grid%t_phy,P_HYD=grid%p_hyd  &
@@ -3983,11 +3983,31 @@ BENCH_START(micro_driver_tim)
       &        ,pert_thom_qc=config_flags%pert_thom_qc                   &
       &        ,pert_thom_qi=config_flags%pert_thom_qi                   &
       &        ,pert_thom_qs=config_flags%pert_thom_qs                   &
-      &        ,pert_thom_ni=config_flags%pert_thom_ni					 &
-	  &		   ,cloudnc=grid%cloudnc 									 &
-	)
+      &        ,pert_thom_ni=config_flags%pert_thom_ni                   &
+      &        ,cloudnc=grid%cloudnc                                     &
+      &        ,snc_Z=grid%snc_Z,snc_N=config_flags%num_bs_sfc_layers        & ! Blowing snow
+      &        ,sn_qs=grid%sn_qs,sn_ns=grid%sn_ns                            & ! Blowing snow
+      &        ,sfc_T=grid%sfc_T,sfc_Q=grid%sfc_Q                            & ! Blowing snow
+      &        ,sfc_RH=grid%sfc_RH,sfc_SQ=grid%sfc_SQ                        & ! Blowing snow
+      &        ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR                  & ! Blowing snow
+      &        ,sfc_SQ_HFX=grid%sfc_SQ_HFX,sfc_SQ_QFX=grid%sfc_SQ_QFX        & ! Blowing snow
+      &        ,bs_qi=moist(ims,kms,jms,P_bs_qi)                             & ! Blowing snow
+      &        ,bs_qni=scalar(ims,kms,jms,P_bs_qni)                          & ! Blowing snow
+      &        ,bs_meanR=grid%bs_meanR                                       & ! Blowing snow
+      &        ,bs_qi_rad=grid%bs_qi_rad, bs_qni_rad=grid%bs_qni_rad         & ! Blowing snow
+      &        ,corr_q_for_rad=grid%corr_q_for_rad                           & ! Blowing snow
+      &        ,corr_N_for_rad=grid%corr_N_for_rad                           & ! Blowing snow
+      &        ,tsk=grid%tsk,in_q_lb=grid%in_q_lb,in_N_lb=grid%in_N_lb       & ! Blowing snow
+      &        ,in_bs_sedi=grid%bs_sedi                                      & ! Blowing snow
+      &        ,bs_bool=config_flags%blowing_snow                            & ! Blowing snow
+      &        ,bool_snow_sublimation=config_flags%blowing_snow_sublimation  & ! Blowing snow
+      &        ,bs_rad_effect=config_flags%bs_rad_effect                     & ! Blowing snow
+      &        ,in_hsalt=grid%in_hsalt,bs_sublim=grid%bs_sublim              & ! Blowing snow
+      &        ,xkhv_LES=grid%xkmv                                           & ! Blowing snow
+      &        ,bs_qi_sublim3d=grid%bs_qi_sublim3d                           & ! Blowing snow
+      &        ,sn_qi_sublim3d=grid%sn_qi_sublim3d                           & ! Blowing snow
+    )
 
-                                                                          
 BENCH_END(micro_driver_tim)
 
 #if 0
@@ -4135,7 +4155,7 @@ BENCH_START(moist_phys_end_tim)
                     ,ims=ims,ime=ime,jms=jms,jme=jme,kms=kms,kme=kme             &
                     ,ips=ips,ipe=ipe,jps=jps,jpe=jpe,kps=kps,kpe=kpe          )
          END IF
- 
+
          CALL pxft ( grid=grid                                                 &
                   ,lineno=__LINE__                                             &
                   ,flag_uv            = 0                                      &
@@ -4160,7 +4180,7 @@ BENCH_START(moist_phys_end_tim)
                   ,ips=ips,ipe=ipe,jps=jps,jpe=jpe,kps=kps,kpe=kpe             &
                   ,imsx=imsx,imex=imex,jmsx=jmsx,jmex=jmex,kmsx=kmsx,kmex=kmex &
                   ,ipsx=ipsx,ipex=ipex,jpsx=jmsx,jpex=jpex,kpsx=kpsx,kpex=kpex )
- 
+
          IF ( config_flags%coupled_filtering ) THEN
            CALL uncouple_scalars_for_filter ( FIELD=moist(ims,kms,jms,im)      &
                     ,MU=grid%mu_2 , MUB=grid%mub                                 &
@@ -4390,7 +4410,7 @@ BENCH_END(moist_phys_end_tim)
 
    ! b.c. routine for data within patch.
 
-   ! we need to do both time levels of 
+   ! we need to do both time levels of
    ! data because the time filter only works in the physical solution space.
 
    ! First, do patch communications for boundary conditions (periodicity)
@@ -4398,13 +4418,13 @@ BENCH_END(moist_phys_end_tim)
 !-----------------------------------------------------------
 !  Stencils for patch communications  (WCS, 29 June 2001)
 !
-!  here's where we need a wide comm stencil - these are the 
+!  here's where we need a wide comm stencil - these are the
 !  uncoupled variables so are used for high order calc in
 !  advection and mixong routines.
 !
 !                              * * * * *
 !            *        * * *    * * * * *
-!          * + *      * + *    * * + * * 
+!          * + *      * + *    * * + * *
 !            *        * * *    * * * * *
 !                              * * * * *
 !
@@ -4437,7 +4457,7 @@ BENCH_END(moist_phys_end_tim)
 #    include "HALO_EM_D3_3.inc"
    ELSE IF ( config_flags%h_mom_adv_order <= 6 .and. config_flags%h_sca_adv_order <= 6 ) THEN
 #    include "HALO_EM_D3_5.inc"
-   ELSE 
+   ELSE
       WRITE(wrf_err_message,*)'solve_em: invalid h_mom_adv_order or h_sca_adv_order = ', &
                config_flags%h_mom_adv_order, config_flags%h_sca_adv_order
       CALL wrf_error_fatal(TRIM(wrf_err_message))
@@ -4539,7 +4559,7 @@ BENCH_END(bc_2d_tim)
 
 !  this code forces boundary values to specified values to avoid drift
 
-   IF( config_flags%specified .or. config_flags%nested ) THEN 
+   IF( config_flags%specified .or. config_flags%nested ) THEN
    !$OMP PARALLEL DO   &
    !$OMP PRIVATE ( ij )
    tile_bc_loop_3: DO ij = 1 , grid%num_tiles
@@ -4904,7 +4924,7 @@ BENCH_END(bc_2d_tim)
    CALL wrf_debug ( 200 , ' call end of solve_em' )
 
 !  Are we about to read SST input from the wrflowinput file?  That data is saved
-!  for use in fractional merging of external/coupled SST and input SST. 
+!  for use in fractional merging of external/coupled SST and input SST.
    IF ( coupler_on )   grid%just_read_auxinput4 = Is_alarm_tstep(grid%domain_clock, grid%alarms(AUXINPUT4_ALARM))
 
 !  Are we about to read the lateral boundary file?  This is a domain one action only.

@@ -115,7 +115,7 @@
 
    REAL :: w_max, w_min
    LOGICAL :: w_needs_to_be_set
-!  
+!
 ! Define variables local (topo_wind local vars)
    REAL    :: alpha, vfac
    INTEGER :: j_save
@@ -128,6 +128,7 @@
 !..Need to fill special height var for setting up initial condition.  G. Thompson
    REAL, ALLOCATABLE, DIMENSION(:,:,:) :: z_at_q
    REAL, ALLOCATABLE, DIMENSION(:,:,:) :: dz8w   !mchen
+   real, allocatable, dimension(:,:) :: z_firstlev
 
 !  CCN for MP=18 initializatio
    REAL :: ccn_max_val
@@ -152,6 +153,7 @@
 #endif
    ALLOCATE(dz8w(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; dz8w = 0.
    ALLOCATE(z_at_q(IMS:IME,KMS:KME,JMS:JME),STAT=I)  ; z_at_q = 0.
+   ALLOCATE(z_firstlev(IMS:IME,JMS:JME),STAT=I)  ; z_firstlev = 0.
    CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
    IF ( ( MOD (ide-ids,config_flags%parent_grid_ratio) .NE. 0 ) .OR. &
@@ -266,7 +268,7 @@
 ! then stop immediately. Likely the user made a mistake.
 ! If the rule of thumb is 6 DX = DT, then anything > 10 is flagged.
 ! Only look at domain 1, only do this for the firt time into this routine,
-! only look at real-data cases (where the map projection is not Cartesian), 
+! only look at real-data cases (where the map projection is not Cartesian),
 ! and only look at user-specified time steps (not the adaptive dt option).
 !-----------------------------------------------------------------------
    IF ( ( grid%id .EQ. 1 ) .AND. &
@@ -278,20 +280,20 @@
              REAL(config_flags%time_step_fract_den)
       dx_km = MIN ( config_flags%dx , config_flags%dy ) / 1000.
       WRITE (message,*) 'D01: Time step                              = ',dt_s ,' (s)'
-      CALL wrf_message ( TRIM(message) ) 
+      CALL wrf_message ( TRIM(message) )
       WRITE (message,*) 'D01: Grid Distance                          = ',dx_km ,' (km)'
-      CALL wrf_message ( TRIM(message) ) 
+      CALL wrf_message ( TRIM(message) )
       WRITE (message,*) 'D01: Grid Distance Ratio dt/dx              = ', dt_s / dx_km, ' (s/km)'
-      CALL wrf_message ( TRIM(message) ) 
+      CALL wrf_message ( TRIM(message) )
       WRITE (message,*) 'D01: Ratio Including Maximum Map Factor     = ', dt_s / (dx_km / max_mf) , ' (s/km)'
-      CALL wrf_message ( TRIM(message) ) 
+      CALL wrf_message ( TRIM(message) )
       WRITE (message,*) 'D01: NML defined reasonable_time_step_ratio = ', config_flags%reasonable_time_step_ratio
-      CALL wrf_message ( TRIM(message) ) 
+      CALL wrf_message ( TRIM(message) )
       IF ( dt_s / dx_km > config_flags%reasonable_time_step_ratio ) THEN
          CALL wrf_message ( 'The time step is probably too large for this grid distance, reduce it.' )
          WRITE (message, * ) 'If you are sure of your settings, set reasonable_time_step_ratio in namelist.input > ' &
                              ,dt_s / (dx_km / max_mf)
-         CALL wrf_message ( TRIM(message) ) 
+         CALL wrf_message ( TRIM(message) )
          CALL wrf_error_fatal ( '--- ERROR: Time step too large')
       END IF
    END IF
@@ -327,12 +329,12 @@
        first_trip_for_this_domain = .TRUE.
    ENDIF
 
-   CALL INITIALIZE_STOCH  (grid, config_flags,                  &    
-                           first_trip_for_this_domain,          &    
-                           ips, ipe, jps, jpe, kps, kpe,        &    
-                           ids, ide, jds, jde, kds, kde,        &    
-                           ims, ime, jms, jme, kms, kme,        &    
-                           its, ite, jts, jte, kts, kte,        &    
+   CALL INITIALIZE_STOCH  (grid, config_flags,                  &
+                           first_trip_for_this_domain,          &
+                           ips, ipe, jps, jpe, kps, kpe,        &
+                           ids, ide, jds, jde, kds, kde,        &
+                           ims, ime, jms, jme, kms, kme,        &
+                           its, ite, jts, jte, kts, kte,        &
                            imsx, imex, jmsx, jmex, kmsx, kmex,  &
                            ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
                            imsy, imey, jmsy, jmey, kmsy, kmey,  &
@@ -702,7 +704,7 @@
         !  the base state is in exact hydrostatic balance with respect to the model equations.
         !  This field is on full levels.
        DO j = jts,min(jte,jde-1)
-       DO i = its, min(ite,ide-1)               
+       DO i = its, min(ite,ide-1)
         grid%phb(i,1,j) = grid%ht(i,j) * g
         IF ( config_flags%hypsometric_opt .EQ. 1 ) THEN
            DO kk  = 2,kte
@@ -759,7 +761,7 @@
         END IF  ! end if initialization for ideal, use method 1 or 2
      END IF ! end if this is a real or ideal run
     END IF ! end if there is more than 1 domain
-     
+
 !------base state is finished, perturbation values are recalculated below-----
   ! For the HRRR application, we want to go through this rebalancing.  They
   ! have a clunky way of testig on this, but it is operational, so no need to
@@ -874,6 +876,8 @@
          ENDDO
       ENDDO
    ENDDO
+   k=1
+   z_firstlev(:,:) = (grid%phb(:,k+1,:)+grid%ph_2(:,k+1,:))/g - (grid%phb(:,k,:)+grid%ph_2(:,k,:))/g
 
    IF ( grid%press_adj .and. ( grid%id .NE. 1 ) .AND. .NOT. ( config_flags%restart ) .AND. &
        ( ( config_flags%input_from_hires ) .OR. ( config_flags%input_from_file ) ) ) THEN
@@ -957,7 +961,7 @@
       grid%dt = grid%starting_time_step
 
 !     Initialize max cfl values
-      
+
       grid%last_max_vert_cfl = 0
       grid%last_max_horiz_cfl = 0
 
@@ -1145,7 +1149,7 @@ endif
                       grid%TRL_URB3D, grid%TBL_URB3D, grid%TGL_URB3D,        & !Optional urban
                       grid%SH_URB2D, grid%LH_URB2D, grid%G_URB2D, grid%RN_URB2D,  & !Optional urban
                       grid%TS_URB2D, grid%FRC_URB2D, grid%UTYPE_URB2D,      & !Optional urban
-                      grid%CMCR_URB2D,grid%TGR_URB2D,grid%TGRL_URB3D,grid%SMR_URB3D, & !Optional urban   
+                      grid%CMCR_URB2D,grid%TGR_URB2D,grid%TGRL_URB3D,grid%SMR_URB3D, & !Optional urban
                       grid%DRELR_URB2D,grid%DRELB_URB2D,grid%DRELG_URB2D,    & !Optional urban
                       grid%FLXHUMR_URB2D,grid%FLXHUMB_URB2D,grid%FLXHUMG_URB2D,   & !Optional urban
                       grid%TRB_URB4D,grid%TW1_URB4D,grid%TW2_URB4D,grid%TGB_URB4D,grid%TLEV_URB3D,  & !multi-layer urban
@@ -1271,7 +1275,12 @@ endif
                       ,grid%NC_CU, grid%NI_CU, grid%NR_CU, grid%NS_CU,grid%CCN_CU                    &
                       ,grid%alevsiz_cu,grid%num_months,grid%no_src_types_cu,grid%aeromcu             &
                       ,grid%aeropcu,grid%EFCG,grid%EFCS,grid%EFIG,grid%EFIS,grid%EFSG,grid%EFSS      &
-                      )
+                      ,grid%in_drift,grid%in_conc,grid%in_csalt,grid%in_q_lb,grid%in_N_lb, grid%grid_id, grid%glo_counter &
+                      ,grid%sn_T,grid%sn_thick,grid%sn_volI,grid%sn_volW,grid%sn_volV,grid%sn_rg,grid%sn_rb &
+                      ,grid%sn_dd,grid%sn_sp,grid%sn_cdot,grid%sn_meta,grid%sn_depd,grid%sn_graintype,grid%sn_mk &
+                      ,grid%sn_nlayers,&
+                       grid%sn_start_from_file,z_firstlev,config_flags%num_bs_sfc_layers,grid%snc_Z,&
+                       grid%sn_qs,grid%sn_ns)
        ENDDO ! loop of tiles for phy_init
 
        if(.not.grid%restart) then
@@ -1906,7 +1915,7 @@ endif
               enddo
            enddo
         end select
-        
+
         ! initialize advective tendency diagnostics for chem
         if ( grid%itimestep .eq. 0 .and. config_flags%chemdiag .eq. USECHEMDIAG ) then
           grid%advh_ct(:,:,:,:) = 0.
@@ -2035,13 +2044,13 @@ DEALLOCATE(dz8w)
                  ,num_press_levels=config_flags%num_press_levels &
                  ,max_press_levels=max_plevs    &
                  ,press_levels=model_config_rec%press_levels &
-                 ,p_pl  = grid%p_pl             &  
-                 ,u_pl  = grid%u_pl             &  
-                 ,v_pl  = grid%v_pl             &  
-                 ,t_pl  = grid%t_pl             &  
+                 ,p_pl  = grid%p_pl             &
+                 ,u_pl  = grid%u_pl             &
+                 ,v_pl  = grid%v_pl             &
+                 ,t_pl  = grid%t_pl             &
                  ,rh_pl = grid%rh_pl            &
                  ,ght_pl= grid%ght_pl           &
-                 ,s_pl  = grid%s_pl             &  
+                 ,s_pl  = grid%s_pl             &
                  ,td_pl = grid%td_pl            &
                  ,q_pl = grid%q_pl              &
                  !  Dimension arguments
@@ -2083,13 +2092,13 @@ DEALLOCATE(dz8w)
                  ,num_z_levels=config_flags%num_z_levels &
                  ,max_z_levels=max_zlevs    &
                  ,z_levels=model_config_rec%z_levels &
-                 ,z_zl  = grid%z_zl             &  
-                 ,u_zl  = grid%u_zl             &  
-                 ,v_zl  = grid%v_zl             &  
-                 ,t_zl  = grid%t_zl             &  
+                 ,z_zl  = grid%z_zl             &
+                 ,u_zl  = grid%u_zl             &
+                 ,v_zl  = grid%v_zl             &
+                 ,t_zl  = grid%t_zl             &
                  ,rh_zl = grid%rh_zl            &
                  ,ght_zl= grid%ght_zl           &
-                 ,s_zl  = grid%s_zl             &  
+                 ,s_zl  = grid%s_zl             &
                  ,td_zl = grid%td_zl            &
                  ,q_zl = grid%q_zl              &
                  ,p_zl = grid%p_zl              &
@@ -2105,7 +2114,7 @@ DEALLOCATE(dz8w)
          DO k = 1, kte-1
             DO i = its, MIN(ite,ide-1)
                dz8w(i,k,j) = (grid%phb(i,k+1,j)+grid%ph_2(i,k+1,j))/g - (grid%phb(i,k,j)+grid%ph_2(i,k,j))/g
-               grid%rho(i,k,j) = 1./( grid%al(i,k,j)+grid%alb(i,k,j) ) 
+               grid%rho(i,k,j) = 1./( grid%al(i,k,j)+grid%alb(i,k,j) )
             END DO
          END DO
       END DO
@@ -2133,7 +2142,7 @@ DEALLOCATE(dz8w)
                ,e=grid%e                                            &
                ,sina=grid%sina                                      &
                ,cosa=grid%cosa                                      &
-               !  Terrestrial data                
+               !  Terrestrial data
                ,rho=grid%rho                                        &
                ,dz8w=dz8w                                           &
                ,ht=grid%ht                                          &
@@ -2368,7 +2377,7 @@ endif
          DO i = its, MIN(ite,ide-1)
 
         IF (n_moist >= PARAM_FIRST_SCALAR ) THEN
-       
+
                !  Integrate the hydrostatic equation (from the RHS of the bigstep vertical momentum
                !  equation) down from the top to get the pressure perturbation.  First get the pressure
                !  perturbation, moisture, and inverse density (total and perturbation) at the top-most level.

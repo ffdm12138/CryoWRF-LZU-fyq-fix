@@ -6,6 +6,7 @@ RM      =       rm -f
 
 
 MODULES = \
+	module_sf_snowpacklsm.o \
 	ccpp_kind_types.o \
 	module_bep_bem_helper.o \
 	complex_number_module.o \
@@ -234,7 +235,7 @@ DIAGNOSTIC_MODULES_EM = \
 	module_diag_zld.o \
 	module_diag_trad_fields.o \
         module_diag_solar.o
-  
+
 PHYSMMM_MODULES = \
 	physics_mmm/sf_sfclayrev.o \
 	physics_mmm/cu_ntiedtke.o \
@@ -258,7 +259,26 @@ $(LIBTARGET) :
 
 include ../configure.wrf
 
-non_nmm : $(MODULES) $(FIRE_MODULES) $(OBJS) $(DIAGNOSTIC_MODULES_EM)
+non_nmm : cryowrf_lib $(MODULES) $(FIRE_MODULES) $(OBJS) $(DIAGNOSTIC_MODULES_EM)
+
+cryowrf_lib :
+	@echo Building CRYOWRF external libraries
+	@( cd cryowrf && if [ ! -f external/meteoio/lib/lib/libmeteoio.so ]; then \
+		mkdir -p external/meteoio/build && cd external/meteoio/build && \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
+			-DENABLE_DBO=OFF -DENABLE_IMIS=OFF -DENABLE_MYSQL=OFF -DENABLE_ODBC=OFF -DENABLE_ORACLE=OFF \
+			-DENABLE_POSTGRESQL=OFF -DENABLE_SQLITE=OFF -DENABLE_SMET=ON -DENABLE_GSN=ON -DENABLE_BORMA=ON \
+			-DENABLE_GRASS=ON -DENABLE_GEOTOP=ON -DENABLE_PROJ=ON -DENABLE_CURL=ON && \
+		make -j$(nproc) && make install; \
+	fi )
+	@( cd cryowrf && if [ ! -f external/snowpack/lib/libsnowpack.so ]; then \
+		mkdir -p external/snowpack/build && cd external/snowpack/build && \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
+			-DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON -DMETEOIO_BASE=../meteoio/lib && \
+		make -j$(nproc) && make install; \
+	fi )
+	@echo Building CRYOWRF coupler library
+	@( cd cryowrf/src && make clean && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
 
 submodules :
 	@if [ \( ! -f module_sf_noahmpdrv.F \) -o \( ! -f module_sf_noahmp_glacier.F \) -o \
@@ -283,6 +303,25 @@ submodules :
 	else \
 		echo No action required for MYNN-EDMF submodule ; \
 	fi
+	@echo Initializing CRYOWRF submodules
+	@( cd .. ; git submodule update --init --recursive )
+	@echo Building CRYOWRF external libraries
+	@( cd cryowrf && if [ ! -f external/meteoio/lib/lib/libmeteoio.so ]; then \
+		mkdir -p external/meteoio/build && cd external/meteoio/build && \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF \
+			-DENABLE_DBO=OFF -DENABLE_IMIS=OFF -DENABLE_MYSQL=OFF -DENABLE_ODBC=OFF -DENABLE_ORACLE=OFF \
+			-DENABLE_POSTGRESQL=OFF -DENABLE_SQLITE=OFF -DENABLE_SMET=ON -DENABLE_GSN=ON -DENABLE_BORMA=ON \
+			-DENABLE_GRASS=ON -DENABLE_GEOTOP=ON -DENABLE_PROJ=ON -DENABLE_CURL=ON && \
+		make -j$(nproc) && make install; \
+	fi )
+	@( cd cryowrf && if [ ! -f external/snowpack/lib/libsnowpack.so ]; then \
+		mkdir -p external/snowpack/build && cd external/snowpack/build && \
+		cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF \
+			-DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON -DMETEOIO_BASE=../meteoio/lib && \
+		make -j$(nproc) && make install; \
+	fi )
+	@echo Building CRYOWRF coupler library
+	@( cd cryowrf/src && make clean && make -j$(nproc) libcoupler.a && cp libcoupler.a ../.. && cp *.mod ../.. )
 	
 clean:
 	@ echo 'use the clean script'

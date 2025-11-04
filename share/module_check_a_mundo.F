@@ -105,7 +105,7 @@
          INTEGER FUNCTION bep_bem_ngb_u()
          END FUNCTION bep_bem_ngb_u
 
-         INTEGER FUNCTION bep_bem_nbui_max() 
+         INTEGER FUNCTION bep_bem_nbui_max()
          END FUNCTION bep_bem_nbui_max
          
          INTEGER FUNCTION bep_bem_ngr_u()
@@ -222,7 +222,7 @@
    model_config_rec%nested(1)    = .FALSE.
    DO i=2,model_config_rec%max_dom
       model_config_rec%nested(i) = .TRUE.
-   END DO 
+   END DO
 
 !-----------------------------------------------------------------------
 ! LBC: Always the case, nested domain BCs are always false.
@@ -240,7 +240,7 @@
       model_config_rec%open_ye(i)      = .FALSE.
       model_config_rec%polar(i)        = .FALSE.
       model_config_rec%specified(i)    = .FALSE.
-   END DO 
+   END DO
 
 !-----------------------------------------------------------------------
 ! LBC: spec_bdy_width = spec_zone + relax_zone
@@ -253,10 +253,10 @@
 
 #if (EM_CORE == 1)
 !-----------------------------------------------------------------------
-! The nominal grid distance on each child domain is ENTIRELY a function 
+! The nominal grid distance on each child domain is ENTIRELY a function
 ! of the MOAD grid distance and the accumulated recursive parent grid ratios
 ! of each child domain. Even if the child grid distance values are specified
-! in the namelist file, overwrite the dx and dy namelist input with the 
+! in the namelist file, overwrite the dx and dy namelist input with the
 ! computed grid distance values.
 !-----------------------------------------------------------------------
 
@@ -382,7 +382,7 @@
       ENDDO
 
 !-----------------------------------------------------------------------
-! Check that SMS-3DTKE scheme Must work with Revised MM5 surface layer 
+! Check that SMS-3DTKE scheme Must work with Revised MM5 surface layer
 ! scheme (sf_sfclay_physics = 1), MYNN surface (sf_sfclay_physics = 5)
 ! and old MM5 surface scheme (sf_sfclay_physics = 91). Also, SMS-3DTKE
 ! Must work with no surface layer scheme.
@@ -462,7 +462,7 @@
       END IF
 
 !-----------------------------------------------------------------------
-! Assign the dimensions for the urban options to the values defined in 
+! Assign the dimensions for the urban options to the values defined in
 ! each of those respective modules.
 !-----------------------------------------------------------------------
       DO i = 1, model_config_rec % max_dom
@@ -473,7 +473,7 @@
            model_config_rec % num_urban_ng   = bep_ng_u()
            model_config_rec % num_urban_nwr  = bep_nwr_u()
          END IF
-         IF ( model_config_rec % sf_urban_physics(i) == bep_bemscheme ) THEN 
+         IF ( model_config_rec % sf_urban_physics(i) == bep_bemscheme ) THEN
            model_config_rec % num_urban_ndm  = bep_bem_ndm()
            model_config_rec % num_urban_nz   = bep_bem_nz_um()
            model_config_rec % num_urban_ng   = bep_bem_ng_u()
@@ -554,7 +554,7 @@
 
 !-----------------------------------------------------------------------
 ! Check that number of hours of daily irrigation is greater than zero.
-! This value is used in the denominator to compute the amount of 
+! This value is used in the denominator to compute the amount of
 ! irrigated water per timestep, and the default value from the Registry
 ! is zero. This is a reminder to the user that this value needs to be
 ! manually set.
@@ -569,7 +569,7 @@
             oops = oops + 1
          END IF
       ENDDO
-      
+
       IF ( oops .GT. 0 ) THEN
          wrf_err_message = '--- ERROR: irr_num_hours must be greater than zero to work with irrigation'
          CALL wrf_message ( wrf_err_message )
@@ -590,7 +590,7 @@
             model_config_rec % sf_surf_irr_alloc = SPRINKLER
          END IF
          IF ( model_config_rec % sf_surf_irr_scheme(i) .EQ. DRIP      ) THEN
-            model_config_rec % sf_surf_irr_alloc = DRIP    
+            model_config_rec % sf_surf_irr_alloc = DRIP
          END IF
       ENDDO
 
@@ -839,7 +839,7 @@
               ( model_config_rec % mp_physics(1) .EQ. WSM6SCHEME      ) .OR. &
               ( model_config_rec % mp_physics(1) .EQ. WDM6SCHEME      ) .OR. &
               ( model_config_rec % mp_physics(1) .EQ. MORR_TWO_MOMENT ) .OR. &
-              ( model_config_rec % mp_physics(1) .EQ. MORR_TM_AERO    ) ) THEN 
+              ( model_config_rec % mp_physics(1) .EQ. MORR_TM_AERO    ) ) THEN
             !  All is OK
          ELSE
             wrf_err_message = '--- WARNING: the AFWA diagnostics option knows only about the following MP schemes:'
@@ -1051,7 +1051,7 @@
 ! Check that if num_metgrid_levels < 20, lagrange_order should be 1
 !-----------------------------------------------------------------------
             IF  ( model_config_rec%num_metgrid_levels .LE. 20 ) THEN
-            wrf_err_message = 'Linear vertical interpolation is recommended with input vertical resolution this coarse, changing lagrange_order to 1' 
+            wrf_err_message = 'Linear vertical interpolation is recommended with input vertical resolution this coarse, changing lagrange_order to 1'
             CALL wrf_debug ( 1, wrf_err_message )
             model_config_rec%lagrange_order = 1
             END IF
@@ -1093,7 +1093,7 @@
          count_fatal_error = count_fatal_error + 1
 
             END IF
-            
+
          END DO
 
       END IF
@@ -1135,7 +1135,7 @@
    END IF
 
 !-----------------------------------------------------------------------
-! Check if the precip bucket reset time interval > 0. If so, then we need to 
+! Check if the precip bucket reset time interval > 0. If so, then we need to
 ! activate a derived namelist variable: prec_acc_opt
 !-----------------------------------------------------------------------
 
@@ -1155,7 +1155,7 @@
          IF ( model_config_rec % sppt(i) .ne. 0)  then
            model_config_rec % sppt_on=1
            IF (( model_config_rec%KMINFORCT .ne. 1) .or. (model_config_rec%KMAXFORCT .ne. 1000000) .or.   &
-               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then    
+               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then
                wrf_err_message = '--- Warning: the namelist parameter "kminforct" etc. are for SKEBS only'
                CALL wrf_message ( wrf_err_message )
                wrf_err_message = '             and should not be changed from their default value for SPPT'
@@ -1171,7 +1171,7 @@
          IF ( model_config_rec % rand_perturb(i) .ne. 0)  then
            model_config_rec % rand_perturb_on=1
            IF (( model_config_rec%KMINFORCT .ne. 1) .or. (model_config_rec%KMAXFORCT .ne. 1000000) .or.   &
-               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then    
+               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then
                wrf_err_message = '--- Warning: the namelist parameter "kminforct" etc are for SKEBS only'
                CALL wrf_message ( wrf_err_message )
                wrf_err_message = '             and should not be changed from their default value for RAND_PERTURB'
@@ -1188,7 +1188,7 @@
            .or. ( model_config_rec % spp(i) .ne. 0))  then
            model_config_rec % spp_on=1
            IF (( model_config_rec%KMINFORCT .ne. 1) .or. (model_config_rec%KMAXFORCT .ne. 1000000) .or.   &
-               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then    
+               ( model_config_rec%LMINFORCT .ne. 1) .or. (model_config_rec%LMAXFORCT .ne. 1000000)) then
                wrf_err_message = '--- Warning: the namelist parameter "kminforct" etc are for SKEBS only'
                CALL wrf_message ( wrf_err_message )
                wrf_err_message = '             and should not be changed from their default value for RAND_PERTURB'
@@ -1305,7 +1305,7 @@
    END IF
 
 !-----------------------------------------------------------------------
-! Catch old method for using multi-file LBCs. Let folks know the 
+! Catch old method for using multi-file LBCs. Let folks know the
 ! new way to get the same functionality with run-time options.
 !-----------------------------------------------------------------------
 #if _MULTI_BDY_FILES_
@@ -1343,7 +1343,7 @@
 !        len2 = "_<date>"
 !        DO len_loop len1-len2+1 , len1
 !           model_config_rec%bdy_inname(len_loop:len_loop) = " "
-!        END DO 
+!        END DO
       END IF
    END IF
 
@@ -1381,9 +1381,9 @@
          CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
          count_fatal_error = count_fatal_error + 1
       END IF
-      
+
 !-----------------------------------------------------------------------
-! IF cu_physics = 11 (scale-aware KF), THEN set other required flags. This 
+! IF cu_physics = 11 (scale-aware KF), THEN set other required flags. This
 ! is not an error, just a convenience for the user.
 !-----------------------------------------------------------------------
 
@@ -1396,7 +1396,7 @@
             model_config_rec%icloud = 1
          END IF
       ENDDO
-      
+
 !-----------------------------------------------------------------------
 ! aercu_opt = 1 (CESM-aerosal) only works with MSKF, special Morrison
 !-----------------------------------------------------------------------
@@ -1789,7 +1789,7 @@
       SCHUMAX = MAXVAL(model_config_rec%shcu_physics(1:model_config_rec%max_dom))
          IF ( ( ( EDMFMAX .GT. 0 ) .AND. ( SCHUMAX .GT. 0 ) ) .OR. &
               ( ( EDMFMAX .GT. 0 ) .AND. ( model_config_rec%ishallow .GT. 0 ) ) ) THEN
-            wrf_err_message = '--- ERROR: bl_mynn_edmf > 0 requires both shcu_physics=0 & ishallow=0' 
+            wrf_err_message = '--- ERROR: bl_mynn_edmf > 0 requires both shcu_physics=0 & ishallow=0'
             CALL wrf_message(wrf_err_message)
             wrf_err_message = 'when using MYNN PBL, by default bl_mynn_edmf is turned on'
             CALL wrf_message(wrf_err_message)
@@ -2098,7 +2098,7 @@
       END IF
 
 !-----------------------------------------------------------------------
-! For nwp_diagnostics = 1, history_interval must be used.           
+! For nwp_diagnostics = 1, history_interval must be used.
 !-----------------------------------------------------------------------
 
       IF ( ( model_config_rec%nwp_diagnostics .NE. 0 ) .AND. &
@@ -2118,7 +2118,7 @@
       IF ( model_config_rec % nwp_diagnostics == 1 ) model_config_rec % do_radar_ref = 1
 
 !-----------------------------------------------------------------------
-! If hailcast_opt = 1 for any domain, convective parameterization must be off for that domain.           
+! If hailcast_opt = 1 for any domain, convective parameterization must be off for that domain.
 !-----------------------------------------------------------------------
 
       DO i = 1, model_config_rec % max_dom
@@ -2299,7 +2299,7 @@
       END DO
 
 !-----------------------------------------------------------------------
-!  Only implement the TEMF PBL scheme with the TEMP SFCLAY scheme.  
+!  Only implement the TEMF PBL scheme with the TEMP SFCLAY scheme.
 !-----------------------------------------------------------------------
 
       DO i = 1, model_config_rec % max_dom
@@ -2720,7 +2720,7 @@
 !  Consistency checks for vertical refinement:
 !  feedback has to be turned off
 !-----------------------------------------------------------------------
-      oops = 0 
+      oops = 0
       DO i = 2, model_config_rec % max_dom
         IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
         IF (model_config_rec%vert_refine_method(i) .NE. 0) THEN
@@ -2740,7 +2740,7 @@
 !  Consistency checks for vertical refinement:
 !  rebalance must be set to 1 
 !-----------------------------------------------------------------------
-      oops = 0 
+      oops = 0
       DO i = 2, model_config_rec % max_dom
         IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
         IF (model_config_rec%vert_refine_method(i) .NE. 0) THEN
@@ -2963,7 +2963,7 @@
            wrf_err_message = '    MOZCART_KPP, T1_MOZCART_KPP, MOZART_MOSAIC_4BIN_KPP, MOZART_MOSAIC_4BIN_AQ_KPP'
            CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
            write(wrf_err_message,'(''    chem_opt = '',i3,'', '',i3,'', '',i3,'', or '',i3)') &
-                 MOZCART_KPP, T1_MOZCART_KPP, MOZART_MOSAIC_4BIN_KPP, MOZART_MOSAIC_4BIN_AQ_KPP 
+                 MOZCART_KPP, T1_MOZCART_KPP, MOZART_MOSAIC_4BIN_KPP, MOZART_MOSAIC_4BIN_AQ_KPP
            CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
            count_fatal_error = count_fatal_error + 1
          END IF
@@ -2980,7 +2980,7 @@
          IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
          IF ( ( model_config_rec % e_we(i) /  model_config_rec % nproc_x .LT. 10 ) .OR. &
               ( model_config_rec % e_sn(i) /  model_config_rec % nproc_y .LT. 10 ) ) THEN
-            WRITE ( wrf_err_message , * ) 'For domain ',i,', the domain size is too small for this many processors, ', & 
+            WRITE ( wrf_err_message , * ) 'For domain ',i,', the domain size is too small for this many processors, ', &
                                           'or the decomposition aspect ratio is poor.'
             CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
             WRITE ( wrf_err_message , * ) 'Minimum decomposed computational patch size, either x-dir or y-dir, is 10 grid cells.'
@@ -3009,14 +3009,14 @@
 
 
 !---------------------------------------------------------------------
-!  The "clean" atmosphere radiative flux diagnostics can only be used 
+!  The "clean" atmosphere radiative flux diagnostics can only be used
 !     with WRF-Chem.
 !---------------------------------------------------------------------
 
       IF ( model_config_rec%clean_atm_diag > 0 ) THEN
 
 #if (WRF_CHEM != 1)
-         wrf_err_message = '--- NOTE: "Clean" atmosphere diagnostics can only be used in WRF-Chem' 
+         wrf_err_message = '--- NOTE: "Clean" atmosphere diagnostics can only be used in WRF-Chem'
          CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
          model_config_rec%calc_clean_atm_diag = 0
 #else
@@ -3266,11 +3266,11 @@
 
 
 !-----------------------------------------------------------------------
-! Set the namelist urban dimensions if sf_urban_physics > 0  
+! Set the namelist urban dimensions if sf_urban_physics > 0
 !-----------------------------------------------------------------------
 
       IF ( any(model_config_rec%sf_urban_physics > 0 ) ) THEN
-      
+
          model_config_rec%urban_map_zrd = model_config_rec%num_urban_ndm * &
                                           model_config_rec%num_urban_nwr * &
                                           model_config_rec%num_urban_nz
@@ -3284,7 +3284,7 @@
                                           model_config_rec%num_urban_nz  * &
                                           model_config_rec%num_urban_nbui
          model_config_rec%urban_map_zdf = model_config_rec%num_urban_ndm * &
-                                          model_config_rec%num_urban_nz 
+                                          model_config_rec%num_urban_nz
          model_config_rec%urban_map_bd  = model_config_rec%num_urban_nz  * &
                                           model_config_rec%num_urban_nbui
          model_config_rec%urban_map_wd  = model_config_rec%num_urban_ndm * &
@@ -3301,25 +3301,25 @@
                                           model_config_rec%num_urban_ngr  * &
                                           model_config_rec%num_urban_nz
 
-      END IF     
-      
+      END IF
+
 !-----------------------------------------------------------------------
-! Set the namelist mosaic_cat_soil parameter for the Noah-mosaic  scheme if sf_surface_mosaic == 1.  
+! Set the namelist mosaic_cat_soil parameter for the Noah-mosaic  scheme if sf_surface_mosaic == 1.
 !-----------------------------------------------------------------------
 
       IF ( model_config_rec % sf_surface_mosaic .EQ. 1 ) THEN
-      
+
       numsoiltemp = model_config_rec % num_soil_layers
       nummosaictemp = model_config_rec % mosaic_cat
-      
+
          model_config_rec % mosaic_cat_soil = numsoiltemp * nummosaictemp
 
          wrf_err_message = '--- NOTE: Noah-mosaic is in use, setting:  ' // &
                            'mosaic_cat_soil = mosaic_cat * num_soil_layers'
          CALL wrf_debug ( 1, wrf_err_message )
 
-      END IF     
-      
+      END IF
+
 #if (DA_CORE != 1)
 !-----------------------------------------------------------------------
 ! How big to allocate random seed arrays.
@@ -3370,10 +3370,10 @@
 
 #endif
 
-      
+
 !-----------------------------------------------------------------------
 ! Set the namelist parameters for the CAM radiation scheme if either
-! ra_lw_physics = CAMLWSCHEME or ra_sw_physics = CAMSWSCHEME.  
+! ra_lw_physics = CAMLWSCHEME or ra_sw_physics = CAMSWSCHEME.
 !-----------------------------------------------------------------------
 
       IF (( model_config_rec % ra_lw_physics(1) .EQ. CAMLWSCHEME ) .OR. &
@@ -3502,7 +3502,7 @@
 
 !-----------------------------------------------------------------------
 ! If a user selected LOGICAL fire-related switches, convert those to
-! INTEGER for the package allocation assignment required in the 
+! INTEGER for the package allocation assignment required in the
 ! registry file.
 !-----------------------------------------------------------------------
 
@@ -3511,20 +3511,20 @@
          IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
          IF ( model_config_rec % fmoist_run(i) .EQV. .TRUE.  ) THEN
             model_config_rec % fmoisti_run(i) = 1
-         ELSE 
+         ELSE
             model_config_rec % fmoisti_run(i) = 0
          END IF
          IF ( model_config_rec % fmoist_interp(i) .EQV. .TRUE.  ) THEN
             model_config_rec % fmoisti_interp(i) = 1
-         ELSE 
+         ELSE
             model_config_rec % fmoisti_interp(i) = 0
          END IF
       ENDDO
 #endif
 
 !-----------------------------------------------------------------------
-! If MYNN PBL is not used, set bl_mynn_edmf = 0 so that we don't get 
-! additional output 
+! If MYNN PBL is not used, set bl_mynn_edmf = 0 so that we don't get
+! additional output
 !-----------------------------------------------------------------------
 
 #if (EM_CORE == 1)
@@ -3588,11 +3588,13 @@
          model_config_rec % num_soil_layers = 4
       ELSE IF (   model_config_rec % sf_surface_physics(1) .EQ. SSIBSCHEME   ) THEN
          model_config_rec % num_soil_layers = 3
+      ELSE IF (   model_config_rec % sf_surface_physics(1) .EQ. SNOWPACKSCHEME   ) THEN
+         model_config_rec % num_soil_layers = 4
       ELSE
          CALL wrf_debug       ( 0 , '--- ERROR: Unknown sf_surface_physics has no associated number of soil levels' )
          WRITE (wrf_err_message, FMT='(A,I6)') '--- ERROR: sf_surface_physics = ' , model_config_rec % sf_surface_physics(1)
          CALL wrf_error_fatal ( TRIM(wrf_err_message) )
-      END IF 
+      END IF
 #endif
 
       WRITE (wrf_err_message, FMT='(A,I6)') '--- NOTE: num_soil_layers has been set to ', &
@@ -3608,7 +3610,7 @@
       INTEGER                     :: max_dom
       INTEGER, DIMENSION(max_dom) :: parent_id, parent_grid_ratio
       INTEGER                     :: factor, id
-   
+
       IF ( id .EQ. 1 ) THEN
          RETURN
       ELSE
