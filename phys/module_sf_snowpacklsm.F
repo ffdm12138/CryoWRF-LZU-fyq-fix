@@ -292,6 +292,7 @@ CONTAINS
     real :: divQx, divQy,tmp_divQ
     double precision :: l_in_hsalt
     double precision :: l_psi_s
+    double precision :: l_z0_roughness
     double precision :: l_loc_sza, l_tau_qc, l_tau_qi
     double precision :: l_tau_qc_tot, l_tau_qi_tot
     real, dimension(ims:ime,snc_N,jms:jme)  :: U_SFC,V_SFC,VW_SFC
@@ -315,6 +316,7 @@ CONTAINS
     in_N_lb = 0.0
     in_hsalt = 0.0
     snpack_psi_s = 0.0
+    l_z0_roughness = 0.002
     sfc_T = 0.0
     sfc_Q = 0.0
 do j = jts,jte
@@ -565,8 +567,8 @@ endif
 
       !!!! snpack-ANTARCTICA: HERE THE CODE SPLITS BETWEEN LAND WITH ICE (isltyp==8) AND LAND WITHOUT ICE
       !!!! snpack-LAND : no if block here
-      IF( ((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
-&          ( snpack_mode == 'land' ) ) then
+      IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+&         ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
 
 
          in_H   = real(Z_ML,8)    ! (1) 
@@ -594,11 +596,8 @@ endif
          out_SNOW   = 0.0 
          out_SNOWH  = 0.0 
 
-         if (snpack_mode == 'antarctica') then 
-            log_z_z0 = log(real(Z_ML,8)/real(0.002,8))
-         else
-            log_z_z0 = log(real(Z_ML,8)/real(0.002,8))
-         endif
+         ! Use initial estimate for log_z_z0, will be updated after Snowpack call
+         log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
 
          in_UST = real(UST_V(I,J),8)
          in_SFP = real(PSFC,8)
@@ -668,12 +667,15 @@ endif
   &                          l_ebug_low_bc,l_ebug_raine,l_ebug_totale,arr_T,arr_thick,arr_volI,arr_volW, &
   &                          arr_volV,arr_rg,arr_rb,arr_dd,arr_sp,arr_cdot,arr_meta,arr_depd,arr_graintype,arr_mk,tmp_bs_bool, &
   &                          l_sn_nlayers,l_rho_v, l_bs_bdg_total, qi_in, qni_in,bs_K, bs_mass_turb,    &
-  &                          bs_number_turb,l_in_hsalt,l_psi_s, l_loc_sza,l_tau_qc,l_tau_qi, &
+  &                          bs_number_turb,l_in_hsalt,l_psi_s,l_z0_roughness, l_loc_sza,l_tau_qc,l_tau_qi, &
   &                          l_tau_qc_tot,l_tau_qi_tot )
 
     UST_V(I,J)    = real(in_UST,4)
     in_hsalt(I,J) = real(l_in_hsalt,4)
     snpack_psi_s(I,J) = real(l_psi_s,4)
+    
+    ! Recalculate log_z_z0 using dynamic roughness length from Snowpack
+    log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
 
     total_sfc_SQ_QFX = sfc_SQ_QFX(I,J)
     total_sfc_SQ_HFX = sfc_SQ_HFX(I,J)
@@ -740,11 +742,8 @@ endif
     endif
     
     if ( out_SNOWH .gt. 0 ) then
-         if (snpack_mode == 'antarctica') then 
-            Z0WRF = 0.002! log(real(Z_ML,8)/real(0.002,8))
-         else
-            Z0WRF = 0.002 ! log(real(Z_ML,8)/real(0.2,8))
-         endif
+         ! Use dynamic roughness length computed by Snowpack
+         Z0WRF = real(l_z0_roughness,4)
     else
       Z0WRF = Z0(I,J)
     endif
@@ -838,8 +837,9 @@ endif
    IILOOP : DO I = its, ite
         JJLOOP : DO J = jts , jte
 
-           IF( ((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
-&              ( snpack_mode == 'land' ) ) then
+
+           IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+&              ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))  ) then
 
            else
 
@@ -988,7 +988,7 @@ endif
     do J=jts,jtf
          do I=its,itf
             if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
-&                (snpack_mode == 'land')  ) then
+&               ((snpack_mode == 'land')  .and. (ISLTYP(I,J) .ne. 14)) ) then
                counter_snowpoints = counter_snowpoints + 1
             endif
          enddo
@@ -1023,7 +1023,7 @@ endif
        do J=jts,jtf
           do I=its,itf
             if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
-&                (snpack_mode == 'land')  ) then
+&               ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))     ) then
 
                 counter_snowpoints = counter_snowpoints + 1
                 in_glo_counter(I,J) = counter_snowpoints
