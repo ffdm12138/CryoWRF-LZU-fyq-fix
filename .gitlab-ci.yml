@@ -1,0 +1,101 @@
+variables:
+  DIR: "$CI_PROJECT_DIR/build"
+  DEPLIBS: "$DIR/libs"
+  CC: "gcc"
+  CXX: "g++"
+  FC: "gfortran"
+  FCFLAGS: "-m64 -fallow-argument-mismatch -fallow-invalid-boz"
+  F77: "gfortran"
+  FFLAGS: "-m64 -fallow-argument-mismatch -fallow-invalid-boz"
+  NETCDF: "/usr"
+  HDF5: "/usr/lib/x86_64-linux-gnu/hdf5/serial"
+  LDFLAGS: "-L/usr/lib/x86_64-linux-gnu/hdf5/serial/ -L/usr/lib"
+  CPPFLAGS: "-I/usr/include/hdf5/serial/ -I/usr/include"
+  LD_LIBRARY_PATH: "/usr/lib"
+  TZ: "Etc/UTC"
+  DEBIAN_FRONTEND: "noninteractive"
+  JASPERLIB: "$DEPLIBS/grib2/lib"
+  JASPERINC: "$DEPLIBS/grib2/include"
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - dependencies
+  - wrf
+
+# Build all dependencies: Jasper, MeteoIO, Snowpack, and CryoWRF coupler
+build-dependencies:
+  stage: dependencies
+  image: ubuntu:24.04
+  script:
+    # Install dependencies
+    - apt-get update
+    - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
+    - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
+    # Initialize submodules
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+
+    # Build Jasper library (meteoio, snowpack, and coupler will be built by WRF)
+    - echo "Building Jasper..."
+    - mkdir -p "$DEPLIBS/grib2"
+    - cd "$DIR"
+    - wget https://www2.mmm.ucar.edu/wrf/OnLineTutorial/compile_tutorial/tar_files/jasper-1.900.1.tar.gz -O jasper.tar.gz
+    - tar -xzf jasper.tar.gz
+    - cd jasper-1.900.1
+    # Unset Fortran flags that interfere with C compilation
+    - unset FCFLAGS FFLAGS F77 FC
+    - export CFLAGS="-O3 -fPIC"
+    - export CXXFLAGS="-O3 -fPIC"
+    - ./configure --prefix="$DEPLIBS/grib2" || (cat config.log && exit 1)
+    - make -j$(nproc) && make install
+  artifacts:
+    paths:
+      - build/libs
+    expire_in: 2h
+
+# Build WRF with CRYOWRF integration
+build-wrf:
+  stage: wrf
+  image: ubuntu:24.04
+  dependencies:
+    - build-dependencies
+  script:
+    # Install dependencies
+    - apt-get update
+    - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
+    - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
+    # Initialize submodules
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+
+    - mkdir -p "$DIR/bin"
+    - cd "$CI_PROJECT_DIR"
+    # Set Jasper environment variables
+    - export JASPER="$DEPLIBS/grib2"
+    - export JASPER_ROOT="$DEPLIBS/grib2"
+    - export JASPERLIB="$DEPLIBS/grib2/lib"
+    - export JASPERINC="$DEPLIBS/grib2/include"
+    # Clean previous builds
+    - ./clean -a
+    # Fix netcdf path in configure script
+    - sed -i 's#$NETCDF/lib#$NETCDF/lib/x86_64-linux-gnu#g' configure
+    # Select em_real configuration (option 35 for gfortran with basic nesting)
+    - printf "35\n1\n" | ./configure
+    # Fix netcdf link flags in configure.wrf
+    - sed -i 's#-L/usr/lib -lnetcdff -lnetcdf#-L/usr/lib/x86_64-linux-gnu -lnetcdff -lnetcdf#g' configure.wrf
+    # Compile WRF
+    - ./compile em_real -j $(nproc) 2>&1 | tee compile.log
+    # Check if WRF executables were created
+    - test -f main/wrf.exe || (echo "WRF compilation failed! Check compile.log" && exit 1)
+    - test -f main/real.exe || (echo "real.exe compilation failed! Check compile.log" && exit 1)
+    # Copy executables to build directory
+    - cp main/wrf.exe "$DIR/bin/"
+    - cp main/real.exe "$DIR/bin/"
+    - cp main/ndown.exe "$DIR/bin/" 2>/dev/null || true
+    - cp main/tc.exe "$DIR/bin/" 2>/dev/null || true
+  artifacts:
+    paths:
+      - build/bin/
+      - build/libs/
+      - compile.log
+    expire_in: 5h
