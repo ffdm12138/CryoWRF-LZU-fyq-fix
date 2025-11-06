@@ -171,7 +171,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,bs_bool,bool_snow_sublimation                     & ! CRYOWRF
                       ,bs_rad_effect,in_hsalt,bs_sublim,xkhv_LES         & ! CRYOWRF
                       ,bs_qi_sublim3d,sn_qi_sublim3d                     & ! CRYOWRF
-                      ,ZNT_MEAN, snpack_dt, HFX, UST, XICE,              & ! CRYOWRF
+                      ,ZNT_MEAN, snpack_dt, HFX, UST, XICE               & ! CRYOWRF
                       ,FRACTIONAL_SEAICE                                 & ! CRYOWRF
 )
 
