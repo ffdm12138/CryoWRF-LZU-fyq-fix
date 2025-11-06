@@ -16,7 +16,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,chem_opt, progn                                   &
                       ,cldfra, cldfra_old, exch_h, nsource               &
                       ,qlsink, precr, preci, precs, precg                &
-                      ,xland,snowh,xice,itimestep                        &
+                      ,xland,snowh,itimestep                             &
                       ,f_ice_phy,f_rain_phy,f_rimef_phy                  &
                       ,lowlyr,sr, id                                     &
                       ,ids,ide, jds,jde, kds,kde                         &
@@ -610,7 +610,6 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN)   :: XLAND
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN), OPTIONAL   :: SNOWH
-   REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN)   :: XICE
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(OUT)   :: SR
 

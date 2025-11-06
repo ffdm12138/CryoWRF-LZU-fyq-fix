@@ -156,7 +156,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    ! Flag for producing diagnostic fields (e.g., radar reflectivity)
    LOGICAL                        :: diag_flag
    INTEGER                        :: ke_diag ! tells reflectivity calculation whether to do full depth or only k=1
-   LOGICAL                        :: restart_flag !  tells if it is a restart timestep to write restart files. 
+   LOGICAL                        :: restart_flag !  tells if it is a restart timestep to write restart files.
 
 #if (WRF_CHEM == 1)
    ! Index cross-referencing array for tendency accumulation
@@ -887,9 +887,9 @@ BENCH_START(rk_tend_tim)
                          ,grid%u_2, grid%v_2, grid%w_2, grid%t_2, grid%ph_2                                    &
                          ,grid%u_1, grid%v_1, grid%w_1, grid%t_1, grid%ph_1                                    &
                          ,grid%h_diabatic, grid%phb, grid%t_init                                               &
-                         ,grid%mu_1, grid%mu_2, grid%mut, grid%muu, grid%muv, grid%mub                         & 
+                         ,grid%mu_1, grid%mu_2, grid%mut, grid%muu, grid%muv, grid%mub                         &
                          ,grid%c1h, grid%c2h, grid%c1f, grid%c2f                                               &
-                         ,grid%al, grid%ht, grid%alt, grid%p, grid%pb, grid%php, cqu, cqv, cqw                 & 
+                         ,grid%al, grid%ht, grid%alt, grid%p, grid%pb, grid%php, cqu, cqv, cqw                 &
                          ,grid%u_base, grid%v_base, grid%t_base, grid%qv_base, grid%z_base                     &
                          ,grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv                                    &
                          ,grid%msfvy, grid%msftx,grid%msfty, grid%clat, grid%f, grid%e, grid%sina, grid%cosa   &
@@ -2215,7 +2215,7 @@ BENCH_START(rk_scalar_tend_tim)
                CALL rk_scalar_tend (  im, im, config_flags, tenddec,         &
                            rk_step, dt_rk,                                   &
                            grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,        &
-                           grid%u_1, grid%v_1,                               &  
+                           grid%u_1, grid%v_1,                               &
                            grid%muts, grid%mub, grid%mu_1,                   &
                            grid%c1h, grid%c2h,  grid%c1f, grid%c2f,          &
                            grid%alt,                                         &
@@ -2384,7 +2384,7 @@ BENCH_START(tke_adv_tim)
            CALL rk_scalar_tend ( 1, 1, config_flags, tenddec,                      &
                             rk_step, dt_rk,                                        &
                             grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,             &
-                            grid%u_1, grid%v_1,                                    &  
+                            grid%u_1, grid%v_1,                                    &
                             grid%muts, grid%mub, grid%mu_1,                        &
                             grid%c1h, grid%c2h,  grid%c1f, grid%c2f,               &
                             grid%alt,                                              &
@@ -2477,7 +2477,7 @@ BENCH_START(chem_adv_tim)
              CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                &
                               rk_step, dt_rk,                                    &
                               grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,         &
-                              grid%u_1, grid%v_1,                                &  
+                              grid%u_1, grid%v_1,                                &
                               grid%muts, grid%mub, grid%mu_1,                    &
                               grid%c1h, grid%c2h,  grid%c1f, grid%c2f,           &
                               grid%alt,                                          &
@@ -2639,7 +2639,7 @@ BENCH_START(tracer_adv_tim)
              CALL rk_scalar_tend ( ic, ic, config_flags, tenddec,                &
                               rk_step, dt_rk,                                    &
                               grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,         &
-                              grid%u_1, grid%v_1,                                &  
+                              grid%u_1, grid%v_1,                                &
                               grid%muts, grid%mub, grid%mu_1,                    &
                               grid%c1h, grid%c2h,  grid%c1f, grid%c2f,           &
                               grid%alt,                                          &
@@ -2781,7 +2781,7 @@ BENCH_END(tracer_adv_tim)
            CALL rk_scalar_tend ( is, is, config_flags, tenddec,                   &
                                  rk_step, dt_rk,                                  &
                                  grid%ru_m, grid%rv_m, grid%ww_m, wwE, wwI,       &
-                                 grid%u_1, grid%v_1,                              &  
+                                 grid%u_1, grid%v_1,                              &
                                  grid%muts, grid%mub, grid%mu_1,                  &
                                  grid%c1h, grid%c2h,  grid%c1f, grid%c2f,         &
                                  grid%alt,                                        &
@@ -3763,7 +3763,7 @@ BENCH_START(micro_driver_tim)
       &        ,DGNUM4D=grid%dgnum4d,DGNUMWET4D=grid%dgnumwet4d           &
 !======================
 #endif
-      &        ,XLAND=grid%xland,SNOWH=grid%SNOW,XICE=grid%XICE           &
+      &        ,XLAND=grid%xland,SNOWH=grid%SNOW                          &
       &        ,SPECIFIED=specified_bdy, CHANNEL_SWITCH=channel_bdy       &
       &        ,F_RAIN_PHY=grid%f_rain_phy                                &
       &        ,F_RIMEF_PHY=grid%f_rimef_phy                              &
@@ -4003,10 +4003,9 @@ BENCH_START(micro_driver_tim)
       &        ,bool_snow_sublimation=config_flags%blowing_snow_sublimation  & ! Blowing snow
       &        ,bs_rad_effect=config_flags%bs_rad_effect                     & ! Blowing snow
       &        ,in_hsalt=grid%in_hsalt,bs_sublim=grid%bs_sublim              & ! Blowing snow
-      &        ,xkhv_LES=grid%xkmv                                           & ! Blowing snow
-      &        ,bs_qi_sublim3d=grid%bs_qi_sublim3d,                          & ! Blowing snow
+      &        ,xkhv_LES=grid%xkmv,bs_qi_sublim3d=grid%bs_qi_sublim3d        & ! Blowing snow
       &        ,sn_qi_sublim3d=grid%sn_qi_sublim3d,znt_mean=grid%znt_mean    & ! Blowing snow
-      &        ,snpack_dt=config_flags%snpack_dt,HFX=grid%hfx,UST=grid%ust,  & ! Blowing snow
+      &        ,snpack_dt=config_flags%snpack_dt,HFX=grid%hfx,UST=grid%ust   & ! Blowing snow
       &        ,XICE=grid%xice                                               & ! Blowing snow
       &        ,FRACTIONAL_SEAICE=config_flags%fractional_seaice             & ! Blowing snow
     )
@@ -4870,17 +4869,17 @@ BENCH_END(bc_2d_tim)
    ENDIF
 #endif
 
-   
+
 !-----------------------------------------------------------------------
-! firebrand spotting (passive Lagrangian particle transport, 
+! firebrand spotting (passive Lagrangian particle transport,
 ! tracks firebrand physics properties)
 !-----------------------------------------------------------------------
 
    IF(config_flags%ifire == 2 .AND. &
        ! Check if spotting is on
-       config_flags%fs_firebrand_gen_lim > 0 .AND. & 
+       config_flags%fs_firebrand_gen_lim > 0 .AND. &
        ! Check if this is the inner most grid
-       config_flags%max_dom == grid%id) THEN 
+       config_flags%max_dom == grid%id) THEN
 
 #ifdef DM_PARALLEL
        CALL wrf_debug ( 200 , ' call HALO_FIREBRAND_SPOTTING' )
@@ -4898,11 +4897,11 @@ BENCH_END(bc_2d_tim)
                fs_p_y        = grid%fs_p_y,         &
                fs_p_z        = grid%fs_p_z,         &
                fs_gen_inst   = grid%fs_gen_inst,    &
-               fs_p_mass     = grid%fs_p_mass,      &  
-               fs_p_diam     = grid%fs_p_diam,      & 
-               fs_p_effd     = grid%fs_p_effd,      & 
-               fs_p_temp     = grid%fs_p_temp,      & 
-               fs_p_tvel     = grid%fs_p_tvel,      & 
+               fs_p_mass     = grid%fs_p_mass,      &
+               fs_p_diam     = grid%fs_p_diam,      &
+               fs_p_effd     = grid%fs_p_effd,      &
+               fs_p_temp     = grid%fs_p_temp,      &
+               fs_p_tvel     = grid%fs_p_tvel,      &
                fs_last_gen_dt= grid%fs_last_gen_dt, &
                fs_gen_idmax  = grid%fs_gen_idmax,   &
                fs_fire_ROSdt = grid%fs_fire_ROSdt,  &
