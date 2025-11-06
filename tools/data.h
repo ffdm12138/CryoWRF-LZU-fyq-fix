@@ -75,7 +75,7 @@ typedef struct node_struct {
   char pkg_4dscalars[NAMELEN_LONG] ;
 
 /* fields used by Comm (halo, period, xpose)  nodes */
-  char comm_define[2*8192] ;
+  char comm_define[4*8192] ;
 
 /* marker */
   int mark ;
@@ -103,6 +103,8 @@ EXTERN char sw_commpath[NAMELEN] ;
 EXTERN int sw_new_bdys ;  /* 20070207 JM support decomposed boundary arrays */
 EXTERN int sw_unidir_shift_halo ;  /* 20100210 JM assume that halo to shift is same in both directions and only gen one of them */
 EXTERN int sw_new_with_old_bdys ;  /* 20070207 JM for debugging interim phase, new comms w/ old data structs */
+EXTERN int sw_chem ;
+EXTERN int sw_kpp ;
 
 EXTERN node_t * Type ;
 EXTERN node_t * Dim ;

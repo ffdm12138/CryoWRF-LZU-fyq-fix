@@ -4,10 +4,10 @@
 !
 ! Michael G. Duda -- 25 August 2005
 ! vertical profiles added by Torge Lorenz -- June 2012
-! ability to output at either i/j or lat/lon locations, and ability to 
+! ability to output at either i/j or lat/lon locations, and ability to
 !     output W, added by Pat Hawbecker -- Jan 2019
 ! ability to output O3 (chem), added by Xin Zhang -- Feb 2020
-! 
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE calc_ts_locations( grid )
 
@@ -29,7 +29,7 @@ SUBROUTINE calc_ts_locations( grid )
 
    ! Local variables
    INTEGER :: ntsloc_temp
-   INTEGER :: i, j, k, iunit  
+   INTEGER :: i, j, k, iunit
    REAL :: ts_rx, ts_ry, ts_xlat, ts_xlong, ts_hgt
    REAL :: known_lat, known_lon
    CHARACTER (LEN=132) :: message
@@ -41,7 +41,7 @@ SUBROUTINE calc_ts_locations( grid )
 #else
    INTEGER, PARAMETER :: TS_FIELDS = 14
    CHARACTER (LEN=2), DIMENSION(TS_FIELDS) :: &
-      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR', 'RO', 'QS', 'NS', 'SQ', 'SN','DQ', 'DN' /) 
+      ts_file_endings = (/ 'UU', 'VV', 'PH', 'TH', 'QV' ,'WW', 'PR', 'RO', 'QS', 'NS', 'SQ', 'SN','DQ', 'DN' /)
 #endif
    INTEGER :: num_fields_out
    INTEGER   ierr
@@ -66,7 +66,7 @@ SUBROUTINE calc_ts_locations( grid )
 
    CHARACTER(len=256)           :: newFolder
    LOGICAL :: dirExists
-              
+
    CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
 
@@ -76,8 +76,8 @@ SUBROUTINE calc_ts_locations( grid )
    ELSE
       num_fields_out = SIZE(ts_file_endings)-6
    END IF
-     
-      
+
+
    IF ( grid%ntsloc .LE. 0 ) RETURN
 
 #if ((EM_CORE == 1) && (DA_CORE != 1))
@@ -95,23 +95,18 @@ SUBROUTINE calc_ts_locations( grid )
 
       ! Set up map transformation structure
       CALL map_init(ts_proj)
-   
+
       IF (ips <= 1 .AND. 1 <= ipe .AND. &
           jps <= 1 .AND. 1 <= jpe) THEN
-#if(NMM_CORE==1)
-         known_lat = grid%hlat(1,1)
-         known_lon = grid%hlon(1,1)
-#else
          known_lat = grid%xlat(1,1)
          known_lon = grid%xlong(1,1)
-#endif
       ELSE
          known_lat = 9999.
          known_lon = 9999.
       END IF
       known_lat = wrf_dm_min_real(known_lat)
       known_lon = wrf_dm_min_real(known_lon)
-   
+
       ! Mercator
       IF (config_flags%map_proj == PROJ_MERC) THEN
          CALL map_set(PROJ_MERC, ts_proj,               &
@@ -121,7 +116,7 @@ SUBROUTINE calc_ts_locations( grid )
                       knowni   = 1.,                    &
                       knownj   = 1.,                    &
                       dx       = config_flags%dx)
-   
+
       ! Lambert conformal
       ELSE IF (config_flags%map_proj == PROJ_LC) THEN
          CALL map_set(PROJ_LC, ts_proj,                  &
@@ -133,7 +128,7 @@ SUBROUTINE calc_ts_locations( grid )
                       knowni   = 1.,                     &
                       knownj   = 1.,                     &
                       dx       = config_flags%dx)
-   
+
       ! Polar stereographic
       ELSE IF (config_flags%map_proj == PROJ_PS) THEN
          CALL map_set(PROJ_PS, ts_proj,                  &
@@ -144,13 +139,13 @@ SUBROUTINE calc_ts_locations( grid )
                       knowni   = 1.,                     &
                       knownj   = 1.,                     &
                       dx       = config_flags%dx)
-   
+
 #if (EM_CORE == 1)
       ! Cassini (global ARW)
       ELSE IF (config_flags%map_proj == PROJ_CASSINI) THEN
          CALL map_set(PROJ_CASSINI, ts_proj,                            &
                       latinc   = grid%dy*360.0/(2.0*EARTH_RADIUS_M*PI), &
-                      loninc   = grid%dx*360.0/(2.0*EARTH_RADIUS_M*PI), & 
+                      loninc   = grid%dx*360.0/(2.0*EARTH_RADIUS_M*PI), &
                       lat1     = known_lat,                             &
                       lon1     = known_lon,                             &
                       lat0     = config_flags%pole_lat,                 &
@@ -173,7 +168,7 @@ SUBROUTINE calc_ts_locations( grid )
                       latinc   = grid%dy,                       &
                       loninc   = grid%dx,                       &
                       stagger  = HH)
-   
+
       END IF
 
       !Create output folder does not exist
@@ -186,7 +181,7 @@ SUBROUTINE calc_ts_locations( grid )
          CALL system( newFolder )
       ENDIF
 
-   
+
       ! Determine simulation start time
       ierr = 0
       CALL nl_get_simulation_start_year   ( 1 , simulation_start_year   )
@@ -200,46 +195,46 @@ SUBROUTINE calc_ts_locations( grid )
               simulation_start_minute,simulation_start_second
 !     WRITE(message,*)'wrf_timeseries: SIMULATION_START_DATE = ',simulation_start_date(1:19)
 !     CALL wrf_debug ( 0, TRIM( message ) )
-      
+
       ! Determine time series locations for domain
       IF (.NOT. grid%have_calculated_tslocs) THEN
          grid%have_calculated_tslocs = .TRUE.
          WRITE(message, '(A43,I3,A15,A19)') 'Computing time series locations for domain ', grid%id, &
                                             ' starting from ',simulation_start_date
          CALL wrf_message(message)
-   
+
          ntsloc_temp = 0
 
          ! Boolean if/else for ij and lat/lon that sets ts_rx(y) to either ij or lat/lon value from tslist
          DO k=1,grid%ntsloc
             ! Ideal case (which has a cartesian coordinate) or specified (i,j) in tslist
-            IF (config_flags%map_proj == 0 .OR. grid%tslist_ij) THEN 
-               ts_rx = grid%itsloc(k)  
+            IF (config_flags%map_proj == 0 .OR. grid%tslist_ij) THEN
+               ts_rx = grid%itsloc(k)
                ts_ry = grid%jtsloc(k)
             ! Real-data case with input locations provided as (lat,lon)
             ELSE
                CALL latlon_to_ij(ts_proj, grid%lattsloc(k), grid%lontsloc(k), ts_rx, ts_ry)
             END IF
-            
+
 
             ntsloc_temp = ntsloc_temp + 1
             grid%itsloc(ntsloc_temp) = NINT(ts_rx)
             grid%jtsloc(ntsloc_temp) = NINT(ts_ry)
             grid%id_tsloc(ntsloc_temp) = k
-   
+
             ! Is point outside of domain (or on the edge of domain)?
             IF (grid%itsloc(ntsloc_temp) < ids .OR. grid%itsloc(ntsloc_temp) > ide .OR. &
                 grid%jtsloc(ntsloc_temp) < jds .OR. grid%jtsloc(ntsloc_temp) > jde) THEN
                ntsloc_temp = ntsloc_temp - 1
-   
+
             END IF
-   
+
          END DO
-   
+
          grid%next_ts_time = 1
-   
+
          grid%ntsloc_domain = ntsloc_temp
-   
+
          DO k=1,grid%ntsloc_domain
 
             ! If location is outside of patch, we need to get lat/lon of TS grid cell from another patch
@@ -249,13 +244,8 @@ SUBROUTINE calc_ts_locations( grid )
                ts_xlong = 1.E30
                ts_hgt   = 1.E30
             ELSE
-#if(NMM_CORE==1)
-               ts_xlat  = grid%hlat(grid%itsloc(k),grid%jtsloc(k))
-               ts_xlong = grid%hlon(grid%itsloc(k),grid%jtsloc(k))
-#else
                ts_xlat  = grid%xlat(grid%itsloc(k),grid%jtsloc(k))
                ts_xlong = grid%xlong(grid%itsloc(k),grid%jtsloc(k))
-#endif
 #if (EM_CORE == 1)
                ts_hgt   = grid%ht(grid%itsloc(k),grid%jtsloc(k))
 #endif
@@ -265,7 +255,7 @@ SUBROUTINE calc_ts_locations( grid )
             ts_xlong = wrf_dm_min_real(ts_xlong)
             ts_hgt   = wrf_dm_min_real(ts_hgt)
 #endif
-   
+
             IF ( wrf_dm_on_monitor() ) THEN
                iunit = get_unused_unit()
                IF ( iunit <= 0 ) THEN
@@ -276,7 +266,7 @@ SUBROUTINE calc_ts_locations( grid )
                WRITE(grid%ts_filename(k)(i-4:i-3),'(I2.2)') grid%id
                OPEN(UNIT=iunit, FILE=TRIM(grid%ts_filename(k)), FORM='FORMATTED', STATUS='REPLACE')
 #if (EM_CORE == 1)
-               IF ( .NOT. grid%tslist_ij ) THEN 
+               IF ( .NOT. grid%tslist_ij ) THEN
                   WRITE(UNIT=iunit, &
                         FMT='(A26,I2,I3,A6,A2,F7.3,A1,F8.3,A3,I4,A1,I4,A3,F7.3,A1,F8.3,A2,F6.1,A7,A2,A19)') &
                         grid%desctsloc(grid%id_tsloc(k))//' ', grid%id, grid%id_tsloc(k), &
@@ -317,7 +307,7 @@ SUBROUTINE calc_ts_locations( grid )
                   WRITE(ts_profile_filename(i-1:i),'(A2)') ts_file_endings(j)
                   OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), FORM='FORMATTED', STATUS='REPLACE')
 #if (EM_CORE == 1)
-                  IF ( .NOT. grid%tslist_ij ) THEN 
+                  IF ( .NOT. grid%tslist_ij ) THEN
                      WRITE(UNIT=iunit, &
                            FMT='(A26,I2,I3,A6,A2,F7.3,A1,F8.3,A3,I4,A1,I4,A3,F7.3,A1,F8.3,A2,F6.1,A7,A2,A19)') &
                            grid%desctsloc(grid%id_tsloc(k))//' ', grid%id, grid%id_tsloc(k), &
@@ -344,12 +334,12 @@ SUBROUTINE calc_ts_locations( grid )
                         ' (', grid%lattsloc(grid%id_tsloc(k)), ',', grid%lontsloc(grid%id_tsloc(k)), ') (', &
                         grid%itsloc(k), ',', grid%jtsloc(k), ') (', &
                         ts_xlat, ',', ts_xlong, ') '
-#endif               
+#endif
                   CLOSE(UNIT=iunit)
                END DO
             END IF
          END DO
-   
+
       END IF
 #if ((EM_CORE == 1) && (DA_CORE != 1))
    END IF
@@ -375,24 +365,29 @@ SUBROUTINE calc_ts( grid )
    INTEGER :: i, k, mm, n, ix, iy, rc
    REAL :: earth_u, earth_v,                       &
            output_t, output_q, clw, xtime_minutes
+   REAL, PARAMETER :: MISSING = -999.0
    REAL, ALLOCATABLE, DIMENSION(:) :: p8w
    REAL, ALLOCATABLE, DIMENSION(:) :: earth_u_profile, earth_v_profile
    TYPE (grid_config_rec_type) :: config_flags
 
-   ! Parameter ts_model_level:  
+   ! Parameter ts_model_level:
        ! TRUE to output T, Q, and wind at lowest model level
        ! FALSE to output T and Q at 2-m and wind at 10-m diagnostic levels:
-   LOGICAL, PARAMETER :: ts_model_level = .FALSE. 
+   LOGICAL, PARAMETER :: ts_model_level = .FALSE.
 
-   !Allocate the arrays for wind components
-#if ( EM_CORE == 1 )   
-   ALLOCATE ( earth_u_profile(grid%max_ts_level), earth_v_profile(grid%max_ts_level) )
-#endif
-
-   IF ( grid%ntsloc_domain .LE. 0 ) RETURN
+   IF ( grid%ntsloc_domain .LE. 0 ) THEN
+       RETURN
+   END IF
 
 #if ((EM_CORE == 1) && (DA_CORE != 1))
-   IF ( grid%dfi_opt /= DFI_NODFI .AND. grid%dfi_stage /= DFI_FST ) RETURN
+   IF ( grid%dfi_opt /= DFI_NODFI .AND. grid%dfi_stage /= DFI_FST ) THEN
+       RETURN
+   END IF
+#endif
+
+   !Allocate the arrays for wind components
+#if ( EM_CORE == 1 )
+   ALLOCATE ( earth_u_profile(grid%max_ts_level), earth_v_profile(grid%max_ts_level) )
 #endif
 
    n = grid%next_ts_time
@@ -404,12 +399,12 @@ SUBROUTINE calc_ts( grid )
 
       ix = grid%itsloc(i)
       iy = grid%jtsloc(i)
-  
+
       IF (grid%sp31 <= ix .AND. ix <= grid%ep31 .AND. &
           grid%sp33 <= iy .AND. iy <= grid%ep33) THEN
-       
+
          IF (ts_model_level) THEN
-   
+
             !
             ! Output from the lowest model computational level:
             !
@@ -427,9 +422,9 @@ SUBROUTINE calc_ts( grid )
             output_t = grid%t(ix,1,iy)
 #endif
             output_q = grid%moist(ix,1,iy,P_QV)
-   
+
          ELSE
-   
+
             !
             ! Output at 2-m and 10-m diagnostic levels:
             !
@@ -439,12 +434,12 @@ SUBROUTINE calc_ts( grid )
                 IF (config_flags%tslist_unstagger_winds) THEN
                     earth_u_profile(k) = &
                     ((grid%u_2(ix,k,iy)*grid%cosa(ix,iy)-grid%v_2(ix,k,iy)*grid%sina(ix,iy)) + &
-                    (grid%u_2(ix+1,k,iy)*grid%cosa(ix+1,iy)-grid%v_2(ix+1,k,iy)*grid%sina(ix+1,iy)))/2.0 
+                    (grid%u_2(ix+1,k,iy)*grid%cosa(ix+1,iy)-grid%v_2(ix+1,k,iy)*grid%sina(ix+1,iy)))/2.0
                     earth_v_profile(k) = &
                     ((grid%v_2(ix,k,iy)*grid%cosa(ix,iy)+grid%u_2(ix,k,iy)*grid%sina(ix,iy)) + &
-                    (grid%v_2(ix,k,iy+1)*grid%cosa(ix,iy+1)+grid%u_2(ix,k,iy+1)*grid%sina(ix,iy+1)))/2.0 
+                    (grid%v_2(ix,k,iy+1)*grid%cosa(ix,iy+1)+grid%u_2(ix,k,iy+1)*grid%sina(ix,iy+1)))/2.0
                 ELSE
-                    earth_u_profile(k) = grid%u_2(ix,k,iy)*grid%cosa(ix,iy)-grid%v_2(ix,k,iy)*grid%sina(ix,iy) 
+                    earth_u_profile(k) = grid%u_2(ix,k,iy)*grid%cosa(ix,iy)-grid%v_2(ix,k,iy)*grid%sina(ix,iy)
                     earth_v_profile(k) = grid%v_2(ix,k,iy)*grid%cosa(ix,iy)+grid%u_2(ix,k,iy)*grid%sina(ix,iy)
                 END IF
             END DO
@@ -457,9 +452,9 @@ SUBROUTINE calc_ts( grid )
             output_q = grid%qsfc(ix,iy)
 #endif
             output_t = grid%t2(ix,iy)
-   
+
          END IF
-   
+
 #if (EM_CORE == 1)
          ! Calculate column-integrated liquid/ice  (kg/m^2 or mm)
          CALL calc_p8w(grid, ix, iy, p8w, grid%sm32, grid%em32)
@@ -474,7 +469,7 @@ SUBROUTINE calc_ts( grid )
          END DO
          clw = clw / g
 #endif
-   
+
          CALL domain_clock_get( grid, minutesSinceSimulationStart=xtime_minutes )
          grid%ts_hour(n,i) = xtime_minutes / 60.
 #if (EM_CORE == 1)
@@ -484,7 +479,7 @@ SUBROUTINE calc_ts( grid )
             grid%ts_v_profile(n,i,k)   = earth_v_profile(k)
             grid%ts_w_profile(n,i,k)   = (grid%w_2(ix,k,iy)+grid%w_2(ix,k+1,iy))/2.0 ! w on cell center
             grid%ts_gph_profile(n,i,k) = 0.5*((grid%phb(ix,k,iy)+grid%ph_2(ix,k,iy)) &
-                                             +(grid%phb(ix,k+1,iy)+grid%ph_2(ix,k+1,iy)))/9.81 
+                                             +(grid%phb(ix,k+1,iy)+grid%ph_2(ix,k+1,iy)))/9.81
             IF (grid%use_theta_m == 1) THEN
                grid%ts_th_profile(n,i,k)  = (grid%t_2(ix,k,iy) + T0)/(1.+R_v/R_d*grid%moist(ix,k,iy,P_QV))
             ELSE
@@ -558,6 +553,38 @@ SUBROUTINE calc_ts( grid )
             grid%ts_ctopht_tot(n,i) = grid%ctopht_tot(ix,iy)
             grid%ts_clrnidx(n,i) = grid%clrnidx(ix,iy)
             grid%ts_sza(n,i) = grid%sza(ix,iy)
+            grid%ts_ghi_accum(n,i) = grid%ghi_accum(ix,iy)
+            grid%ts_swdown(n,i) = grid%swdown(ix,iy)
+            grid%ts_swddni(n,i) = grid%swddni(ix,iy)
+            grid%ts_swddif(n,i) = grid%swddif(ix,iy)
+            ! Calc extra solar variables if FARMS or RRTMG/RRTMG FAST
+            if ( config_flags%swint_opt == 2 .or. &
+                 config_flags%ra_sw_physics == RRTMG_SWSCHEME .or. &
+                 config_flags%ra_sw_physics == RRTMG_SWSCHEME_FAST ) then
+              grid%ts_swdownc(n,i) = grid%swdownc(ix,iy)
+              grid%ts_swddnic(n,i) = grid%swddnic(ix,iy)
+              if ( config_flags%swint_opt == 2 ) then  ! FARMS
+                grid%ts_swdown2(n,i) = grid%swdown2(ix,iy)
+                grid%ts_swddni2(n,i) = grid%swddni2(ix,iy)
+                grid%ts_swddif2(n,i) = grid%swddif2(ix,iy)
+                grid%ts_swdownc2(n,i) = grid%swdownc2(ix,iy)
+                grid%ts_swddnic2(n,i) = grid%swddnic2(ix,iy)
+              else
+                grid%ts_swdown2(n,i) = MISSING
+                grid%ts_swddni2(n,i) = MISSING
+                grid%ts_swddif2(n,i) = MISSING
+                grid%ts_swdownc2(n,i) = MISSING
+                grid%ts_swddnic2(n,i) = MISSING
+              end if
+            else
+              grid%ts_swdownc(n,i) = MISSING
+              grid%ts_swddnic(n,i) = MISSING
+              grid%ts_swdown2(n,i) = MISSING
+              grid%ts_swddni2(n,i) = MISSING
+              grid%ts_swddif2(n,i) = MISSING
+              grid%ts_swdownc2(n,i) = MISSING
+              grid%ts_swddnic2(n,i) = MISSING
+            end if
          END IF
 #else
          grid%ts_tsk(n,i)  = grid%nmm_tsk(ix,iy)
@@ -565,11 +592,11 @@ SUBROUTINE calc_ts( grid )
          grid%ts_tslb(n,i) = grid%tslb(ix,1,iy)
 
       ELSE
-#if (EM_CORE == 1 )   
+#if (EM_CORE == 1 )
          DO k=1,grid%max_ts_level
          grid%ts_u_profile(n,i,k)     = 1.E30
          grid%ts_v_profile(n,i,k)     = 1.E30
-         grid%ts_w_profile(n,i,k)     = 1.E30 
+         grid%ts_w_profile(n,i,k)     = 1.E30
          grid%ts_gph_profile(n,i,k)   = 1.E30
          grid%ts_th_profile(n,i,k)    = 1.E30
          grid%ts_qv_profile(n,i,k)    = 1.E30
@@ -586,7 +613,7 @@ SUBROUTINE calc_ts( grid )
              grid%ts_sfc_nd_profile(n,i,k)    = 1.E30
          enddo
 
-#endif   
+#endif
 #if (WRF_CHEM == 1)
          DO k=1,grid%max_ts_level
          grid%ts_o3_profile(n,i,k)    = 1.E30
@@ -608,7 +635,7 @@ SUBROUTINE calc_ts( grid )
          grid%ts_rainnc(n,i) = 1.E30
 
          grid%ts_snd(n,i)  = 1.E30
-         grid%ts_hsalt(n,i) = 1.E30 
+         grid%ts_hsalt(n,i) = 1.E30
          grid%ts_q_lb(n,i)  = 1.E30
          grid%ts_N_lb(n,i)  = 1.E30
          grid%ts_uthresh(n,i) = 1.E30
@@ -642,6 +669,17 @@ SUBROUTINE calc_ts( grid )
             grid%ts_ctopht_tot(n,i) = 1.E30
             grid%ts_clrnidx(n,i) = 1.E30
             grid%ts_sza(n,i) = 1.E30
+            grid%ts_ghi_accum(n,i) = 1.E30
+            grid%ts_swdown(n,i) = 1.E30
+            grid%ts_swddni(n,i) = 1.E30
+            grid%ts_swddif(n,i) = 1.E30
+            grid%ts_swdownc(n,i) = 1.E30
+            grid%ts_swddnic(n,i) = 1.E30
+            grid%ts_swdown2(n,i) = 1.E30
+            grid%ts_swddni2(n,i) = 1.E30
+            grid%ts_swddif2(n,i) = 1.E30
+            grid%ts_swdownc2(n,i) = 1.E30
+            grid%ts_swddnic2(n,i) = 1.E30
          END IF
 #endif
          grid%ts_tsk(n,i)  = 1.E30
@@ -650,10 +688,10 @@ SUBROUTINE calc_ts( grid )
       END IF
    END DO
 
-#if (EM_CORE == 1) 
+#if (EM_CORE == 1)
    DEALLOCATE(p8w, earth_u_profile, earth_v_profile)
-#endif 
- 
+#endif
+
    grid%next_ts_time = grid%next_ts_time + 1
 
    IF ( grid%next_ts_time > grid%ts_buf_size ) CALL write_ts(grid)
@@ -699,17 +737,17 @@ SUBROUTINE write_ts( grid )
 
    CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
-#if (EM_CORE == 1) 
+#if (EM_CORE == 1)
    DO k=1,grid%max_ts_level
    ts_buf(:,:) = grid%ts_u_profile(:,:,k)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_u_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
    END DO
- 
+
    DO k=1,grid%max_ts_level
    ts_buf(:,:) = grid%ts_v_profile(:,:,k)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_v_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
    END DO
- 
+
    DO k=1,grid%max_ts_level
    ts_buf(:,:) = grid%ts_w_profile(:,:,k)
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_w_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
@@ -770,7 +808,7 @@ SUBROUTINE write_ts( grid )
    CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sfc_nd_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
    END DO
 
-#endif         
+#endif
 #if (WRF_CHEM == 1)
    DO k=1,grid%max_ts_level
    ts_buf(:,:) = grid%ts_o3_profile(:,:,k)
@@ -905,6 +943,39 @@ SUBROUTINE write_ts( grid )
 
       ts_buf(:,:) = grid%ts_sza(:,:)
       CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sza(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_ghi_accum(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_ghi_accum(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swdown(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdown(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddni(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddni(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddif(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddif(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swdownc(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdownc(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddnic(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddnic(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swdown2(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdown2(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddni2(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddni2(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddif2(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddif2(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swdownc2(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdownc2(:,:),grid%ts_buf_size*grid%max_ts_locs)
+
+      ts_buf(:,:) = grid%ts_swddnic2(:,:)
+      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddnic2(:,:),grid%ts_buf_size*grid%max_ts_locs)
    END IF
 #endif
 
@@ -978,7 +1049,7 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_rainnc(n,i),                       &
                                  grid%ts_clw(n,i)
                END IF
-                                 
+
             ELSE
                !!! WRF-Solar diagnostics
                IF ( config_flags%sf_surface_physics == 18 ) THEN
@@ -1031,7 +1102,7 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_clrnidx(n,i),                      &
                                  grid%ts_sza(n,i)
                ELSE
-                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,39(f13.5,1x))')  &
+                  WRITE(UNIT=iunit,FMT='(i2,f13.6,i5,i5,i5,1x,49(f13.5,1x))')  &
                                  grid%id, grid%ts_hour(n,i),                &
                                  grid%id_tsloc(i), ix, iy,                  &
                                  grid%ts_t(n,i),                            &
@@ -1072,7 +1143,18 @@ SUBROUTINE write_ts( grid )
                                  grid%ts_cbaseht_tot(n,i),                  &
                                  grid%ts_ctopht_tot(n,i),                   &
                                  grid%ts_clrnidx(n,i),                      &
-                                 grid%ts_sza(n,i)
+                                 grid%ts_sza(n,i),                          &
+                                 grid%ts_ghi_accum(n,i),                    &
+                                 grid%ts_swdown(n,i),                       &
+                                 grid%ts_swddni(n,i),                       &
+                                 grid%ts_swddif(n,i),                       &
+                                 grid%ts_swdownc(n,i),                      &
+                                 grid%ts_swddnic(n,i),                      &
+                                 grid%ts_swdown2(n,i),                      &
+                                 grid%ts_swddni2(n,i),                      &
+                                 grid%ts_swddif2(n,i),                      &
+                                 grid%ts_swdownc2(n,i),                     &
+                                 grid%ts_swddnic2(n,i)
                END IF
             END IF
 #else
@@ -1089,9 +1171,9 @@ SUBROUTINE write_ts( grid )
 #endif
          END DO
          CLOSE(UNIT=iunit)
-         
+
          !Set write format for vertical profiles, depending on the highest model level of interest
-#if (EM_CORE == 1)   
+#if (EM_CORE == 1)
          profile_format = '(f13.6,1x,000(f13.5,1x))'
          k= LEN_TRIM(profile_format)
          WRITE(profile_format(11:13),'(I3.3)') grid%max_ts_level
@@ -1111,14 +1193,14 @@ SUBROUTINE write_ts( grid )
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-4:k-3),'(I2.2)') grid%id
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'UU'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)           &
                               grid%ts_hour(n,i),                      &
-                              grid%ts_u_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_u_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
 
@@ -1130,14 +1212,14 @@ SUBROUTINE write_ts( grid )
          !Recreate filename for v wind component profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'VV'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)  &
-                              grid%ts_hour(n,i),             & 
-                              grid%ts_v_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_hour(n,i),             &
+                              grid%ts_v_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
 
@@ -1147,14 +1229,14 @@ SUBROUTINE write_ts( grid )
             END IF
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'WW'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)  &
-                              grid%ts_hour(n,i),             & 
-                              grid%ts_w_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_hour(n,i),             &
+                              grid%ts_w_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
 
@@ -1166,17 +1248,17 @@ SUBROUTINE write_ts( grid )
          !Recreate filename for geopotential height profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'PH'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
-                              grid%ts_gph_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_gph_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
-         
+
          !Write potential temperature profile to separate file
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
@@ -1185,17 +1267,17 @@ SUBROUTINE write_ts( grid )
          !Recreate filename for potential temperature profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'TH'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)   &
                               grid%ts_hour(n,i),              &
-                              grid%ts_th_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_th_profile(n,i,1:grid%max_ts_level)
          END DO
-         CLOSE(UNIT=iunit) 
-       
+         CLOSE(UNIT=iunit)
+
          !Write water vapor mixing ratio profile to separate file
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
@@ -1204,35 +1286,33 @@ SUBROUTINE write_ts( grid )
          !Recreate filename for water vapor mixing ratio profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'QV'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
 
             WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
-                              grid%ts_qv_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_qv_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
-       
+
          !Write pressure profile to separate file
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
             CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
             END IF
-
-
          !Recreate filename for pressure profiles
          k = LEN_TRIM(ts_profile_filename)
          WRITE(ts_profile_filename(k-1:k),'(A2)') 'PR'
-         
+
          OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
          DO n=1,grid%next_ts_time - 1
-               
+
             WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
-                              grid%ts_p_profile(n,i,1:grid%max_ts_level)                                       
+                              grid%ts_p_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
 
@@ -1241,7 +1321,6 @@ SUBROUTINE write_ts( grid )
             IF ( iunit <= 0 ) THEN
             CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
             END IF
-
 
          !Recreate filename for air density profiles
          k = LEN_TRIM(ts_profile_filename)
@@ -1256,7 +1335,6 @@ SUBROUTINE write_ts( grid )
                               grid%ts_rho_profile(n,i,1:grid%max_ts_level)
          END DO
          CLOSE(UNIT=iunit)
-
 
          !Write blowing snow mixing ratio (bs_qi) profile to separate file
          iunit = get_unused_unit()
@@ -1273,7 +1351,7 @@ SUBROUTINE write_ts( grid )
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
             DO n=1,grid%next_ts_time - 1
-               
+
                WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_qi_profile(n,i,1:grid%max_ts_level)
@@ -1285,15 +1363,15 @@ SUBROUTINE write_ts( grid )
                IF ( iunit <= 0 ) THEN
                   CALL wrf_error_fatal('Error in write_ts: could not find a free Fortran unit.')
                END IF
-               
+
             !Recreate filename for blowing snow number concentration
             k = LEN_TRIM(ts_profile_filename)
             WRITE(ts_profile_filename(k-1:k),'(A2)') 'NS'
-               
+
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
             DO n=1,grid%next_ts_time - 1
-                  
+
                WRITE(UNIT=iunit,FMT=profile_format)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_qni_profile(n,i,1:grid%max_ts_level)
@@ -1309,7 +1387,7 @@ SUBROUTINE write_ts( grid )
             !Recreate filename for snow drift rate
             k = LEN_TRIM(ts_profile_filename)
             WRITE(ts_profile_filename(k-1:k),'(A2)') 'SQ'
-            
+
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
 
             DO n=1,grid%next_ts_time - 1
@@ -1331,15 +1409,14 @@ SUBROUTINE write_ts( grid )
             WRITE(ts_profile_filename(k-1:k),'(A2)') 'SN'
 
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
-            
+
             DO n=1,grid%next_ts_time - 1
-               
+
                WRITE(UNIT=iunit,FMT=profile_format_sfc_N)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_qni_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
             CLOSE(UNIT=iunit)
-
 
             !Write sfc snow drift rate:number (sfc_qd_drift) profile to separate file
             iunit = get_unused_unit()
@@ -1352,15 +1429,14 @@ SUBROUTINE write_ts( grid )
             WRITE(ts_profile_filename(k-1:k),'(A2)') 'DQ'
 
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
-            
+
             DO n=1,grid%next_ts_time - 1
-               
+
                WRITE(UNIT=iunit,FMT=profile_format_sfc)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_qd_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
             CLOSE(UNIT=iunit)
-
 
             !Write sfc snow drift rate:number (sfc_nd_drift) profile to separate file
             iunit = get_unused_unit()
@@ -1373,28 +1449,17 @@ SUBROUTINE write_ts( grid )
             WRITE(ts_profile_filename(k-1:k),'(A2)') 'DN'
 
             OPEN(UNIT=iunit, FILE=TRIM(ts_profile_filename), STATUS='unknown', POSITION='append', FORM='formatted')
-            
+
             DO n=1,grid%next_ts_time - 1
-               
+
                WRITE(UNIT=iunit,FMT=profile_format_sfc_N)  &
                               grid%ts_hour(n,i),             &
                               grid%ts_sfc_nd_profile(n,i,1:config_flags%num_bs_sfc_layers)
             END DO
             CLOSE(UNIT=iunit)
 
-
-
-
-
-
-
-
-
-
-
          END IF
-
-#endif   
+#endif
 #if (WRF_CHEM == 1)
          !Write O3 profile to separate file
          iunit = get_unused_unit()
@@ -1440,7 +1505,7 @@ SUBROUTINE calc_p8w(grid, ix, iy, p8w, k_start, k_end)
 
    ! Local variables
    INTEGER :: k
-   REAL    :: z0, z1, z2, w1, w2 
+   REAL    :: z0, z1, z2, w1, w2
    REAL, DIMENSION(k_start:k_end)   :: z_at_w
    REAL, DIMENSION(k_start:k_end-1) :: z
 

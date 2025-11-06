@@ -31,7 +31,6 @@ END MODULE module_interp_info
 
 !=========================================================================
 
-#if ! defined(NMM_CORE) || NMM_CORE!=1
    SUBROUTINE interp_fcn    ( cfld,                                 &  ! CD field
                               cids, cide, ckds, ckde, cjds, cjde,   &
                               cims, cime, ckms, ckme, cjms, cjme,   &
@@ -46,7 +45,7 @@ END MODULE module_interp_info
                               ipos, jpos,                           &  ! Position of lower left of nest in CD
                               nri, nrj                              )  ! Nest ratio, i- and j-directions
 
-     USE module_interp_info      
+     USE module_interp_info
 
      IMPLICIT NONE
 
@@ -178,14 +177,14 @@ END MODULE module_interp_info
      INTEGER, EXTERNAL :: compute_CGLL
 
      !  This stag stuff is to keep us away from the outer most row
-     !  and column for the unstaggered directions.  We are going to 
+     !  and column for the unstaggered directions.  We are going to
      !  consider "U" an xstag variable and "V" a ystag variable.  The
      !  vertical staggering is handled in the actual arguments.  The
      !  ckte and nkte are the ending vertical dimensions for computations
      !  for this particular variable.
 
      IF ( xstag ) THEN
-        istag = 0 
+        istag = 0
         ioff  = 1
      ELSE
         istag = 1
@@ -193,7 +192,7 @@ END MODULE module_interp_info
      END IF
 
      IF ( ystag ) THEN
-        jstag = 0 
+        jstag = 0
         joff  = 1
      ELSE
         jstag = 1
@@ -234,8 +233,8 @@ END MODULE module_interp_info
 
         cj = compute_CGLL ( nj , jpos , nrj , jstag )
         ny = REAL(nj)
-        cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff ) 
-        cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff ) 
+        cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff )
+        cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff )
 
         !  What is the weighting for this CG point to the FG point, j-weight only.
 
@@ -250,18 +249,18 @@ END MODULE module_interp_info
            i_loop : DO ni = nits, MIN(nide-istag,nite)
 
               IF ( imask ( ni, nj ) .EQ. 1 ) THEN
- 
+
                  !  The coarse grid location that is to the lower left of the FG point.
-   
+
                  ci = compute_CGLL ( ni , ipos , nri , istag )
                  nx = REAL(ni)
-                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff ) 
-                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff ) 
-   
+                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff )
+                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff )
+
                  wx = ( cxp1 - nx ) / ( cxp1 - cxp0 )
-   
+
                  !  The four surrounding CG values.
-   
+
                  cfld_ll = cfld(ci  ,nk,cj  )
                  cfld_lr = cfld(ci+1,nk,cj  )
                  cfld_ul = cfld(ci  ,nk,cj+1)
@@ -335,14 +334,14 @@ END MODULE module_interp_info
      INTEGER, EXTERNAL :: compute_CGLL
 
      !  This stag stuff is to keep us away from the outer most row
-     !  and column for the unstaggered directions.  We are going to 
+     !  and column for the unstaggered directions.  We are going to
      !  consider "U" an xstag variable and "V" a ystag variable.  The
      !  vertical staggering is handled in the actual arguments.  The
      !  ckte and nkte are the ending vertical dimensions for computations
      !  for this particular variable.
 
      IF ( xstag ) THEN
-        istag = 0 
+        istag = 0
         ioff  = 1
      ELSE
         istag = 1
@@ -350,7 +349,7 @@ END MODULE module_interp_info
      END IF
 
      IF ( ystag ) THEN
-        jstag = 0 
+        jstag = 0
         joff  = 1
      ELSE
         jstag = 1
@@ -358,7 +357,7 @@ END MODULE module_interp_info
      END IF
 
      !  If this is a projection where the nest is over the pole, and
-     !  we are using the parent to interpolate the longitudes, then 
+     !  we are using the parent to interpolate the longitudes, then
      !  we are going to have longitude troubles.  If this is the case,
      !  stop the model right away.
 
@@ -367,8 +366,8 @@ END MODULE module_interp_info
      min_lat = +90
      DO nj = njts, MIN(njde-jstag,njte)
         DO ni = nits, MIN(nide-istag,nite)
-           max_lat = MAX ( nlat_in(ni,nj) , max_lat )       
-           min_lat = MIN ( nlat_in(ni,nj) , min_lat )       
+           max_lat = MAX ( nlat_in(ni,nj) , max_lat )
+           min_lat = MIN ( nlat_in(ni,nj) , min_lat )
         END DO
      END DO
 
@@ -389,8 +388,8 @@ END MODULE module_interp_info
         cj = compute_CGLL ( nj , jpos , nrj , jstag )
         DO ni = nits, MIN(nide-istag,nite)
            ci = compute_CGLL ( ni , ipos , nri , istag )
-           max_lon = MAX ( cfld_inp(ci,1,cj) , max_lon )       
-           min_lon = MIN ( cfld_inp(ci,1,cj) , min_lon )       
+           max_lon = MAX ( cfld_inp(ci,1,cj) , max_lon )
+           min_lon = MIN ( cfld_inp(ci,1,cj) , min_lon )
         END DO
      END DO
 
@@ -444,8 +443,8 @@ END MODULE module_interp_info
 
         cj = compute_CGLL ( nj , jpos , nrj , jstag )
         ny = REAL(nj)
-        cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff ) 
-        cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff ) 
+        cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff )
+        cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff )
 
         !  What is the weighting for this CG point to the FG point, j-weight only.
 
@@ -460,18 +459,18 @@ END MODULE module_interp_info
            i_loop : DO ni = nits, MIN(nide-istag,nite)
 
               IF ( imask ( ni, nj ) .EQ. 1 ) THEN
- 
+
                  !  The coarse grid location that is to the lower left of the FG point.
-   
+
                  ci = compute_CGLL ( ni , ipos , nri , istag )
                  nx = REAL(ni)
-                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff ) 
-                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff ) 
-   
+                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff )
+                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff )
+
                  wx = ( cxp1 - nx ) / ( cxp1 - cxp0 )
-   
+
                  !  The four surrounding CG values.
-   
+
                  cfld_ll = cfld(ci  ,nk,cj  )
                  cfld_lr = cfld(ci+1,nk,cj  )
                  cfld_ul = cfld(ci  ,nk,cj+1)
@@ -551,23 +550,23 @@ END MODULE module_interp_info
      INTEGER, EXTERNAL :: compute_CGLL
 
      !  This stag stuff is to keep us away from the outer most row
-     !  and column for the unstaggered directions.  We are going to 
+     !  and column for the unstaggered directions.  We are going to
      !  consider "U" an xstag variable and "V" a ystag variable.  The
      !  vertical staggering is handled in the actual arguments.  The
      !  ckte and nkte are the ending vertical dimensions for computations
      !  for this particular variable.
 
      !  The ioff and joff are offsets due to the staggering.  It is a lot
-     !  simpler with ioff and joff if 
+     !  simpler with ioff and joff if
      !  u var => ioff=1
      !  v var => joff=1
      !  otherwise zero.
      !  Note that is OPPOSITE of the istag, jstag vars.  The stag variables are
-     !  used for the domain dimensions, the offset guys are used in the 
+     !  used for the domain dimensions, the offset guys are used in the
      !  determination of grid points between the CG and FG
 
      IF ( xstag ) THEN
-        istag = 0 
+        istag = 0
         ioff  = 1
      ELSE
         istag = 1
@@ -575,7 +574,7 @@ END MODULE module_interp_info
      END IF
 
      IF ( ystag ) THEN
-        jstag = 0 
+        jstag = 0
         joff  = 1
      ELSE
         jstag = 1
@@ -619,7 +618,7 @@ END MODULE module_interp_info
         !  |=========|=========|=========|=========|
 
         !  To interpolate to FG point 4, 5, or 6 we will use CG points: A through P.  It is
-        !  sufficient to find the lower left corner of a 4-point interpolation, and then extend 
+        !  sufficient to find the lower left corner of a 4-point interpolation, and then extend
         !  each side by one unit.
 
         !  Here are the lower left hand corners of the following FG points:
@@ -641,7 +640,7 @@ END MODULE module_interp_info
           !  Loop over each i-index on this tile for the nested domain.
 
            i_loop : DO ni = nits, MIN(nide-istag,nite)
- 
+
               !  The coarse grid location that is to the lower left of the FG point.
 
               ci = compute_CGLL ( ni , ipos , nri , istag )
@@ -699,19 +698,19 @@ END MODULE module_interp_info
 
                  !  I-direction location of "A", "E", "I", "M"
 
-                 cxm1 = nest_loc_of_cg ( ci-1 , ipos , nri , ioff ) 
+                 cxm1 = nest_loc_of_cg ( ci-1 , ipos , nri , ioff )
 
                  !  I-direction location of "B", "F", "J", "N"
 
-                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff ) 
+                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff )
 
                  !  I-direction location of "C", "G", "K", "O"
 
-                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff ) 
+                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff )
 
                  !  I-direction location of "D", "H", "L", "P"
 
-                 cxp2 = nest_loc_of_cg ( ci+2 , ipos , nri , ioff ) 
+                 cxp2 = nest_loc_of_cg ( ci+2 , ipos , nri , ioff )
 
                  !  Value at "a"
 
@@ -735,19 +734,19 @@ END MODULE module_interp_info
 
                  !  J-direction location of "A", "B", "C", "D"
 
-                 cym1 = nest_loc_of_cg ( cj-1 , jpos , nrj , joff ) 
+                 cym1 = nest_loc_of_cg ( cj-1 , jpos , nrj , joff )
 
-                 !  J-direction location of "E", "F", "G", "H" 
+                 !  J-direction location of "E", "F", "G", "H"
 
-                 cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff ) 
+                 cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff )
 
                  !  J-direction location of "I", "J", "K", "L"
 
-                 cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff ) 
+                 cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff )
 
                  !  J-direction location of "M", "N", "O", "P"
 
-                 cyp2 = nest_loc_of_cg ( cj+2 , jpos , nrj , joff ) 
+                 cyp2 = nest_loc_of_cg ( cj+2 , jpos , nrj , joff )
 
                  !  Value at "*"
 
@@ -766,21 +765,21 @@ END MODULE module_interp_info
 
    REAL FUNCTION lagrange_quad ( x , x0, x1, x2, y0, y1, y2 )
 
-     IMPLICIT NONE 
+     IMPLICIT NONE
 
      REAL :: x , x0, x1, x2, y0, y1, y2
 
      !  Lagrange = sum     prod    ( x  - xj )
      !             i=0,n ( j=0,n    ---------  * yi )
-     !                     j<>i    ( xi - xj ) 
-     
+     !                     j<>i    ( xi - xj )
+
      !  For a quadratic, in the above equation, we are setting n=2. Three points
      !  required for a quadratic, points x0, x1, x2 (hence n=2).
 
      lagrange_quad = &
             (x-x1)*(x-x2)*y0 / ( (x0-x1)*(x0-x2) ) + &
             (x-x0)*(x-x2)*y1 / ( (x1-x0)*(x1-x2) ) + &
-            (x-x0)*(x-x1)*y2 / ( (x2-x0)*(x2-x1) ) 
+            (x-x0)*(x-x1)*y2 / ( (x2-x0)*(x2-x1) )
 
    END FUNCTION lagrange_quad
 
@@ -793,14 +792,14 @@ END MODULE module_interp_info
      REAL, EXTERNAL :: lagrange_quad
      REAL :: x , x0, x1, x2, x3, y0, y1, y2, y3
 
-     !  Since there are three points required for a quadratic, we compute it twice 
-     !  (once with x0, x1, x2 and once with x1, x2, x3), and then average those values.  This will 
+     !  Since there are three points required for a quadratic, we compute it twice
+     !  (once with x0, x1, x2 and once with x1, x2, x3), and then average those values.  This will
      !  reduce overshoot.  The "x" point is where we are interpolating TO.
-    
+
      !         x0         x1    x    x2
      !                    x1    x    x2         x3
 
-     lagrange_quad_avg = & 
+     lagrange_quad_avg = &
 !      ( lagrange_quad ( x , x0, x1, x2,     y0, y1, y2     )               + &
 !        lagrange_quad ( x ,     x1, x2, x3,     y1, y2, y3 )               ) / &
 !        2.
@@ -817,17 +816,17 @@ END MODULE module_interp_info
      !  I and J direction equations for mass and momentum values for even
      !  and odd ratios: Given that the starting value of the nest in the
      !  CG grid cell is defined as (1,1), what is the location of the CG
-     !  location in FG index units.  Example, for a 2:1 ratio, the location 
+     !  location in FG index units.  Example, for a 2:1 ratio, the location
      !  of the mass point T is 1.5 (3:1 ratio = 2, 4:1 ratio = 2.5, etc).
      !  Note that for momentum points, the CG U point is defined as "1", the
      !  same as the I-direction of the (1,1) location of the FG U point.
      !  Same for V, but in the J-direction.
 
-     IMPLICIT NONE 
+     IMPLICIT NONE
 
      INTEGER :: ci , ipos , nri , ioff
 
-     nest_loc_of_cg = & 
+     nest_loc_of_cg = &
        ( ci - ipos ) * nri + ( 1 - ioff ) * REAL ( nri + 1 ) / 2. + ioff
 
    END FUNCTION nest_loc_of_cg
@@ -916,13 +915,13 @@ END MODULE module_interp_info
      INTEGER nrio2, nrjo2
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
      ioff  = 0 ; joff  = 0
      nioff = 0 ; njoff = 0
-     IF ( xstag ) THEN 
+     IF ( xstag ) THEN
        ioff = (nri-1)/2
-       nioff = nri 
+       nioff = nri
      ENDIF
      IF ( ystag ) THEN
        joff = (nrj-1)/2
@@ -965,7 +964,7 @@ END MODULE module_interp_info
         ENDDO                 ! nf
 
 ! tile dims in this call to sint are 1-over to account for the fact
-! that the number of cells on the nest local subdomain is not 
+! that the number of cells on the nest local subdomain is not
 ! necessarily a multiple of the nest ratio in a given dim.
 ! this could be a little less ham-handed.
 
@@ -974,12 +973,12 @@ END MODULE module_interp_info
                    cits-1, cite+1, cjts-1, cjte+1, nrj*nri, xstag, ystag )
 
         DO nj = njts, njte+joff
-           cj = jpos + (nj-1) / nrj ! j coord of CD point 
+           cj = jpos + (nj-1) / nrj ! j coord of CD point
            jp = mod ( nj-1 , nrj )  ! coord of ND w/i CD point
            nk = k
            ck = nk
            DO ni = nits, nite+ioff
-               ci = ipos + (ni-1) / nri      ! i coord of CD point 
+               ci = ipos + (ni-1) / nri      ! i coord of CD point
                ip = mod ( ni-1 , nri )  ! coord of ND w/i CD point
                if ( ( ni-ioff .ge. nits ) .and. ( nj-joff .ge. njts ) ) then
                   if ( imask ( ni, nj ) .eq. 1 .or. imask ( ni-ioff, nj-joff ) .eq. 1  ) then
@@ -1030,11 +1029,11 @@ END MODULE module_interp_info
      INTEGER ci, cj, ck, ni, nj, nk
 
      ! Iterate over the ND tile and assign the values
-     ! from the CD tile.  This is a trivial implementation 
+     ! from the CD tile.  This is a trivial implementation
      ! of the interp_fcn; just copies the values from the CD into the ND
 
      DO nj = njts, njte
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
@@ -1052,7 +1051,7 @@ END MODULE module_interp_info
    END SUBROUTINE interp_fcn_nn
 
 !=========================================================================
-
+!  CRYOWRF
 !  Nearest neighbor interpolation for snowpacks (for reals)
 
    SUBROUTINE interp_fcn_nn_snpack ( cfld,                                 &  ! CD field
@@ -1085,7 +1084,7 @@ END MODULE module_interp_info
      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-    
+
      REAL, DIMENSION ( cims:cime, cjms:cjme ) , INTENT(IN) :: coarse_xice
      REAL, DIMENSION ( nims:nime, njms:njme ) , INTENT(IN) :: nest_xice
 
@@ -1093,7 +1092,7 @@ END MODULE module_interp_info
      REAL, DIMENSION ( nims:nime, njms:njme ) , INTENT(IN) :: nest_xland
 
      integer, dimension( nims:nime,njms:njme ) :: c_x , c_y
- 
+
      INTEGER ci, cj, ck, ni, nj, nk
      integer :: ccci,cccj,iii,jjj,counter_neigh
      real :: r_cj,r_ci,d,min_d
@@ -1116,7 +1115,7 @@ END MODULE module_interp_info
                    do iii=-3,3
                       do jjj=-3,3
                          ccci = ci+iii
-                         cccj = cj+jjj   
+                         cccj = cj+jjj
                          if ( (coarse_xice(ccci,cccj) < 0.001) .and. ( (coarse_xland(ccci,cccj)-1.5) < 0. ) ) then
                             d = sqrt( (ccci - r_ci)*(ccci-r_ci) + (cccj-r_cj)*(cccj-r_cj) )
                             if (min_d .eq. 0.0) then
@@ -1127,14 +1126,14 @@ END MODULE module_interp_info
                                c_y(ni,nj) = cccj
                             endif
                          endif ! end of check if the neighborhood point is land ice
-                     enddo 
+                     enddo
                    enddo ! end of loops on neighborhood points
               endif
            endif
         enddo
      enddo
      ! Iterate over the ND tile and assign the values
-     ! from the CD tile.  This is a trivial implementation 
+     ! from the CD tile.  This is a trivial implementation
      ! of the interp_fcn; just copies the values from the CD into the ND
 
      !write(*,*) ' WOOOHOO - in snpacks home !'
@@ -1142,14 +1141,14 @@ END MODULE module_interp_info
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
-                   ci = c_x(ni,nj) 
+                   ci = c_x(ni,nj)
                    cj = c_y(ni,nj)
-                   !write(*,*) cims,cime, cjms,cjme,nims,nime, njms,njme  
+                   !write(*,*) cims,cime, cjms,cjme,nims,nime, njms,njme
                    if ( (nest_xice(ni,nj) < 0.001) .and. ( (nest_xland(ni,nj)-1.5) < 0. ) ) then
                       !write(*,*) 'ni,nj,ci,cj: ',ni,nj,ci,cj
                       nfld( ni, nk, nj ) = cfld( ci , ck , cj )
                    else
-                      nfld( ni, nk, nj ) = cfld( cims, ck , cjms ) 
+                      nfld( ni, nk, nj ) = cfld( cims, ck , cjms )
                    endif
            ENDDO
         ENDDO
@@ -1191,7 +1190,7 @@ END MODULE module_interp_info
      INTEGER, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
      INTEGER, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-    
+
      REAL, DIMENSION ( cims:cime, cjms:cjme ) , INTENT(IN) :: coarse_xice
      REAL, DIMENSION ( nims:nime, njms:njme ) , INTENT(IN) :: nest_xice
 
@@ -1199,7 +1198,7 @@ END MODULE module_interp_info
      REAL, DIMENSION ( nims:nime, njms:njme ) , INTENT(IN) :: nest_xland
 
      integer, dimension( nims:nime,njms:njme ) :: c_x , c_y
- 
+
      INTEGER ci, cj, ck, ni, nj, nk
      integer :: ccci,cccj,iii,jjj,counter_neigh
      real :: r_cj,r_ci,d,min_d
@@ -1222,7 +1221,7 @@ END MODULE module_interp_info
                    do iii=-3,3
                       do jjj=-3,3
                          ccci = ci+iii
-                         cccj = cj+jjj   
+                         cccj = cj+jjj
                          if ( (coarse_xice(ccci,cccj) < 0.001) .and. ( (coarse_xland(ccci,cccj)-1.5) < 0. ) ) then
                             d = sqrt( (ccci - r_ci)*(ccci-r_ci) + (cccj-r_cj)*(cccj-r_cj) )
                             if (min_d .eq. 0.0) then
@@ -1233,14 +1232,14 @@ END MODULE module_interp_info
                                c_y(ni,nj) = cccj
                             endif
                          endif ! end of check if the neighborhood point is land ice
-                      enddo 
+                      enddo
                    enddo ! end of loops on neighborhood points
               endif
            endif
         enddo
      enddo
      ! Iterate over the ND tile and assign the values
-     ! from the CD tile.  This is a trivial implementation 
+     ! from the CD tile.  This is a trivial implementation
      ! of the interp_fcn; just copies the values from the CD into the ND
 
      !write(*,*) ' WOOOHOO - in snpacks home !'
@@ -1248,14 +1247,14 @@ END MODULE module_interp_info
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
-                   ci = c_x(ni,nj) 
+                   ci = c_x(ni,nj)
                    cj = c_y(ni,nj)
-                   !write(*,*) cims,cime, cjms,cjme,nims,nime, njms,njme  
+                   !write(*,*) cims,cime, cjms,cjme,nims,nime, njms,njme
                    if ( (nest_xice(ni,nj) < 0.001) .and. ( (nest_xland(ni,nj)-1.5) < 0. ) ) then
                       !write(*,*) 'ni,nj,ci,cj: ',ni,nj,ci,cj
                       nfld( ni, nk, nj ) = cfld( ci , ck , cj )
                    else
-                      nfld( ni, nk, nj ) = cfld (cims , ck , cjms) 
+                      nfld( ni, nk, nj ) = cfld (cims , ck , cjms)
                    endif
            ENDDO
         ENDDO
@@ -1328,7 +1327,7 @@ END MODULE module_interp_info
      !  the tile dimensions.
 
      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cpb
-  
+
      !  A bit larger than tile sized to allow horizontal interpolation on the CG.
 
      REAL, DIMENSION ( cits-2:cite+2, cjts-2:cjte+2 ) :: cfld_max_p, cfld_min_p
@@ -1345,20 +1344,20 @@ END MODULE module_interp_info
      CALL nl_get_iso_temp   ( 1 , tiso )
 
      !  This stag stuff is to keep us away from the outer most row
-     !  and column for the unstaggered directions.  We are going to 
+     !  and column for the unstaggered directions.  We are going to
      !  consider "U" an xstag variable and "V" a ystag variable.  The
      !  vertical staggering is handled in the actual arguments.  The
      !  ckte and nkte are the ending vertical dimensions for computations
      !  for this particular variable.
 
      IF ( xstag ) THEN
-        istag = 0 
+        istag = 0
      ELSE
         istag = 1
      END IF
 
      IF ( ystag ) THEN
-        jstag = 0 
+        jstag = 0
      ELSE
         jstag = 1
      END IF
@@ -1377,7 +1376,7 @@ END MODULE module_interp_info
         DO i = cits-2 , cite+2
            p_surf = p00 * EXP ( -t00/a + ( (t00/a)**2 - 2.*g*cht(i,j)/a/r_d ) **0.5 )
            DO k = ckts , ckte
-              cpb(i,k,j) = zn(k)*(p_surf - p_top) + p_top  
+              cpb(i,k,j) = zn(k)*(p_surf - p_top) + p_top
            END DO
            IF ( ckte .EQ. ckme ) THEN
               cfld_max_p(i,j) = cght_max_p(i,j) * g
@@ -1398,7 +1397,7 @@ END MODULE module_interp_info
         DO i = nits , MIN(nide-1,nite)
            p_surf = p00 * EXP ( -t00/a + ( (t00/a)**2 - 2.*g*nht(i,j)/a/r_d ) **0.5 )
            DO k = nkts , nkte
-              npb(i,k,j) = zn(k)*(p_surf - p_top) + p_top  
+              npb(i,k,j) = zn(k)*(p_surf - p_top) + p_top
            END DO
         END DO
      END DO
@@ -1435,16 +1434,16 @@ END MODULE module_interp_info
         !  6 => B
         !  7 => B
         !  We want an equation that returns the CG LL:
-        !  CG LL =   ipos                          (the starting point of the nest in the CG) 
+        !  CG LL =   ipos                          (the starting point of the nest in the CG)
         !          + (ni-1)/nri                    (gives us the CG cell, based on the nri-groups of FG cells
-        !          - istag                         (a correction term, this is either zero for u in the x-dir, 
+        !          - istag                         (a correction term, this is either zero for u in the x-dir,
         !                                           since we are doing an "i" example, or 1 for anything else)
         !          + (MOD(ni-1,nri)+1 + nri/2)/nri (gives us specifically related CG point for each of the nri
         !                                           FG points, for example, we want points "1", "4", and "7" all
         !                                           to point to the CG at the left for the LL point)
         !  For grid points 4, 5, 6, we want the CG LL (sans the first two terms) to be -1, 0, 0 (which
         !  means that the CG point for "4" is to the left, and the CG LL point for "5" and "6"
-        !  is in the current CG index.  
+        !  is in the current CG index.
 
         cj = jpos + (nj-1)/nrj - jstag + (MOD(nj-1,nrj)+1 + nrj/2)/nrj
 
@@ -1464,7 +1463,7 @@ END MODULE module_interp_info
           !  Loop over each i-index on this tile for the nested domain.
 
            i_loop : DO ni = nits, MIN(nide-istag,nite)
- 
+
               !  The coarse grid location that is to the lower left of the FG point.
 
               ci = ipos + (ni-1)/nri - istag + (MOD(ni-1,nri)+1 + nri/2)/nri
@@ -1480,7 +1479,7 @@ END MODULE module_interp_info
               !  The pressure of the FG point.
 
               IF      ( ( .NOT. xstag ) .AND. ( .NOT. ystag ) ) THEN
-                 nprs =   npb(  ni  , nk , nj  ) 
+                 nprs =   npb(  ni  , nk , nj  )
               ELSE IF ( xstag ) THEN
                  nprs = ( npb(  ni-1, nk , nj  ) + npb(  ni  , nk , nj  ) ) * 0.5
               ELSE IF ( ystag ) THEN
@@ -1504,7 +1503,7 @@ END MODULE module_interp_info
                                           cfld_max_p(ci+1,cj+1) , cmax_p(ci+1,cj+1) , cfld_min_p(ci+1,cj+1) , cmin_p(ci+1,cj+1) )
 
               ELSE IF ( xstag ) THEN
-                 cprs(:) = ( cpb(ci  ,:,cj  ) + cpb(ci-1,:,cj  ) )*0.5 
+                 cprs(:) = ( cpb(ci  ,:,cj  ) + cpb(ci-1,:,cj  ) )*0.5
                  cfld_ll = v_interp_col ( cfld(ci  ,:,cj  ) , cprs(:) , ckms , ckme , ckte, nprs, ni, nj, nk, ci  , cj  , &
                                           cfld_max_p(ci  ,cj  ) , cmax_p(ci  ,cj  ) , cfld_min_p(ci  ,cj  ) , cmin_p(ci  ,cj  ) )
                  cprs(:) = ( cpb(ci+1,:,cj  ) + cpb(ci  ,:,cj  ) )*0.5
@@ -1607,7 +1606,7 @@ END MODULE module_interp_info
       END DO
 
       CALL wrf_error_fatal ( 'ERROR -- vertical interpolation for nest interp cannot find trapping pressures' )
-   
+
    END FUNCTION v_interp_col
 
 !==================================
@@ -1661,14 +1660,14 @@ END MODULE module_interp_info
 
      !  Due to peculiarities of staggering, it is simpler to handle the feedback
      !  for the staggerings based upon whether it is a even ratio (2::1, 4::1, etc.) or
-     !  an odd staggering ratio (3::1, 5::1, etc.). 
+     !  an odd staggering ratio (3::1, 5::1, etc.).
 
      !  Though there are separate grid ratios for the i and j directions, this code
      !  is not general enough to handle aspect ratios .NE. 1 for the fine grid cell.
- 
+
      !  These are local integer increments in the looping.  Basically, istag=1 means
      !  that we will assume one less point in the i direction.  Note that ci and cj
-     !  have a maximum value that is decreased by istag and jstag, respectively.  
+     !  have a maximum value that is decreased by istag and jstag, respectively.
 
      !  Horizontal momentum feedback is along the face, not within the cell.  For a
      !  3::1 ratio, temperature would use 9 pts for feedback, while u and v use
@@ -1787,20 +1786,20 @@ END MODULE module_interp_info
         IF ( ( .NOT. xstag ) .AND. ( .NOT. ystag ) ) THEN
 
         !  This is a simple schematic of the feedback indexing used in the even
-        !  ratio nests.  For simplicity, a 2::1 ratio is depicted.  Only the 
-        !  mass variable staggering is shown. 
+        !  ratio nests.  For simplicity, a 2::1 ratio is depicted.  Only the
+        !  mass variable staggering is shown.
         !                                                                  Each of
         !  the boxes with a "T" and four small "t" represents a coarse grid (CG)
         !  cell, that is composed of four (2::1 ratio) fine grid (FG) cells.
-   
+
         !  Shown below is the area of the CG that is in the area of the FG.   The
         !  first grid point of the depicted CG is the starting location of the nest
         !  in the parent domain (ipos,jpos = i_parent_start and j_parent_start from
-        !  the namelist).  
-   
+        !  the namelist).
+
         !  For each of the CG points, the feedback loop is over each of the FG points
-        !  within the CG cell.  For a 2::1 ratio, there are four total points (this is 
-        !  the ijpoints loop).  The feedback value to the CG is the arithmetic mean of 
+        !  within the CG cell.  For a 2::1 ratio, there are four total points (this is
+        !  the ijpoints loop).  The feedback value to the CG is the arithmetic mean of
         !  all of the FG values within each CG cell.
 
 !              |-------------||-------------|                          |-------------||-------------|
@@ -1850,9 +1849,9 @@ END MODULE module_interp_info
            !  hardcode the loop feedback.  For example, it is set up to run a 2::1 ratio
            !  if uncommented.  This lacks generality, but is likely to gain timing benefits
            !  with compilers unable to unroll inner loops that do not have parameterized sizes.
-   
-           !  The extra +1 ---------/ and the extra -1 ----\  (both for ci and cj) 
-           !                       /                        \   keeps the feedback out of the 
+
+           !  The extra +1 ---------/ and the extra -1 ----\  (both for ci and cj)
+           !                       /                        \   keeps the feedback out of the
            !                      /                          \  outer row/col, since that CG data
            !                     /                            \ specified the nest boundary originally
            !                    /                              \   This
@@ -1902,13 +1901,13 @@ END MODULE module_interp_info
 ! jpoints = 0, u       u       |
 ! nj=1         |               |
 !              |---------------|
-! 
-!              ^               
-!              |              
-!              |             
-!            ipos           
+!
+!              ^
+!              |
+!              |
+!            ipos
 !     ni =     1               3
-! ipoints=     0       1       0 
+! ipoints=     0       1       0
 !
 
            DO cj = MAX(jpos+spec_zone,cjts),MIN(jpos+(njde-njds)/nrj-jstag-spec_zone,cjte)
@@ -1931,7 +1930,7 @@ END MODULE module_interp_info
               ENDDO
            ENDDO
 
-        !  V 
+        !  V
 
         ELSE IF ( ( .NOT. xstag ) .AND. (       ystag ) ) THEN
            DO cj = MAX(jpos+spec_zone,cjts),MIN(jpos+(njde-njds)/nrj-jstag-spec_zone,cjte)
@@ -2004,7 +2003,7 @@ END MODULE module_interp_info
      INTEGER , PARAMETER :: passes = 2
      INTEGER spec_zone
 
-     CALL nl_get_spec_zone( 1, spec_zone ) 
+     CALL nl_get_spec_zone( 1, spec_zone )
      istag = 1 ; jstag = 1
      IF ( xstag ) istag = 0
      IF ( ystag ) jstag = 0
@@ -2086,7 +2085,7 @@ END MODULE module_interp_info
      INTEGER , PARAMETER :: passes = 2
      INTEGER spec_zone
 
-     CALL nl_get_spec_zone( 1, spec_zone ) 
+     CALL nl_get_spec_zone( 1, spec_zone )
      istag = 1 ; jstag = 1
      IF ( xstag ) istag = 0
      IF ( ystag ) jstag = 0
@@ -2127,171 +2126,171 @@ END MODULE module_interp_info
 !==================================
 
    SUBROUTINE vert_interp_vert_nesting ( cfld,                                 &  ! CD field
-                                         ids, ide, kds, kde, jds, jde,         & 
+                                         ids, ide, kds, kde, jds, jde,         &
                                          ims, ime, kms, kme, jms, jme,         &
-                                         its, ite, kts, kte, jts, jte,         &   
+                                         its, ite, kts, kte, jts, jte,         &
                                          pgrid_s_vert, pgrid_e_vert,           &  ! vertical dimensions of parent grid
 					 cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c,   &  ! coarse grid extrapolation constants
                                          alt_u_c, alt_u_n)
 
-!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
+!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting
 
    IMPLICIT NONE
-   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
+   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld
    INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
                           ims, ime, kms, kme, jms, jme,   &
                           its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid
    REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
    REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
 
-   
+
    !local
-   
+
    INTEGER :: i,j,k
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
    REAL, DIMENSION(kde+1) :: pro_u_n
-   
+
    DO j = jms,jme
    DO i = ims,ime
-   
-      ! pro_u_c is u on the 1D coarse grid 
-    
+
+      ! pro_u_c is u on the 1D coarse grid
+
       do k = pgrid_s_vert,pgrid_e_vert-1
       pro_u_c(k+1) = cfld(i,k,j)
-      enddo 
-      
+      enddo
+
       !KAL fill in the surface value and the top value using extrapolation
 
       pro_u_c(1      ) = cf1_c*cfld(i,1,j) &
                        + cf2_c*cfld(i,2,j) &
                        + cf3_c*cfld(i,3,j)
-   
+
       pro_u_c(pgrid_e_vert+1) = cfn_c *cfld(i,pgrid_e_vert-1,j) &
-                              + cfn1_c*cfld(i,pgrid_e_vert-2,j)  
-		       
+                              + cfn1_c*cfld(i,pgrid_e_vert-2,j)
+
       call inter_wrf_copy(pro_u_c, alt_u_c, pgrid_e_vert+1, pro_u_n, alt_u_n, kde+1)
-      
+
       do k = 1,kde-1
          cfld(i,k,j) = pro_u_n(k+1)
-      enddo	
-            
+      enddo
+
    ENDDO
    ENDDO
-  
-   
+
+
    END SUBROUTINE vert_interp_vert_nesting
-   
+
  !==================================
 
    SUBROUTINE vert_interp_vert_nesting_w ( cfld,                                 &  ! CD field
-                                           ids, ide, kds, kde, jds, jde,         & 
+                                           ids, ide, kds, kde, jds, jde,         &
                                            ims, ime, kms, kme, jms, jme,         &
-                                           its, ite, kts, kte, jts, jte,         &   
+                                           its, ite, kts, kte, jts, jte,         &
                                            pgrid_s_vert, pgrid_e_vert,           &  ! vertical dimensions of parent grid
                                            alt_w_c, alt_w_n)
 
 !KAL vertical interpolation at w points for vertical nesting
 
    IMPLICIT NONE
-   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
+   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld
    INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
                           ims, ime, kms, kme, jms, jme,   &
                           its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert), INTENT(IN) :: alt_w_c
    REAL, DIMENSION(kde), INTENT(IN) :: alt_w_n
 
-   
+
    !local
-   
+
    INTEGER :: i,j,k
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert) :: pro_w_c           ! variable in 1D on the coarse grid
    REAL, DIMENSION(kde) :: pro_w_n
-   
+
    DO j = jms,jme
    DO i = ims,ime
-   
-      ! pro_w_c is w on the 1D coarse grid 
-    
+
+      ! pro_w_c is w on the 1D coarse grid
+
       do k = pgrid_s_vert,pgrid_e_vert
       pro_w_c(k) = cfld(i,k,j)
-      enddo 
-	       
+      enddo
+
       call inter_wrf_copy(pro_w_c, alt_w_c, pgrid_e_vert, pro_w_n, alt_w_n, kde)
-      
+
       do k = 1,kde
          cfld(i,k,j) = pro_w_n(k)
-      enddo	
-            
+      enddo
+
    ENDDO
    ENDDO
-  
-   
+
+
    END SUBROUTINE vert_interp_vert_nesting_w
 
-!-----------------------------------------------------------------------------------------   
+!-----------------------------------------------------------------------------------------
 
    SUBROUTINE vert_interp_vert_nesting_1d ( cfld,                                 &  ! CD field
-                                            ids, ide, kds, kde, jds, jde,         & 
+                                            ids, ide, kds, kde, jds, jde,         &
                                             ims, ime, kms, kme, jms, jme,         &
-                                            its, ite, kts, kte, jts, jte,         &   
+                                            its, ite, kts, kte, jts, jte,         &
                                             pgrid_s_vert, pgrid_e_vert,           &  ! vertical dimensions of parent grid
 					    cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c,   &  ! coarse grid extrapolation constants
                                             alt_u_c, alt_u_n)
 
-!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
+!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting
 
    IMPLICIT NONE
-   REAL, DIMENSION (kms:kme),INTENT(INOUT) :: cfld   
+   REAL, DIMENSION (kms:kme),INTENT(INOUT) :: cfld
    INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
                           ims, ime, kms, kme, jms, jme,   &
                           its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid
    REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
    REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
 
-   
+
    !local
-   
+
    INTEGER :: i,j,k
    REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
    REAL, DIMENSION(kde+1) :: pro_u_n
-   
 
-      ! pro_u_c is u on the 1D coarse grid 
-    
+
+      ! pro_u_c is u on the 1D coarse grid
+
       do k = pgrid_s_vert,pgrid_e_vert-1
       pro_u_c(k+1) = cfld(k)
-      enddo 
-      
+      enddo
+
       !KAL fill in the surface value and the top value using extrapolation
 
       pro_u_c(1      ) = cf1_c*cfld(1) &
                        + cf2_c*cfld(2) &
                        + cf3_c*cfld(3)
-   
+
       pro_u_c(pgrid_e_vert+1) = cfn_c *cfld(pgrid_e_vert-1) &
-                              + cfn1_c*cfld(pgrid_e_vert-2)  
-		       
+                              + cfn1_c*cfld(pgrid_e_vert-2)
+
       call inter_wrf_copy(pro_u_c, alt_u_c, pgrid_e_vert+1, pro_u_n, alt_u_n, kde+1)
-      
+
       do k = 1,kde-1
          cfld(k) = pro_u_n(k+1)
-      enddo	
-            
-   
-   END SUBROUTINE vert_interp_vert_nesting_1d   
-   
-     
+      enddo
+
+
+   END SUBROUTINE vert_interp_vert_nesting_1d
+
+
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !KAL this is a direct copy of a subroutine from ndown, but a dependency on ndown will not work because it is not always compiled (for ideal cases), and most likely not compliled in the order needed.
 
   SUBROUTINE inter_wrf_copy(pro_c,alt_c,kde_c,pro_n,alt_n,kde_n)
-  
-!KAL this routine has been added for vertical nesting  
+
+!KAL this routine has been added for vertical nesting
 
    IMPLICIT NONE
    INTEGER , INTENT(IN) :: kde_c,kde_n
@@ -2328,8 +2327,8 @@ END MODULE module_interp_info
 !KAL this is a direct copy of a subroutine from ndown, but a dependency on ndown will not work because it is not always compiled (for ideal cases), and most likely not compliled in the order needed.
 
      subroutine  coeff_mon_wrf_copy(x,y,a,b,c,d,n)
-     
-!KAL this routine has been added for vertical nesting     
+
+!KAL this routine has been added for vertical nesting
 
       implicit none
 
@@ -2369,11 +2368,11 @@ END MODULE module_interp_info
       enddo
 
       end  subroutine  coeff_mon_wrf_copy
-      
-  !-----------------------------------------------------------------------------------------
-  
 
-!================================== 
+  !-----------------------------------------------------------------------------------------
+
+
+!==================================
 
    SUBROUTINE p2c ( cfld,                                 &  ! CD field
                     cids, cide, ckds, ckde, cjds, cjde,   &
@@ -2388,7 +2387,7 @@ END MODULE module_interp_info
                     xstag, ystag,                         &  ! staggering of field
                     ipos, jpos,                           &  ! Position of lower left of nest in CD
                     nri, nrj                              &  ! nest ratios
-                    )   
+                    )
      USE module_configure
      IMPLICIT NONE
 
@@ -2432,7 +2431,7 @@ END MODULE module_interp_info
                            cits, cite, ckts, ckte, cjts, cjte,   &
                            nfld,                                 &  ! ND field
                            nids, nide, nkds, nkde, njds, njde,   &
-                           nims, nime, nkms, nkme, njms, njme,   &  
+                           nims, nime, nkms, nkme, njms, njme,   &
                            nits, nite, nkts, nkte, njts, njte,   &
                            shw,                                  &  ! stencil half width
                            imask,                                &  ! interpolation mask
@@ -2447,18 +2446,18 @@ END MODULE module_interp_info
 !                          cbdy_txe, nbdy_txe,                       &
 !                          cbdy_tys, nbdy_tys,                       &
 !                          cbdy_tye, nbdy_tye,                       &
-                           parent_id,nest_id                        &!cyl    
+                           parent_id,nest_id                        &!cyl
                            )   ! boundary arrays
      USE module_configure
      IMPLICIT NONE
 
 !------------------------------------------------------------
 ! Subroutine c2f_interp interpolate field from coarse resolution domain
-! to its nested domain. It is written by Dave Gill in NCAR for the purpose 
-! running phys/module_sf_oml.F-DPWP in only d01 and d02 
+! to its nested domain. It is written by Dave Gill in NCAR for the purpose
+! running phys/module_sf_oml.F-DPWP in only d01 and d02
 !                                       Chiaying Lee RSMAS/UM
 !------------------------------------------------------------
-                            
+
      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                             cims, cime, ckms, ckme, cjms, cjme,   &
                             cits, cite, ckts, ckte, cjts, cjte,   &
@@ -2470,7 +2469,7 @@ END MODULE module_interp_info
                             nri, nrj,parent_id,nest_id            !cyl
 
      LOGICAL, INTENT(IN) :: xstag, ystag
-     
+
      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
@@ -2479,28 +2478,28 @@ END MODULE module_interp_info
 !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ys, cbdy_tys, nbdy_ys, nbdy_tys
 !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ye, cbdy_tye, nbdy_ye, nbdy_tye
      REAL cdt, ndt
-     
+
      ! Local
 
      INTEGER ci, cj, ck, ni, nj, nk, ip, jp
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
 !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
 !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 !     write(0,*)'cyl parentid',parent_id
 !     write(0,*)'cyl nestid',nest_id
 !     If ( nest_id .le. 2 .and. (1.0/rdx .ge. 3000.0 .and. 1.0/rdy .ge. 3000.0)  ) then ! cyl: only run it in the nest domain with dx, dy < 3 km
-     If ( nest_id .eq. 3 ) then 
+     If ( nest_id .eq. 3 ) then
      DO nj = njts, njte
-     
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         jp = mod ( nj , nrj )  ! coord of ND w/i CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
-              ci = ipos + (ni-1) / nri      ! j coord of CD point 
+              ci = ipos + (ni-1) / nri      ! j coord of CD point
               ip = mod ( ni , nri )  ! coord of ND w/i CD point
               ! This is a trivial implementation of the interp_fcn; just copies
               ! the values from the CD into the ND
@@ -2605,7 +2604,7 @@ END MODULE module_interp_info
                     ( interp_method_type .EQ. NEAREST_NEIGHBOR ) .OR. &
                     ( interp_method_type .EQ. QUADRATIC        ) .OR. &
                     ( interp_method_type .EQ. SPLINE           ) .OR. &
-                    ( interp_method_type .EQ. SINT_NEW         ) ) THEN 
+                    ( interp_method_type .EQ. SINT_NEW         ) ) THEN
          CALL bdy_interp2( cfld,                                 &  ! CD field
                            cids, cide, ckds, ckde, cjds, cjde,   &
                            cims, cime, ckms, ckme, cjms, cjme,   &
@@ -2706,7 +2705,7 @@ END MODULE module_interp_info
      LOGICAL icmask( cims:cime, cjms:cjme )
      INTEGER i,j,k
      INTEGER shw
-     INTEGER spec_zone 
+     INTEGER spec_zone
      INTEGER relax_zone
      INTEGER sz
      INTEGER n2ci,n
@@ -2721,7 +2720,7 @@ END MODULE module_interp_info
      shw = 0
 
      ioff  = 0 ; joff  = 0
-     IF ( xstag ) THEN 
+     IF ( xstag ) THEN
        ioff = MAX((nri-1)/2,1)
      ENDIF
      IF ( ystag ) THEN
@@ -2729,7 +2728,7 @@ END MODULE module_interp_info
      ENDIF
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
      CALL nl_get_spec_zone( 1, spec_zone )
      CALL nl_get_relax_zone( 1, relax_zone )
@@ -2778,13 +2777,13 @@ END MODULE module_interp_info
           n2ci(MAX(nits,nide-sz-ioff)), n2ci(MIN(nite,nide-1+ioff)), n2cj(njts)-1, n2cj(njte)+1, nrj*nri, xstag, ystag )
                ENDIF
 
-        DO nj1 = MAX(njds,njts-1), MIN(njde+joff,njte+joff+1) 
-           cj = jpos + (nj1-1) / nrj     ! j coord of CD point 
+        DO nj1 = MAX(njds,njts-1), MIN(njde+joff,njte+joff+1)
+           cj = jpos + (nj1-1) / nrj     ! j coord of CD point
            jp = mod ( nj1-1 , nrj )  ! coord of ND w/i CD point
            nk = k
            ck = nk
            DO ni1 = MAX(nids,nits-1), MIN(nide+ioff,nite+ioff+1)
-               ci = ipos + (ni1-1) / nri      ! j coord of CD point 
+               ci = ipos + (ni1-1) / nri      ! j coord of CD point
                ip = mod ( ni1-1 , nri )  ! coord of ND w/i CD point
 
                ni = ni1-ioff
@@ -2839,7 +2838,7 @@ END MODULE module_interp_info
         ENDDO
      ENDDO
    !$OMP END PARALLEL DO
-                  
+
      RETURN
 
    END SUBROUTINE bdy_interp1
@@ -2910,7 +2909,7 @@ END MODULE module_interp_info
                                                                               ! sized array
      INTEGER ni, nj, nk, istag, jstag
      INTEGER shw
-     INTEGER spec_zone 
+     INTEGER spec_zone
      INTEGER relax_zone
      INTEGER sz
      REAL*8 rdt
@@ -2938,14 +2937,14 @@ END MODULE module_interp_info
 
      !  Staggering, to determine loop indexes
 
-     IF ( xstag ) THEN 
+     IF ( xstag ) THEN
         istag = 0
      ELSE
         istag = 1
      END IF
      IF ( ystag ) THEN
         jstag = 0
-     ELSE 
+     ELSE
         jstag = 1
      END IF
 
@@ -2962,7 +2961,7 @@ END MODULE module_interp_info
 
    !$OMP PARALLEL DO   &
    !$OMP PRIVATE ( ni,nj,nk )
-     
+
      DO nj = MAX ( njts-nrj, njds ) , MIN ( njte+nrj, njde-jstag )
         DO nk = nkts, nkte
            DO ni = MAX( nits-nri, nids ) , MIN ( nite+nri, nide-istag )
@@ -3056,26 +3055,26 @@ END MODULE module_interp_info
      INTEGER ci, cj, ck, ni, nj, nk, ip, jp
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
 !write(0,'("cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
 !write(0,'("nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 
      DO nj = njts, njte
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         jp = mod ( nj , nrj )  ! coord of ND w/i CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
               if ( imask(ni,nj) .NE. 1 ) cycle
-              ci = ipos + (ni-1) / nri      ! j coord of CD point 
+              ci = ipos + (ni-1) / nri      ! j coord of CD point
               ip = mod ( ni , nri )  ! coord of ND w/i CD point
               ! This is a trivial implementation of the interp_fcn; just copies
               ! the values from the CD into the ND
               nfld( ni, nk, nj ) = cfld( ci , ck , cj )
-                if ( (ni .eq. 28) .and. (nj .eq. 42) ) then
-                   write(*,*) 'nfld(28,:,42) :',nk,nfld(28,nk,42),ci,cj
-                endif
+                if ( (ni .eq. 28) .and. (nj .eq. 42) ) then                ! CRYOWRF
+                   write(*,*) 'nfld(28,:,42) :',nk,nfld(28,nk,42),ci,cj    ! CRYOWRF
+                endif                                                      ! CRYOWRF
            ENDDO
         ENDDO
      ENDDO
@@ -3085,6 +3084,7 @@ END MODULE module_interp_info
    END SUBROUTINE interp_fcni
 
 !==================================
+! CRYOWRF
 
    SUBROUTINE interp_fcni_snpack( cfld,                                 &  ! CD field
                            cids, cide, ckds, ckde, cjds, cjde,   &
@@ -3123,19 +3123,19 @@ END MODULE module_interp_info
      INTEGER ci, cj, ck, ni, nj, nk, ip, jp
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
 !write(0,'("cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
 !write(0,'("nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 
      DO nj = njts, njte
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         jp = mod ( nj , nrj )  ! coord of ND w/i CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
               if ( imask(ni,nj) .NE. 1 ) cycle
-              ci = ipos + (ni-1) / nri      ! j coord of CD point 
+              ci = ipos + (ni-1) / nri      ! j coord of CD point
               ip = mod ( ni , nri )  ! coord of ND w/i CD point
               ! This is a trivial implementation of the interp_fcn; just copies
               ! the values from the CD into the ND
@@ -3186,18 +3186,18 @@ END MODULE module_interp_info
      INTEGER ci, cj, ck, ni, nj, nk, ip, jp
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
 !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
 !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 
      DO nj = njts, njte
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         jp = mod ( nj , nrj )  ! coord of ND w/i CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
-              ci = ipos + (ni-1) / nri      ! j coord of CD point 
+              ci = ipos + (ni-1) / nri      ! j coord of CD point
               ip = mod ( ni , nri )  ! coord of ND w/i CD point
               ! This is a trivial implementation of the interp_fcn; just copies
               ! the values from the CD into the ND
@@ -3226,7 +3226,7 @@ END MODULE module_interp_info
                            cxlat,    nxlat,                      &
                            cxlong,   nxlong,                     &
                            cdx, ndx,                             &
-                           cid, nid                            ) 
+                           cid, nid                            )
      USE module_configure
 
      IMPLICIT NONE
@@ -3242,7 +3242,7 @@ END MODULE module_interp_info
                             ipos, jpos,                           &
                             nri, nrj,                             &
                             cid, nid
-     LOGICAL, INTENT(IN) :: xstag, ystag 
+     LOGICAL, INTENT(IN) :: xstag, ystag
 
      REAL,    INTENT(IN) :: cdx, ndx
 
@@ -3262,7 +3262,7 @@ END MODULE module_interp_info
      INTEGER, DIMENSION(256) :: ipath  ! array for integer coded ascii for passing path down to get_landuse
 
      REAL , ALLOCATABLE, DIMENSION(:,:) :: xlat_g, xlon_g, landuse_g
-     CHARACTER*256 :: message 
+     CHARACTER*256 :: message
      CHARACTER*256 :: rsmas_data_path
 
      LOGICAL :: input_from_hires, input_from_file
@@ -3274,7 +3274,7 @@ END MODULE module_interp_info
      CALL nl_get_input_from_file ( nid , input_from_file )
 
      IF ( input_from_file .AND. input_from_hires ) THEN
-       Write(message, '(a,i3,a)') & 
+       Write(message, '(a,i3,a)') &
           "Warning : input_from_file turned on for domain ", nid, ", input_from_hires disabled"
        CALL wrf_message(message)
      END IF
@@ -3390,18 +3390,18 @@ END MODULE module_interp_info
      INTEGER ci, cj, ck, ni, nj, nk, ip, jp
 
      ! Iterate over the ND tile and compute the values
-     ! from the CD tile. 
+     ! from the CD tile.
 
 !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte,cjts,cjte
 !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte,njts,njte
 
      DO nj = njts, njte
-        cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+        cj = jpos + (nj-1) / nrj     ! j coord of CD point
         jp = mod ( nj , nrj )  ! coord of ND w/i CD point
         DO nk = nkts, nkte
            ck = nk
            DO ni = nits, nite
-              ci = ipos + (ni-1) / nri      ! j coord of CD point 
+              ci = ipos + (ni-1) / nri      ! j coord of CD point
               ip = mod ( ni , nri )  ! coord of ND w/i CD point
               ! This is a trivial implementation of the interp_fcn; just copies
               ! the values from the CD into the ND
@@ -3415,12 +3415,8 @@ END MODULE module_interp_info
      RETURN
 
    END SUBROUTINE interp_fcnm_imask
-#endif
 ! end of first block of ARW-only routines
 
-! NMM: We still allow interp_mask_land_field because it is needed, but no
-! equivalent exists.  Use of this in WRF-NMM is an error and will have
-! unintended consequences.
    SUBROUTINE interp_mask_land_field ( enable,                   &  ! says whether to allow interpolation or just the bcasts
                                        cfld,                     &  ! CD field
                            cids, cide, ckds, ckde, cjds, cjde,   &
@@ -3442,8 +3438,8 @@ END MODULE module_interp_info
       USE module_dm, only : wrf_dm_sum_reals, wrf_dm_sum_integers
 
       IMPLICIT NONE
-   
-   
+
+
       LOGICAL, INTENT(IN) :: enable
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
@@ -3455,16 +3451,16 @@ END MODULE module_interp_info
                              ipos, jpos,                           &
                              nri, nrj
       LOGICAL, INTENT(IN) :: xstag, ystag
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-   
+
       REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
-   
+
       ! Local
-   
+
       INTEGER ci, cj, ck, ni, nj, nk, ip, jp
       INTEGER :: icount , ii , jj , ist , ien , jst , jen , iswater, ierr
       REAL :: avg , sum , dx , dy
@@ -3472,13 +3468,13 @@ END MODULE module_interp_info
       CHARACTER(LEN=255) :: message
       INTEGER :: icount_n(nkts:nkte), idummy(nkts:nkte)
       REAL :: avg_n(nkts:nkte), sum_n(nkts:nkte), dummy(nkts:nkte)
-   
+
       !  Find out what the water value is.
-   
+
       CALL nl_get_iswater(1,iswater)
 
       !  Right now, only mass point locations permitted.
-   
+
       IF ( ( .NOT. xstag) .AND. ( .NOT. ystag ) ) THEN
 
          !  Loop over each i,k,j in the nested domain.
@@ -3500,7 +3496,7 @@ END MODULE module_interp_info
                   ELSE
                      ci = ( ni + (nri-1)/2 ) / nri + ipos -1 ! first coarse position equal to or to the left of nest point
                   END IF
-   
+
 
 
 
@@ -3513,25 +3509,25 @@ END MODULE module_interp_info
                   !          dy   |        | (ni,nj)   |
                   !               |        |           |
                   !               -        -------------
-                  !                    (ci,cj)       (ci+1,cj)  
+                  !                    (ci,cj)       (ci+1,cj)
                   !
                   !                        |--|--------|
-                  !                         dx  1-dx         
+                  !                         dx  1-dx
 
 
                   !  For odd ratios, at (nri+1)/2, we are on the coarse grid point, so dx = 0
 
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
-                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri ) 
-                  ELSE 
-                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri ) 
+                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri )
+                  ELSE
+                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri )
                   END IF
                   IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
-                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj ) 
-                  ELSE 
-                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj ) 
+                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj )
+                  ELSE
+                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj )
                   END IF
-   
+
                   !  This is a "land only" field.  If this is a water point, no operations required.
 
                   IF      ( ( NINT(nlu(ni  ,nj  )) .EQ. iswater ) ) THEN
@@ -3560,8 +3556,8 @@ END MODULE module_interp_info
                             ( NINT(clu(ci+1,cj+1)) .EQ. iswater ) ) THEN
                      nfld(ni,nk,nj) = -1
 
-                  !  If there are some water points and some land points, take an average. 
-                  
+                  !  If there are some water points and some land points, take an average.
+
                   ELSE IF ( NINT(nlu(ni  ,nj  )) .NE. iswater ) THEN
                      icount = 0
                      sum = 0
@@ -3581,7 +3577,7 @@ END MODULE module_interp_info
                         icount = icount + 1
                         sum = sum + cfld(ci+1,ck,cj+1)
                      END IF
-                     nfld(ni,nk,nj) = sum / REAL ( icount ) 
+                     nfld(ni,nk,nj) = sum / REAL ( icount )
                   END IF
                END DO
             END DO
@@ -3640,7 +3636,7 @@ END MODULE module_interp_info
                        ien = MIN (ci+max_search,cite,cide-1)
                        jst = MAX (cj-max_search,cjts)
                        jen = MIN (cj+max_search,cjte,cjde-1)
-                       icount = 0 
+                       icount = 0
                        sum = 0
                        DO jj = jst,jen
                           DO ii = ist,ien
@@ -3651,13 +3647,13 @@ END MODULE module_interp_info
                           END DO
                        END DO
                        IF ( icount .GT. 0 ) THEN
-                          nfld(ni,nk,nj) = sum / REAL ( icount ) 
+                          nfld(ni,nk,nj) = sum / REAL ( icount )
                        ELSE
                           Write(message,fmt='(a,i4,a,i4,a,f10.4)') &
                             'horizontal interp error - island (', ni, ',', nj, '), using average ', avg_n(nk)
                           CALL wrf_message ( message )
                           nfld(ni,nk,nj) = avg_n(nk)
-                       END IF        
+                       END IF
                     END IF
                  END DO
               END DO
@@ -3691,8 +3687,8 @@ END MODULE module_interp_info
       USE module_dm, only : wrf_dm_sum_reals, wrf_dm_sum_integers
 
       IMPLICIT NONE
-   
-   
+
+
       LOGICAL, INTENT(IN) :: enable
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
@@ -3704,16 +3700,16 @@ END MODULE module_interp_info
                              ipos, jpos,                           &
                              nri, nrj, cflag, nflag
       LOGICAL, INTENT(IN) :: xstag, ystag
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-   
+
       REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
-   
+
       ! Local
-   
+
       INTEGER ci, cj, ck, ni, nj, nk, ip, jp
       INTEGER :: icount , ii , jj , ist , ien , jst , jen, ierr
       REAL :: avg , sum , dx , dy
@@ -3723,7 +3719,7 @@ END MODULE module_interp_info
       CHARACTER(LEN=255) :: message
 
       !  Right now, only mass point locations permitted.
-   
+
       IF ( ( .NOT. xstag) .AND. ( .NOT. ystag ) ) THEN
 
        IF ( enable ) THEN
@@ -3744,7 +3740,7 @@ END MODULE module_interp_info
                   ELSE
                      ci = ( ni + (nri-1)/2 ) / nri + ipos -1 ! first coarse position equal to or to the left of nest point
                   END IF
-   
+
 
 
 
@@ -3757,25 +3753,25 @@ END MODULE module_interp_info
                   !          dy   |        | (ni,nj)   |
                   !               |        |           |
                   !               -        -------------
-                  !                    (ci,cj)       (ci+1,cj)  
+                  !                    (ci,cj)       (ci+1,cj)
                   !
                   !                        |--|--------|
-                  !                         dx  1-dx         
+                  !                         dx  1-dx
 
 
                   !  At ni=2, we are on the coarse grid point, so dx = 0
 
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
-                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri ) 
-                  ELSE 
-                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri ) 
+                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri )
+                  ELSE
+                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri )
                   END IF
                   IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
-                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj ) 
-                  ELSE 
-                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj ) 
+                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj )
+                  ELSE
+                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj )
                   END IF
-   
+
                   !  This is a "water only" field.  If this is a land point, no operations required.
 
                   IF      ( ( NINT(nlu(ni  ,nj  )) .NE. nflag ) ) THEN
@@ -3804,8 +3800,8 @@ END MODULE module_interp_info
                             ( NINT(clu(ci+1,cj+1)) .NE. nflag ) ) THEN
                      nfld(ni,nk,nj) = -4
 
-                  !  If there are some land points and some water points, take an average. 
-                  
+                  !  If there are some land points and some water points, take an average.
+
                   ELSE IF ( NINT(nlu(ni  ,nj  )) .EQ. nflag ) THEN
                      icount = 0
                      sum = 0
@@ -3825,7 +3821,7 @@ END MODULE module_interp_info
                         icount = icount + 1
                         sum = sum + cfld(ci+1,ck,cj+1)
                      END IF
-                     nfld(ni,nk,nj) = sum / REAL ( icount ) 
+                     nfld(ni,nk,nj) = sum / REAL ( icount )
                   END IF
                END DO
             END DO
@@ -3883,7 +3879,7 @@ END MODULE module_interp_info
                        ien = MIN (ci+max_search,cite,cide-1)
                        jst = MAX (cj-max_search,cjts)
                        jen = MIN (cj+max_search,cjte,cjde-1)
-                       icount = 0 
+                       icount = 0
                        sum = 0
                        DO jj = jst,jen
                           DO ii = ist,ien
@@ -3894,13 +3890,13 @@ END MODULE module_interp_info
                           END DO
                        END DO
                        IF ( icount .GT. 0 ) THEN
-                          nfld(ni,nk,nj) = sum / REAL ( icount ) 
+                          nfld(ni,nk,nj) = sum / REAL ( icount )
                        ELSE
                          Write(message,fmt='(a,i4,a,i4,a,f10.4)') &
                             'horizontal interp error - lake (', ni, ',', nj, '), using average ', avg_n(nk)
-                         CALL wrf_message ( message )                         
+                         CALL wrf_message ( message )
                           nfld(ni,nk,nj) = avg_n(nk)
-                       END IF        
+                       END IF
                     END IF
                  END DO
               END DO
@@ -3913,8 +3909,6 @@ END MODULE module_interp_info
 
    END SUBROUTINE interp_mask_water_field
 
-! Begin second block of ARW-only routines
-#if ! defined(NMM_CORE) || NMM_CORE!=1
    SUBROUTINE p2c_mask (   cfld,                                 &  ! CD field
                            cids, cide, ckds, ckde, cjds, cjde,   &
                            cims, cime, ckms, ckme, cjms, cjme,   &
@@ -3937,7 +3931,7 @@ END MODULE module_interp_info
       USE module_wrf_error
 
       IMPLICIT NONE
-   
+
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
                              cits, cite, ckts, ckte, cjts, cjte,   &
@@ -3948,14 +3942,14 @@ END MODULE module_interp_info
                              ipos, jpos,                           &
                              nri, nrj,                             &
                              cnum_soil_layers, nnum_soil_layers,   &
-                             ciswater, niswater 
+                             ciswater, niswater
 
       LOGICAL, INTENT(IN) :: xstag, ystag
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
       INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-   
+
       REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
 
@@ -3963,13 +3957,13 @@ END MODULE module_interp_info
       REAL, DIMENSION ( nims:nime, 1:nnum_soil_layers, njms:njme ) :: ntslb
 
       ! Local
-   
+
       INTEGER ci, cj, ck, ni, nj, nk
-      INTEGER :: icount 
+      INTEGER :: icount
       REAL :: sum , dx , dy
 
       !  Right now, only mass point locations permitted.
-   
+
       IF ( ( .NOT. xstag) .AND. ( .NOT. ystag ) ) THEN
 
          !  Loop over each i,k,j in the nested domain.
@@ -3998,25 +3992,25 @@ END MODULE module_interp_info
                   !          dy   |        | (ni,nj)   |
                   !               |        |           |
                   !               -        -------------
-                  !                    (ci,cj)       (ci+1,cj)  
+                  !                    (ci,cj)       (ci+1,cj)
                   !
                   !                        |--|--------|
-                  !                         dx  1-dx         
+                  !                         dx  1-dx
 
 
                   !  At ni=2, we are on the coarse grid point, so dx = 0
 
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
-                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri ) 
-                  ELSE 
-                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri ) 
+                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri )
+                  ELSE
+                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri )
                   END IF
                   IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
-                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj ) 
-                  ELSE 
-                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj ) 
+                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj )
+                  ELSE
+                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj )
                   END IF
-   
+
                   !  This is a "water only" field.  If this is a land point, no operations required.
 
                   IF      ( ( NINT(nlu(ni  ,nj  )) .NE. niswater ) ) THEN
@@ -4049,7 +4043,7 @@ END MODULE module_interp_info
                                                              dy   * ctslb(ci+1,cnum_soil_layers,cj+1) )
 
                   !  If there are some land points and some water points, take an average of the water points.
-                  
+
                   ELSE IF ( NINT(nlu(ni  ,nj  )) .EQ. niswater ) THEN
                      icount = 0
                      sum = 0
@@ -4069,7 +4063,7 @@ END MODULE module_interp_info
                         icount = icount + 1
                         sum = sum + cfld(ci+1,ck,cj+1)
                      END IF
-                     nfld(ni,nk,nj) = sum / REAL ( icount ) 
+                     nfld(ni,nk,nj) = sum / REAL ( icount )
                   END IF
                END DO
             END DO
@@ -4095,21 +4089,21 @@ END MODULE module_interp_info
                       ipos, jpos,                           &  ! Position of lower left of nest in
                       nri, nrj                              &
                       )
- 
+
       USE module_configure
       IMPLICIT NONE
-   
+
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
                              cits, cite, ckts, ckte, cjts, cjte,   &
                              nids, nide, nkds, nkde, njds, njde,   &
                              nims, nime, nkms, nkme, njms, njme,   &
                              nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &  
+                             nri, nrj,                             &
                              ipos, jpos
       LOGICAL, INTENT(IN) :: xstag, ystag
       INTEGER             :: smooth_option, feedback , spec_zone
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
 
       !  If there is no feedback, there can be no smoothing.
@@ -4135,8 +4129,8 @@ END MODULE module_interp_info
                       nids, nide, nkds, nkde, njds, njde,   &
                       nims, nime, nkms, nkme, njms, njme,   &
                       nits, nite, nkts, nkte, njts, njte,   &
-                      nri, nrj,                             &  
-                      ipos, jpos                            &  ! Position of lower left of nest in 
+                      nri, nrj,                             &
+                      ipos, jpos                            &  ! Position of lower left of nest in
                       )
       ELSE IF ( smooth_option == 2 ) THEN
          CALL smdsm ( cfld , &
@@ -4147,12 +4141,12 @@ END MODULE module_interp_info
                       nids, nide, nkds, nkde, njds, njde,   &
                       nims, nime, nkms, nkme, njms, njme,   &
                       nits, nite, nkts, nkte, njts, njte,   &
-                      nri, nrj,                             &  
-                      ipos, jpos                            &  ! Position of lower left of nest in 
+                      nri, nrj,                             &
+                      ipos, jpos                            &  ! Position of lower left of nest in
                       )
       END IF
 
-   END SUBROUTINE smoother 
+   END SUBROUTINE smoother
 
    SUBROUTINE sm121 ( cfld , &
                       cids, cide, ckds, ckde, cjds, cjde,   &
@@ -4162,26 +4156,26 @@ END MODULE module_interp_info
                       nids, nide, nkds, nkde, njds, njde,   &
                       nims, nime, nkms, nkme, njms, njme,   &
                       nits, nite, nkts, nkte, njts, njte,   &
-                      nri, nrj,                             &  
-                      ipos, jpos                            &  ! Position of lower left of nest in 
+                      nri, nrj,                             &
+                      ipos, jpos                            &  ! Position of lower left of nest in
                       )
-   
+
       USE module_configure
       IMPLICIT NONE
-   
+
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
                              cits, cite, ckts, ckte, cjts, cjte,   &
                              nids, nide, nkds, nkde, njds, njde,   &
                              nims, nime, nkms, nkme, njms, njme,   &
                              nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &  
+                             nri, nrj,                             &
                              ipos, jpos
       LOGICAL, INTENT(IN) :: xstag, ystag
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( cims:cime,            cjms:cjme ) :: cfldnew
-   
+
       INTEGER                        :: i , j , k , loop
       INTEGER :: istag,jstag
 
@@ -4190,23 +4184,23 @@ END MODULE module_interp_info
       istag = 1 ; jstag = 1
       IF ( xstag ) istag = 0
       IF ( ystag ) jstag = 0
-   
+
       !  Simple 1-2-1 smoother.
-   
+
       smoothing_passes : DO loop = 1 , smooth_passes
-   
+
          DO k = ckts , ckte
-   
+
             !  Initialize dummy cfldnew
 
             DO i = MAX(ipos,cits-3) , MIN(ipos+(nide-nids)/nri,cite+3)
                DO j = MAX(jpos,cjts-3) , MIN(jpos+(njde-njds)/nrj,cjte+3)
-                  cfldnew(i,j) = cfld(i,k,j) 
+                  cfldnew(i,j) = cfld(i,k,j)
                END DO
             END DO
 
-            !  1-2-1 smoothing in the j direction first, 
-   
+            !  1-2-1 smoothing in the j direction first,
+
             DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
             DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
                   cfldnew(i,j) = 0.25 * ( cfld(i,k,j+1) + 2.*cfld(i,k,j) + cfld(i,k,j-1) )
@@ -4214,17 +4208,17 @@ END MODULE module_interp_info
             END DO
 
             !  then 1-2-1 smoothing in the i direction last
-       
+
             DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
             DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
                   cfld(i,k,j) =  0.25 * ( cfldnew(i+1,j) + 2.*cfldnew(i,j) + cfldnew(i-1,j) )
                END DO
             END DO
-       
+
          END DO
-    
+
       END DO smoothing_passes
-   
+
    END SUBROUTINE sm121
 
    SUBROUTINE smdsm ( cfld , &
@@ -4235,75 +4229,75 @@ END MODULE module_interp_info
                       nids, nide, nkds, nkde, njds, njde,   &
                       nims, nime, nkms, nkme, njms, njme,   &
                       nits, nite, nkts, nkte, njts, njte,   &
-                      nri, nrj,                             &  
-                      ipos, jpos                            &  ! Position of lower left of nest in 
+                      nri, nrj,                             &
+                      ipos, jpos                            &  ! Position of lower left of nest in
                       )
-   
+
       USE module_configure
       IMPLICIT NONE
-   
+
       INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                              cims, cime, ckms, ckme, cjms, cjme,   &
                              cits, cite, ckts, ckte, cjts, cjte,   &
                              nids, nide, nkds, nkde, njds, njde,   &
                              nims, nime, nkms, nkme, njms, njme,   &
                              nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &  
+                             nri, nrj,                             &
                              ipos, jpos
       LOGICAL, INTENT(IN) :: xstag, ystag
-   
+
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( cims:cime,            cjms:cjme ) :: cfldnew
-   
+
       REAL , DIMENSION ( 2 )         :: xnu
-      INTEGER                        :: i , j , k , loop , n 
+      INTEGER                        :: i , j , k , loop , n
       INTEGER :: istag,jstag
 
       INTEGER, PARAMETER  :: smooth_passes = 1 ! More passes requires a larger stencil (currently 48 pt)
 
       xnu  =  (/ 0.50 , -0.52 /)
-    
+
       istag = 1 ; jstag = 1
       IF ( xstag ) istag = 0
       IF ( ystag ) jstag = 0
-   
+
       !  The odd number passes of this are the "smoother", the even
       !  number passes are the "de-smoother" (note the different signs on xnu).
-   
+
       smoothing_passes : DO loop = 1 , smooth_passes * 2
-   
+
          n  =  2 - MOD ( loop , 2 )
-    
+
          DO k = ckts , ckte
-   
+
             DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
                DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
                   cfldnew(i,j) = cfld(i,k,j) + xnu(n) * ((cfld(i,k,j+1) + cfld(i,k,j-1)) * 0.5-cfld(i,k,j))
                END DO
             END DO
-       
+
             DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
                DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
                   cfld(i,k,j) = cfldnew(i,j)
                END DO
             END DO
-       
+
             DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
                DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
                   cfldnew(i,j) = cfld(i,k,j) + xnu(n) * ((cfld(i+1,k,j) + cfld(i-1,k,j)) * 0.5-cfld(i,k,j))
                END DO
             END DO
-       
+
             DO j = MAX(jpos+2,cjts-2) , MIN(jpos+(njde-njds)/nrj-2-jstag,cjte+2)
                DO i = MAX(ipos+2,cits-2) , MIN(ipos+(nide-nids)/nri-2-istag,cite+2)
                   cfld(i,k,j) = cfldnew(i,j)
                END DO
             END DO
-   
+
          END DO
-    
+
       END DO smoothing_passes
-   
+
    END SUBROUTINE smdsm
 
 !==================================
@@ -4364,1564 +4358,6 @@ END MODULE module_interp_info
      ENDDO
 
    END SUBROUTINE mark_domain
-#endif 
-! end of second block of WRF-ARW-specific interpolation schemes
-
-#if ( NMM_CORE == 1 )
-!=======================================================================================
-!  Old circa 2007 interpolation schemes that are still in use
-!  This is gopal's doing
-!=======================================================================================
-  SUBROUTINE force_sst_nmm    (cfld,                                 &  ! CD field
-                               cids, cide, ckds, ckde, cjds, cjde,   &
-                               cims, cime, ckms, ckme, cjms, cjme,   &
-                               cits, cite, ckts, ckte, cjts, cjte,   &
-                               nfld,                                 &  ! ND field
-                               nids, nide, nkds, nkde, njds, njde,   &
-                               nims, nime, nkms, nkme, njms, njme,   &
-                               nits, nite, nkts, nkte, njts, njte,   &
-                               shw,                                  &  ! stencil half width for interp
-                               imask,                                &  ! interpolation mask
-                               xstag, ystag,                         &  ! staggering of field
-                               ipos, jpos,                           &  ! Position of lower left of nest in CD
-                               nri, nrj,                             &  ! nest ratios                         
-                               CII, IIH, CJJ, JJH, CBWGT1, HBWGT1,   &  ! south-western grid locs and weights 
-                               CBWGT2, HBWGT2, CBWGT3, HBWGT3,       &  ! note that "C"ourse grid ones are
-                               CBWGT4, HBWGT4, CCSST, CSST           )  ! just dummys
-     USE module_timing
-     IMPLICIT NONE
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-                            cims, cime, ckms, ckme, cjms, cjme,   &
-                            cits, cite, ckts, ckte, cjts, cjte,   &
-                            nids, nide, nkds, nkde, njds, njde,   &
-                            nims, nime, nkms, nkme, njms, njme,   &
-                            nits, nite, nkts, nkte, njts, njte,   &
-                            shw,                                  &
-                            ipos, jpos,                           &
-                            nri, nrj
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     REAL, DIMENSION ( cims:cime, cjms:cjme ) :: cfld
-     REAL, DIMENSION ( nims:nime, njms:njme ) :: nfld
-     REAL,    DIMENSION ( cims:cime, cjms:cjme ), INTENT(IN) :: CBWGT1,CBWGT2,CBWGT3,CBWGT4    ! dummy
-     REAL,    DIMENSION ( nims:nime, njms:njme ), INTENT(IN) :: HBWGT1,HBWGT2,HBWGT3,HBWGT4
-     INTEGER, DIMENSION ( cims:cime, cjms:cjme ), INTENT(IN) :: CII,CJJ                        ! dummy
-     INTEGER, DIMENSION ( nims:nime, njms:njme ), INTENT(IN) :: IIH,JJH
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-     INTEGER , INTENT(IN) :: csst(*), ccsst(*)
-!    local
-
-     LOGICAL  FLIP
-     INTEGER  i,j,k,n
-     REAL     SUM,AMAXVAL
-     REAL,    DIMENSION (4, nims:nime, njms:njme ) :: NBWGT
-
-     if(csst(1) /= 1) return
-
-!
-!*** INDEX CONVENTIONS
-!***                     NBWGT4=0
-!***                      4
-!***
-!***
-!***
-!***                   h
-!***             1                 2
-!***            NBWGT1=1           NBWGT2=0
-!***
-!***
-!***                      3
-!***                     NBWGT3=0
-
-     DO J=NJTS,MIN(NJTE,NJDE-1)
-      DO I=NITS,MIN(NITE,NIDE-1)
-            NBWGT(1,I,J)=HBWGT1(I,J)
-            NBWGT(2,I,J)=HBWGT2(I,J)
-            NBWGT(3,I,J)=HBWGT3(I,J)
-            NBWGT(4,I,J)=HBWGT4(I,J)
-      ENDDO
-     ENDDO
-
-     DO J=NJTS,MIN(NJTE,NJDE-1)
-      DO I=NITS,MIN(NITE,NIDE-1)
-          AMAXVAL=0.
-          DO N=1,4
-            AMAXVAL=amax1(NBWGT(N,I,J),AMAXVAL)
-          ENDDO
-
-          FLIP=.TRUE.
-          SUM=0.0
-          DO N=1,4
-             IF(AMAXVAL .EQ. NBWGT(N,I,J) .AND. FLIP)THEN
-               NBWGT(N,I,J)=1.0
-               FLIP=.FALSE.
-             ELSE
-               NBWGT(N,I,J)=0.0
-             ENDIF
-             SUM=SUM+NBWGT(N,I,J)
-             IF(SUM .GT. 1.0)CALL wrf_error_fatal ( "horizontal interp error - interp_hnear_nmm" )
-          ENDDO
-      ENDDO
-     ENDDO
-
-       DO J=NJTS,MIN(NJTE,NJDE-1)
-        DO I=NITS,MIN(NITE,NIDE-1)
-            IF(MOD(JJH(I,J),2) .NE. 0)THEN    ! 1,3,5,7 
-                NFLD(I,J) = NBWGT(1,I,J)*CFLD(IIH(I,J),  JJH(I,J)  ) &
-                          + NBWGT(2,I,J)*CFLD(IIH(I,J)+1,JJH(I,J)  ) &
-                          + NBWGT(3,I,J)*CFLD(IIH(I,J),  JJH(I,J)-1) &
-                          + NBWGT(4,I,J)*CFLD(IIH(I,J),  JJH(I,J)+1)
-            ELSE
-                NFLD(I,J) = NBWGT(1,I,J)*CFLD(IIH(I,J),  JJH(I,J)  ) &
-                          + NBWGT(2,I,J)*CFLD(IIH(I,J)+1,JJH(I,J)  ) &
-                          + NBWGT(3,I,J)*CFLD(IIH(I,J)+1,JJH(I,J)-1) &
-                          + NBWGT(4,I,J)*CFLD(IIH(I,J)+1,JJH(I,J)+1)
-            ENDIF
-        ENDDO
-       ENDDO
-
-
-     END SUBROUTINE force_sst_nmm
-
-   SUBROUTINE nmm_smoother_ikj ( cfld , &
-                             cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             xstag, ystag,                         &
-                             ipos, jpos,                           &
-                             nri, nrj                              &
-                             )
-
-      USE module_configure
-      IMPLICIT NONE
-
-      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &
-                             ipos, jpos
-      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ), INTENT(INOUT) :: cfld
-      LOGICAL, INTENT(IN) :: xstag, ystag
-
-
-      ! Local
-
-      INTEGER             :: feedback
-      INTEGER, PARAMETER  :: smooth_passes = 5
-
-      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfldnew
-      INTEGER :: ci, cj, ck
-      INTEGER :: is, npass
-      REAL    :: AVGH
-      CHARACTER (LEN=256) :: a_message
-
-      RETURN
-      !  If there is no feedback, there can be no smoothing.
-
-      CALL nl_get_feedback       ( 1, feedback  )
-      IF ( feedback == 0 ) RETURN
-
-      WRITE(a_message,*)'SIMPLE SMOOTHER IS SWITCHED ON FOR HEIGHT'
-      CALL wrf_message ( a_message )                       
-
-      DO npass = 1, smooth_passes
-
-      DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-       if(mod(cj,2) .eq. 0)THEN
-        is=0 ! even rows for mass points (2,4,6,8)
-       else
-        is=1 ! odd rows for mass points  (1,3,5,7)
-       endif
-       DO ck = ckts, ckte
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-            IF(IS==0)THEN    ! (2,4,6,8)
-             AVGH = CFLD(CI,CK,CJ+1) + CFLD(CI,CK,CJ-1) + CFLD(CI+1,CK,CJ+1) + CFLD(CI+1,CK,CJ-1)
-            ELSE
-             AVGH = CFLD(CI,CK,CJ+1) + CFLD(CI,CK,CJ-1) + CFLD(CI-1,CK,CJ+1) + CFLD(CI-1,CK,CJ-1)
-            ENDIF
-            CFLDNEW(CI,CK,CJ) = (AVGH + 4*CFLD(CI,CK,CJ)) / 8.0
-        ENDDO
-       ENDDO
-      ENDDO
-
-      DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-       if(mod(cj,2) .eq. 0)THEN
-        is=0 ! even rows for mass points (2,4,6,8)
-       else
-        is=1 ! odd rows for mass points  (1,3,5,7)
-       endif
-       DO ck = ckts, ckte
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-           CFLD(CI,CK,CJ) = CFLDNEW(CI,CK,CJ)
-        ENDDO
-       ENDDO
-      ENDDO
-
-      ENDDO   ! do npass
-
-   END SUBROUTINE nmm_smoother_ikj
-
-
-   SUBROUTINE nmm_smoother_ijk ( cfld , &
-                             cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             xstag, ystag,                         &
-                             ipos, jpos,                           &
-                             nri, nrj                              &
-                             )
-
-      USE module_configure
-      IMPLICIT NONE
-
-      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &
-                             ipos, jpos
-      REAL, DIMENSION ( cims:cime, cjms:cjme, ckms:ckme ), INTENT(INOUT) :: cfld
-      LOGICAL, INTENT(IN) :: xstag, ystag
-
-
-      ! Local
-
-      INTEGER             :: feedback
-      INTEGER, PARAMETER  :: smooth_passes = 5
-
-      REAL, DIMENSION ( cims:cime, cjms:cjme, ckms:ckme ) :: cfldnew
-      INTEGER :: ci, cj, ck
-      INTEGER :: is, npass
-      REAL    :: AVGH
-      CHARACTER (LEN=256) :: a_message
-
-      RETURN
-      !  If there is no feedback, there can be no smoothing.
-
-      CALL nl_get_feedback       ( 1, feedback  )
-      IF ( feedback == 0 ) RETURN
-
-      WRITE(a_message,*)'SIMPLE SMOOTHER IS SWITCHED ON FOR HEIGHT'
-      CALL wrf_message ( a_message )                       
-
-      DO npass = 1, smooth_passes
-
-      DO ck = ckts, ckte
-       DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-        if(mod(cj,2) .eq. 0)THEN
-         is=0 ! even rows for mass points (2,4,6,8)
-        else
-         is=1 ! odd rows for mass points  (1,3,5,7)
-        endif
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-            IF(IS==0)THEN    ! (2,4,6,8)
-             AVGH = CFLD(CI,CJ+1,CK) + CFLD(CI,CJ-1,CK) + CFLD(CI+1,CJ+1,CK) + CFLD(CI+1,CJ-1,CK)
-            ELSE
-             AVGH = CFLD(CI,CJ+1,CK) + CFLD(CI,CJ-1,CK) + CFLD(CI-1,CJ+1,CK) + CFLD(CI-1,CJ-1,CK)
-            ENDIF
-            CFLDNEW(CI,CJ,CK) = (AVGH + 4*CFLD(CI,CJ,CK)) / 8.0
-        ENDDO
-       ENDDO
-      ENDDO
-
-      DO ck = ckts, ckte
-       DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-        if(mod(cj,2) .eq. 0)THEN
-         is=0 ! even rows for mass points (2,4,6,8)
-        else
-         is=1 ! odd rows for mass points  (1,3,5,7)
-        endif
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-           CFLD(CI,CJ,CK) = CFLDNEW(CI,CJ,CK)
-        ENDDO
-       ENDDO
-      ENDDO
-
-      ENDDO   ! do npass
-
-   END SUBROUTINE nmm_smoother_ijk
-
-
-   SUBROUTINE nmm_vsmoother_ikj ( cfld , &
-                             cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             xstag, ystag,                         &
-                             ipos, jpos,                           &
-                             nri, nrj                              &
-                             )
-
-      USE module_configure
-      IMPLICIT NONE
-
-      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-                             cims, cime, ckms, ckme, cjms, cjme,   &
-                             cits, cite, ckts, ckte, cjts, cjte,   &
-                             nids, nide, nkds, nkde, njds, njde,   &
-                             nims, nime, nkms, nkme, njms, njme,   &
-                             nits, nite, nkts, nkte, njts, njte,   &
-                             nri, nrj,                             &
-                             ipos, jpos
-      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ), INTENT(INOUT) :: cfld
-      LOGICAL, INTENT(IN) :: xstag, ystag
-
-
-      ! Local
-
-      INTEGER             :: feedback
-      INTEGER, PARAMETER  :: smooth_passes = 5
-
-      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfldnew
-      INTEGER :: ci, cj, ck
-      INTEGER :: is, npass
-      REAL    :: AVGV
-      CHARACTER (LEN=256) :: a_message
-
-      RETURN
-      !  If there is no feedback, there can be no smoothing.
-
-      CALL nl_get_feedback       ( 1, feedback  )
-      IF ( feedback == 0 ) RETURN
-
-      WRITE(a_message,*)'SIMPLE SMOOTHER IS SWITCHED ON FOR VELOCITY'
-      CALL wrf_message ( a_message )                       
-
-      DO npass = 1, smooth_passes
-
-      DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-       if(mod(cj,2) .eq. 0)THEN
-        is=1 ! even rows for mass points (2,4,6,8)
-       else
-        is=0 ! odd rows for mass points  (1,3,5,7)
-       endif
-       DO ck = ckts, ckte
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-            IF(IS==0)THEN    ! (2,4,6,8)
-             AVGV = CFLD(CI,CK,CJ+1) + CFLD(CI,CK,CJ-1) + CFLD(CI+1,CK,CJ+1) + CFLD(CI+1,CK,CJ-1)
-            ELSE
-             AVGV = CFLD(CI,CK,CJ+1) + CFLD(CI,CK,CJ-1) + CFLD(CI-1,CK,CJ+1) + CFLD(CI-1,CK,CJ-1)
-            ENDIF
-            CFLDNEW(CI,CK,CJ) = (AVGV + 4*CFLD(CI,CK,CJ)) / 8.0
-        ENDDO
-       ENDDO
-      ENDDO
-
-      DO cj = MAX(jpos+1,cjts),MIN(jpos+(njde-njds)/nrj-1,cjte)  ! exclude top and bottom BCs
-       if(mod(cj,2) .eq. 0)THEN
-        is=1 ! even rows for mass points (2,4,6,8)
-       else
-        is=0 ! odd rows for mass points  (1,3,5,7)
-       endif
-       DO ck = ckts, ckte
-        DO ci = MAX(ipos+is,cits),MIN(ipos+(nide-nids)/nri-1,cite) ! excludes LBCs
-           CFLD(CI,CK,CJ) = CFLDNEW(CI,CK,CJ)
-        ENDDO
-       ENDDO
-      ENDDO
-
-      ENDDO
-
-   END SUBROUTINE nmm_vsmoother_ikj
-!======================================================================================
-!   End of gopal's doing
-!======================================================================================
-!======================================================================================
-!   New NMM Interpolation Routines; wrappers around module_interp_nmm (Sam's doing)
-!======================================================================================
-
-!--------------------------------------------------------------------------------------
-   
-   subroutine NoInterpMany(cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios                         
-        cpint,npint, cpd,npd, cq,nq, ct,nt,   &
-        cfis,nfis)
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-
-     !  parent domain
-
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(IN)           :: CFLD,cpint,ct,cq
-     REAL,DIMENSION(cims:cime,cjms:cjme),             INTENT(IN)           :: cpd,cfis
-
-     !  nested domain
-
-     REAL,DIMENSION(nims:nime,njms:njme),             INTENT(IN)           :: nFIS,npd
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(IN)           :: NFLD,npint,nt,nq
-
-   end subroutine NoInterpMany
-
-   subroutine DownAged2D(junk,                &
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj, &
-        c_age,n_age, cfld)
-
-     use module_interp_nmm, only: c2n_copy2d_nomask
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     integer, intent(in) :: c_age
-     integer, intent(inout) :: n_age
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme),   INTENT(IN)           :: CFLD,junk
-     REAL,DIMENSION(nims:nime,njms:njme),   INTENT(INOUT)        :: nfld
-
-     logical bad
-     integer i,j
-     ! Skip if the nest is up-to-date with the parent.  Special age
-     ! of 0 means the values are invalid (parent just moved, nest
-     ! just moved or one was initialized).
-     if(n_age==c_age .and. n_age/=0 .and. c_age/=0) then
-        !write(0,*) 'Grid ',grid_id,' not storing pdyn in DownAged2D'
-        !write(0,*) '  reason: n_age=',n_age,' c_age=',c_age
-        return
-     end if
-     n_age=c_age
-     !write(0,*) 'Storing grid ',parent_grid_id,' pdyn_smooth in grid ',grid_id,' pdyn_parent'
-
-     call c2n_copy2d_nomask(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,  &
-          cfld,nfld,                &
-          cims, cime, cjms, cjme,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte, .true.)
-
-   end subroutine DownAged2D
-
-   subroutine ForceNearSST   (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj, &
-        cactivate, nactivate)
-     use module_interp_nmm, only: c2n_sst
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     integer, intent(In), dimension(*) :: cactivate, nactivate
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme),   INTENT(INOUT)        :: nfld
-
-     if(nactivate(1)/=1) return
-
-     call c2n_sst(hnear_i,hnear_j,          &
-          cfld,nfld,                &
-          cims, cime, cjms, cjme,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-   end subroutine ForceNearSST
-
-   subroutine DownNear      (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios         
-     use module_interp_nmm, only: c2n_near2d, c2n_near3d
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme),   INTENT(INOUT)          :: nfld
-
-     if(nkts==nkte) then
-        call c2n_near2d(hnear_i,hnear_j,   &
-             cfld,nfld,imask,                       &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte)
-     else
-        call c2n_near3d(hnear_i,hnear_j,   &
-             cfld,nfld,imask,                       &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte)
-     endif
-   end subroutine DownNear
-
-   subroutine DownNearIKJ   (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios         
-     use module_interp_nmm, only: c2n_near3dikj
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,ckms:ckme,cjms:cjme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,nkms:nkme,njms:njme),   INTENT(INOUT)          :: nfld
-     
-     if(nkts==nkte) &
-          call wrf_error_fatal('IJ interpolation of an IKJ variable is not supported and makes no sense anyway.  Use DownNear instead.')
-
-     call c2n_near3dikj(hnear_i,hnear_j,   &
-          cfld,nfld,imask,                       &
-          cims, cime, cjms, cjme, ckms, ckme,  &
-          nids, nide, njds, njde, nkds, nkde,  &
-          nims, nime, njms, njme, nkms, nkme,  &
-          nits, nite, njts, njte, nkts, nkte)
-   end subroutine DownNearIKJ
-
-   subroutine UpNear(cfld,                    &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-     use module_interp_store
-     use module_interp_nmm, only: n2c_near2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme),   INTENT(IN)          :: nfld
-
-     if(nkts/=nkte) &
-          call wrf_error_fatal('Up nearest neighbor interpolation is not implemented.')
-
-     call n2c_near2d( cfld,nfld,ipos,jpos,                  &
-          cids, cide, cjds, cjde,   &
-          cims, cime, cjms, cjme,   &
-          cits, cite, cjts, cjte,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-   end subroutine UpNear
-
-   subroutine DownINear      (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios         
-     use module_interp_nmm, only: c2n_inear2d
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     INTEGER,DIMENSION(cims:cime,cjms:cjme),   INTENT(IN)           :: CFLD
-     INTEGER,DIMENSION(nims:nime,njms:njme),   INTENT(INOUT)          :: nfld
-
-     if(nkts/=nkte) &
-          call wrf_error_fatal('3D integer nearest neighbor interpolation is not implemented.')
-
-     call c2n_inear2d(hnear_i,hnear_j,   &
-          cfld,nfld,imask,                       &
-          cims, cime, cjms, cjme,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-   end subroutine DownINear
-
-   subroutine UpINear        (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-     use module_interp_store
-     use module_interp_nmm, only: n2c_inear2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     INTEGER,DIMENSION(cims:cime,cjms:cjme),   INTENT(OUT)           :: CFLD
-     INTEGER,DIMENSION(nims:nime,njms:njme),   INTENT(IN)          :: nfld
-
-     if(nkts/=nkte) &
-          call wrf_error_fatal('3D integer nearest neighbor interpolation is not implemented.')
-
-     call n2c_inear2d( cfld,nfld,ipos,jpos,                  &
-          cids, cide, cjds, cjde,   &
-          cims, cime, cjms, cjme,   &
-          cits, cite, cjts, cjte,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-   end subroutine UpINear
-
-   subroutine DownMass      (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        emethod, evalue)                         ! extrapolation method
-     use module_interp_nmm, only: c2n_mass, c2n_copy2d
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj, emethod
-     real, intent(in) :: evalue
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(INOUT)          :: nfld
-
-     if(nkts==nkte) then
-        call c2n_copy2d(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,  &
-             cfld,nfld,imask,                &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call c2n_mass(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,   &
-             cfld,nfld,iinfo,winfo,imask,          &
-             emethod,evalue,                       &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte)
-     endif
-   end subroutine DownMass
-
-   subroutine DownMassIKJ   (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        emethod, evalue)                         ! extrapolation method
-     use module_interp_nmm, only: c2n_massikj
-     use module_interp_store
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj,emethod
-     real, intent(in) :: evalue
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,ckms:ckme,cjms:cjme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,nkms:nkme,njms:njme),   INTENT(INOUT)          :: nfld
-
-     if(nkts==nkte) &
-          call wrf_error_fatal('IKJ 2D interpolation of an IJ array is not implemented (and makes no sense anyway).  Use DownCopy instead.')
-     call c2n_massikj(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,   &
-          cfld,nfld,iinfo,winfo,imask,          &
-          emethod, evalue,                      &
-          cims, cime, cjms, cjme, ckms, ckme,   &
-          nids, nide, njds, njde, nkds, nkde,   &
-          nims, nime, njms, njme, nkms, nkme,   &
-          nits, nite, njts, njte, nkts, nkte)
-   end subroutine DownMassIKJ
-
-   subroutine UpMassIKJ     (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios                         
-        emethod, evalue)                         ! extrapolation method
-     use module_interp_store
-     use module_interp_nmm, only: n2c_massikj, n2c_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj, emethod
-     real, intent(in) :: evalue
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,ckms:ckme,cjms:cjme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,nkms:nkme,njms:njme),   INTENT(IN)          :: nfld
-
-     if(nkts==nkte) then
-        call n2c_copy2d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde,   &
-             cims, cime, cjms, cjme,   &
-             cits, cite, cjts, cjte,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call n2c_massikj(&
-             cfld,nfld,parent_iinfo,parent_winfo,  &
-             ipos,jpos,emethod, evalue,            &
-             cids, cide, cjds, cjde, ckds, ckde,   &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             cits, cite, cjts, cjte, ckts, ckte,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte)
-     endif
-   end subroutine UpMassIKJ
-
-   subroutine UpMass        (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios                         
-        emethod, evalue)                         ! extrapolation method
-     use module_interp_store
-     use module_interp_nmm, only: n2c_mass, n2c_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj, emethod
-     real, intent(in) :: evalue
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(IN)          :: nfld
-
-     if(nkts==nkte) then
-        call n2c_copy2d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde,   &
-             cims, cime, cjms, cjme,   &
-             cits, cite, cjts, cjte,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call n2c_mass(&
-             cfld,nfld,parent_iinfo,parent_winfo,  &
-             ipos,jpos,emethod, evalue,            &
-             cids, cide, cjds, cjde, ckds, ckde,   &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             cits, cite, cjts, cjte, ckts, ckte,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte)
-     endif
-   end subroutine UpMass
-
-   subroutine UpCopy         (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-
-     use module_interp_nmm, only: n2c_copy3d, n2c_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(IN)          :: nfld
-
-     if(nkts==nkte) then
-        call n2c_copy2d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde,   &
-             cims, cime, cjms, cjme,   &
-             cits, cite, cjts, cjte,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call n2c_copy3d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde, ckds, ckde,   &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             cits, cite, cjts, cjte, ckts, ckte,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .true.)
-     endif
-   end subroutine UpCopy
-
-   subroutine UpMax          (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-
-     use module_interp_nmm, only: n2c_max3d, n2c_max2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(IN)          :: nfld
-
-     if(nkts==nkte) then
-        call n2c_max2d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde,   &
-             cims, cime, cjms, cjme,   &
-             cits, cite, cjts, cjte,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call n2c_max3d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde, ckds, ckde,   &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             cits, cite, cjts, cjte, ckts, ckte,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .true.)
-     endif
-   end subroutine UpMax
-
-   subroutine DownCopy      (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-     use module_interp_store
-     use module_interp_nmm, only: c2n_copy3d, c2n_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(INOUT)          :: nfld
-
-     if(nkts==nkte) then
-        call c2n_copy2d(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,  &
-             cfld,nfld,imask,                &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .true.)
-     else
-        call c2n_copy3d(IIH,JJH,HBWGT1,HBWGT2,HBWGT3,HBWGT4,  &
-             cfld,nfld,imask,                &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .true.)
-     endif
-   end subroutine DownCopy
-
-   subroutine UpVel   (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-
-     use module_interp_nmm, only: n2c_copy3d, n2c_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(OUT)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(IN)          :: nfld
-
-     if(nkts==nkte) then
-        call n2c_copy2d( cfld,nfld,ipos,jpos,             &
-             cids, cide, cjds, cjde,   &
-             cims, cime, cjms, cjme,   &
-             cits, cite, cjts, cjte,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .false.)
-     else
-        call n2c_copy3d(&
-             cfld,nfld,ipos,jpos,                   &
-             cids, cide, cjds, cjde, ckds, ckde,   &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             cits, cite, cjts, cjte, ckts, ckte,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .false.)
-     endif
-   end subroutine UpVel
-
-   subroutine DownVel      (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width for interp
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj)                                ! nest ratios                         
-     use module_interp_store
-     use module_interp_nmm, only: c2n_copy3d, c2n_copy2d
-     implicit none
-     LOGICAL,INTENT(IN) :: xstag, ystag
-     INTEGER,INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,ipos,jpos,nri,nrj
-
-     INTEGER,DIMENSION(nims:nime,njms:njme),          INTENT(IN)           :: IMASK
-     REAL,DIMENSION(cims:cime,cjms:cjme,ckms:ckme),   INTENT(IN)           :: CFLD
-     REAL,DIMENSION(nims:nime,njms:njme,nkms:nkme),   INTENT(INOUT)          :: nfld
-
-     if(nkts==nkte) then
-        call c2n_copy2d(IIV,JJV,VBWGT1,VBWGT2,VBWGT3,VBWGT4,  &
-             cfld,nfld,imask,                &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .false.)
-     else
-        call c2n_copy3d(IIV,JJV,VBWGT1,VBWGT2,VBWGT3,VBWGT4,  &
-             cfld,nfld,imask,                &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .false.)
-     endif
-   end subroutine DownVel
-
-   SUBROUTINE BdyMass (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        c_bxs,n_bxs,                          &
-        c_bxe,n_bxe,                          &
-        c_bys,n_bys,                          &
-        c_bye,n_bye,                          &
-        c_btxs,n_btxs,                        &
-        c_btxe,n_btxe,                        &
-        c_btys,n_btys,                        &
-        c_btye,n_btye,                        &
-        emethod,evalue)                          ! Extrapolation information
-
-     !     use module_state_description
-     USE module_configure
-     USE module_wrf_error
-     use module_interp_store
-     use module_interp_nmm, only: c2b_mass, c2b_copy2d
-
-     IMPLICIT NONE
-     integer, parameter :: bdyw = 1
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,                                  &
-          ipos, jpos,                           &
-          nri, nrj, emethod
-     real, intent(in) :: evalue
-
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     REAL, DIMENSION ( cims:cime, cjms:cjme, ckms:ckme ) :: cfld,ccwm
-     REAL, DIMENSION ( nims:nime, njms:njme, nkms:nkme ) :: nfld,ncwm
-     !
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-
-     ! Output field boundary info:
-     real,dimension(nims:nime,nkms:nkme,bdyw) :: n_bys,n_bye
-     real,dimension(njms:njme,nkms:nkme,bdyw) :: n_bxs,n_bxe
-
-     ! Unused parameters:
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_bxs,c_bxe,c_bys,c_bye
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_btxs,n_btxs,c_btxe,n_btxe,c_btys,n_btys,c_btye,n_btye
-
-     if(nkts==nkte) then
-        call c2b_copy2d(iih,jjh,                   &
-             hbwgt1,hbwgt2,hbwgt3,hbwgt4,          &
-             cfld,                                 &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte,   &
-             .true.)
-     else
-        call c2b_mass(iih,jjh,                     &
-             hbwgt1,hbwgt2,hbwgt3,hbwgt4,          &
-             cfld,                                 &
-             iinfo_bxs,iinfo_bxe,iinfo_bys,iinfo_bye,          &
-             winfo_bxs,winfo_bxe,winfo_bys,winfo_bye,          &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             emethod, evalue,                      &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte)
-     endif
-   END SUBROUTINE BdyMass
-
-   !
-   !--------------------------------------------------------------------------------------
-   !
-   SUBROUTINE BdyCopy  (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        c_bxs,n_bxs,                          &
-        c_bxe,n_bxe,                          &
-        c_bys,n_bys,                          &
-        c_bye,n_bye,                          &
-        c_btxs,n_btxs,                        &
-        c_btxe,n_btxe,                        &
-        c_btys,n_btys,                        &
-        c_btye,n_btye)
-
-     !     use module_state_description
-     USE module_configure
-     USE module_wrf_error
-     use module_interp_nmm, only: c2b_copy3d, c2b_copy2d
-     use module_interp_store
-
-     IMPLICIT NONE
-     integer, parameter :: bdyw = 1
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,                                  &
-          ipos, jpos,                           &
-          nri, nrj
-
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     REAL, DIMENSION ( cims:cime, cjms:cjme, ckms:ckme ) :: cfld
-     REAL, DIMENSION ( nims:nime, njms:njme, nkms:nkme ) :: nfld
-     !
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-
-     ! Output field boundary info:
-     real,dimension(nims:nime,nkms:nkme,bdyw) :: n_bys,n_bye
-     real,dimension(njms:njme,nkms:nkme,bdyw) :: n_bxs,n_bxe
-
-     ! Nest-parent horizontal interpolation information:
-     ! Unused parameters:
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_bxs,c_bxe,c_bys,c_bye
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_btxs,n_btxs,c_btxe,n_btxe,c_btys,n_btys,c_btye,n_btye
-
-     if(nkts==nkte) then
-        call c2b_copy2d(iiv,jjv,                   &
-             vbwgt1,vbwgt2,vbwgt3,vbwgt4,          &
-             cfld,                                 &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .false.)
-     else
-        call c2b_copy3d(iih,jjh,                     &
-             hbwgt1,hbwgt2,hbwgt3,hbwgt4,          &
-             cfld,                                 &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .false.)
-     endif
-
-   END SUBROUTINE BdyCopy
-   !
-   !--------------------------------------------------------------------------------------
-   !
-   subroutine NoInterp()
-   end subroutine NoInterp
-   !
-   !--------------------------------------------------------------------------------------
-   !
-   SUBROUTINE BdyVel  (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        c_bxs,n_bxs,                          &
-        c_bxe,n_bxe,                          &
-        c_bys,n_bys,                          &
-        c_bye,n_bye,                          &
-        c_btxs,n_btxs,                        &
-        c_btxe,n_btxe,                        &
-        c_btys,n_btys,                        &
-        c_btye,n_btye)
-
-     !     use module_state_description
-     USE module_configure
-     USE module_wrf_error
-     use module_interp_nmm, only: c2b_copy3d, c2b_copy2d
-     use module_interp_store
-
-     IMPLICIT NONE
-     integer, parameter :: bdyw = 1
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,                                  &
-          ipos, jpos,                           &
-          nri, nrj
-
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     REAL, DIMENSION ( cims:cime, cjms:cjme, ckms:ckme ) :: cfld
-     REAL, DIMENSION ( nims:nime, njms:njme, nkms:nkme ) :: nfld
-     !
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-
-     ! Output field boundary info:
-     real,dimension(nims:nime,nkms:nkme,bdyw) :: n_bys,n_bye
-     real,dimension(njms:njme,nkms:nkme,bdyw) :: n_bxs,n_bxe
-
-     ! Nest-parent horizontal interpolation information:
-     ! Unused parameters:
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_bxs,c_bxe,c_bys,c_bye
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_btxs,n_btxs,c_btxe,n_btxe,c_btys,n_btys,c_btye,n_btye
-
-     if(nkts==nkte) then
-        call c2b_copy2d(iiv,jjv,                     &
-             vbwgt1,vbwgt2,vbwgt3,vbwgt4,          &
-             cfld,                                 &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             cims, cime, cjms, cjme,   &
-             nids, nide, njds, njde,   &
-             nims, nime, njms, njme,   &
-             nits, nite, njts, njte, .false.)
-     else
-        call c2b_copy3d(iiv,jjv,                     &
-             vbwgt1,vbwgt2,vbwgt3,vbwgt4,          &
-             cfld,                                 &
-             n_bxs, n_bxe, n_bys, n_bye,           &
-             cims, cime, cjms, cjme, ckms, ckme,   &
-             nids, nide, njds, njde, nkds, nkde,   &
-             nims, nime, njms, njme, nkms, nkme,   &
-             nits, nite, njts, njte, nkts, nkte, .false.)
-     endif
-   END SUBROUTINE BdyVel
-   !
-   !--------------------------------------------------------------------------------------
-   !
-   SUBROUTINE BdyNear (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        c_bxs,n_bxs,                          &
-        c_bxe,n_bxe,                          &
-        c_bys,n_bys,                          &
-        c_bye,n_bye,                          &
-        c_btxs,n_btxs,                        &
-        c_btxe,n_btxe,                        &
-        c_btys,n_btys,                        &
-        c_btye,n_btye)
-
-     !     use module_state_description
-     USE module_configure
-     USE module_wrf_error
-     use module_interp_nmm, only: c2b_near2d
-     use module_interp_store
-
-     IMPLICIT NONE
-     integer, parameter :: bdyw = 1
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,                                  &
-          ipos, jpos,                           &
-          nri, nrj
-
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     REAL, DIMENSION ( cims:cime, cjms:cjme ) :: cfld
-     REAL, DIMENSION ( nims:nime, njms:njme ) :: nfld
-
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-
-     ! Output field boundary info:
-     real,dimension(nims:nime,1,bdyw) :: n_bys,n_bye
-     real,dimension(njms:njme,1,bdyw) :: n_bxs,n_bxe
-
-     ! Unused parameters:
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_bxs,c_bxe,c_bys,c_bye
-     REAL,  DIMENSION( * ), INTENT(INOUT) :: c_btxs,n_btxs,c_btxe,n_btxe,c_btys,n_btys,c_btye,n_btye
-
-     if(nkts/=nkte) &
-          call wrf_error_fatal('3D boundary nearest neighbor interpolation is not implemented.')
-     call c2b_near2d(hnear_i,hnear_j,cfld,      &
-          n_bxs, n_bxe, n_bys, n_bye,           &
-          cims, cime, cjms, cjme,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-
-   END SUBROUTINE BdyNear
-
-   SUBROUTINE BdyINear (cfld,                                 &  ! CD field
-        cids, cide, ckds, ckde, cjds, cjde,   &
-        cims, cime, ckms, ckme, cjms, cjme,   &
-        cits, cite, ckts, ckte, cjts, cjte,   &
-        nfld,                                 &  ! ND field
-        nids, nide, nkds, nkde, njds, njde,   &
-        nims, nime, nkms, nkme, njms, njme,   &
-        nits, nite, nkts, nkte, njts, njte,   &
-        shw,                                  &  ! stencil half width
-        imask,                                &  ! interpolation mask
-        xstag, ystag,                         &  ! staggering of field
-        ipos, jpos,                           &  ! Position of lower left of nest in CD
-        nri, nrj,                             &  ! nest ratios
-        c_bxs,n_bxs,                          &
-        c_bxe,n_bxe,                          &
-        c_bys,n_bys,                          &
-        c_bye,n_bye,                          &
-        c_btxs,n_btxs,                        &
-        c_btxe,n_btxe,                        &
-        c_btys,n_btys,                        &
-        c_btye,n_btye)
-
-     !     use module_state_description
-     USE module_configure
-     USE module_wrf_error
-     use module_interp_nmm, only: c2b_inear2d
-     use module_interp_store
-
-     IMPLICIT NONE
-     integer, parameter :: bdyw = 1
-
-     INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
-          cims, cime, ckms, ckme, cjms, cjme,   &
-          cits, cite, ckts, ckte, cjts, cjte,   &
-          nids, nide, nkds, nkde, njds, njde,   &
-          nims, nime, nkms, nkme, njms, njme,   &
-          nits, nite, nkts, nkte, njts, njte,   &
-          shw,                                  &
-          ipos, jpos,                           &
-          nri, nrj
-
-     LOGICAL, INTENT(IN) :: xstag, ystag
-
-     INTEGER, DIMENSION ( cims:cime, cjms:cjme ) :: cfld
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: nfld
-
-     INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-
-     ! Output field boundary info:
-     integer,dimension(nims:nime,1,bdyw) :: n_bys,n_bye
-     integer,dimension(njms:njme,1,bdyw) :: n_bxs,n_bxe
-
-     ! Unused parameters:
-     integer,  DIMENSION( * ), INTENT(INOUT) :: c_bxs,c_bxe,c_bys,c_bye
-     integer,  DIMENSION( * ), INTENT(INOUT) :: c_btxs,n_btxs,c_btxe,n_btxe,c_btys,n_btys,c_btye,n_btye
-
-     if(nkts/=nkte) &
-          call wrf_error_fatal('3D boundary nearest neighbor interpolation is not implemented.')
-     call c2b_inear2d(hnear_i,hnear_j,cfld,      &
-          n_bxs, n_bxe, n_bys, n_bye,           &
-          cims, cime, cjms, cjme,   &
-          nids, nide, njds, njde,   &
-          nims, nime, njms, njme,   &
-          nits, nite, njts, njte)
-
-   END SUBROUTINE BdyINear
-
-!--------------------------------------------------------------------------------------
-! End of Sam's doing
-!--------------------------------------------------------------------------------------
-
-#endif
-
-! Third block of ARW-specific routines
-#if ! defined(NMM_CORE) || NMM_CORE!=1
 
    SUBROUTINE interp_mask_field ( enable,                  &  ! says whether to allow interpolation or just the bcasts
                                        cfld,                     &  ! CD field
@@ -5937,7 +4373,7 @@ END MODULE module_interp_info
                            xstag, ystag,                         &  ! staggering of field
                            ipos, jpos,                           &  ! Position of lower left of nest in CD
                            nri, nrj,                             &  ! nest ratios
-                           clu, nlu, cflag, nflag ) 
+                           clu, nlu, cflag, nflag )
 
       USE module_configure
       USE module_wrf_error
@@ -6036,9 +4472,9 @@ END MODULE module_interp_info
                   IF ( ( NINT(nlu(ni, nj)) .EQ. iswater ) ) THEN
 
                      ! If the surrounding coarse values are all WATER points,
-                     ! i.e. open water, this is a simple 4-pt interpolation. 
+                     ! i.e. open water, this is a simple 4-pt interpolation.
                      ! If the surrounding coarse values are all LAND points,
-                     ! i.e. this is a 1-cell lake, we have no better way to 
+                     ! i.e. this is a 1-cell lake, we have no better way to
                      ! come up with the value than to do a simple 4-pt interpolation.
 
                      IF ( ALL( clu(ci:ci+1,cj:cj+1) == iswater ) .OR. &
@@ -6076,9 +4512,9 @@ END MODULE module_interp_info
                    ELSE IF ( ( NINT(nlu(ni, nj)) .NE. iswater ) ) THEN
 
                      ! If the surrounding coarse values are all LAND points,
-                     ! this is a simple 4-pt interpolation. 
+                     ! this is a simple 4-pt interpolation.
                      ! If the surrounding coarse values are all WATER points,
-                     ! i.e. this is a 1-cell island, we have no better way to 
+                     ! i.e. this is a 1-cell island, we have no better way to
                      ! come up with the value than to do a simple 4-pt interpolation.
 
                      IF ( ALL( clu(ci:ci+1,cj:cj+1) == iswater ) .OR. &
@@ -6089,7 +4525,7 @@ END MODULE module_interp_info
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
 
-                    !  If there are some water points and some land points, take an average.                  
+                    !  If there are some water points and some land points, take an average.
                     ELSE
                       icount = 0
                       sum = 0
@@ -6193,27 +4629,27 @@ END MODULE module_interp_info
         IF ( enable ) THEN
 
           DO nj = njts, njte
-             cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+             cj = jpos + (nj-1) / nrj     ! j coord of CD point
             DO nk = nkts, nkte
                ck = nk
                DO ni = nits, nite
-                  ci = ipos + (ni-1) / nri      ! j coord of CD point 
+                  ci = ipos + (ni-1) / nri      ! j coord of CD point
 
                   IF ( imask(ni, nj) .NE. 1 ) cycle
 
                   IF ( ( NINT(nlu(ni, nj)) .EQ. iswater ) ) then
 
-                     IF ( ( NINT(clu(ci  ,cj  )) .EQ. iswater ) ) then 
+                     IF ( ( NINT(clu(ci  ,cj  )) .EQ. iswater ) ) then
                        nfld(ni,nk,nj) = cfld(ci,ck,cj)
-                     ELSE 
+                     ELSE
                        nfld(ni,nk,nj) = -1
                      ENDIF
 
                   ELSE IF ( ( NINT(nlu(ni, nj)) .NE. iswater ) ) THEN
 
-                      IF ( ( NINT(clu(ci  ,cj  )) .NE. iswater ) ) THEN 
+                      IF ( ( NINT(clu(ci  ,cj  )) .NE. iswater ) ) THEN
                          nfld(ni,nk,nj) = cfld(ci,ck,cj)
-                      ELSE 
+                      ELSE
                          nfld(ni,nk,nj) = -1
                       ENDIF
 
@@ -6227,7 +4663,7 @@ END MODULE module_interp_info
                 DO ni = nits, nite
                   IF ( imask(ni, nj) .NE. 1 ) cycle
                   IF ( nfld(ni,nk,nj) .EQ. -1 ) THEN
-                     IF ( NINT(nlu(ni,nj)) .EQ. iswater ) THEN 
+                     IF ( NINT(nlu(ni,nj)) .EQ. iswater ) THEN
                         nfld(ni,nk,nj) = isoilwater
                      END IF
                   END IF
@@ -6245,12 +4681,12 @@ END MODULE module_interp_info
             icount_land  = 0
             avg_water    = 0
             avg_land     = 0
-           
+
             DO nj = njts, njte
-               cj = jpos + (nj-1) / nrj     ! j coord of CD point 
+               cj = jpos + (nj-1) / nrj     ! j coord of CD point
                DO nk = nkts, nkte
                   DO ni = nits, nite
-                     ci = ipos + (ni-1) / nri      ! j coord of CD point 
+                     ci = ipos + (ni-1) / nri      ! j coord of CD point
                      IF ( imask(ni, nj) .NE. 1 ) cycle
                      IF ( nfld(ni,nk,nj) .EQ. -1 ) THEN
                         ist = MAX (ci-max_search,cits)
@@ -6329,7 +4765,7 @@ END MODULE module_interp_info
       deallocate (icount_land)
 
    END SUBROUTINE interp_mask_soil
- 
+
 !=========================================================================
 
 ! Lagrange interpolating polynomials, set up as a quadratic, with an average of
@@ -6391,23 +4827,23 @@ END MODULE module_interp_info
      INTEGER, EXTERNAL :: compute_CGLL
 
      !  This stag stuff is to keep us away from the outer most row
-     !  and column for the unstaggered directions.  We are going to 
+     !  and column for the unstaggered directions.  We are going to
      !  consider "U" an xstag variable and "V" a ystag variable.  The
      !  vertical staggering is handled in the actual arguments.  The
      !  ckte and nkte are the ending vertical dimensions for computations
      !  for this particular variable.
 
      !  The ioff and joff are offsets due to the staggering.  It is a lot
-     !  simpler with ioff and joff if 
+     !  simpler with ioff and joff if
      !  u var => ioff=1
      !  v var => joff=1
      !  otherwise zero.
      !  Note that is OPPOSITE of the istag, jstag vars.  The stag variables are
-     !  used for the domain dimensions, the offset guys are used in the 
+     !  used for the domain dimensions, the offset guys are used in the
      !  determination of grid points between the CG and FG
 
      IF ( xstag ) THEN
-        istag = 0 
+        istag = 0
         ioff  = 1
      ELSE
         istag = 1
@@ -6415,7 +4851,7 @@ END MODULE module_interp_info
      END IF
 
      IF ( ystag ) THEN
-        jstag = 0 
+        jstag = 0
         joff  = 1
      ELSE
         jstag = 1
@@ -6423,7 +4859,7 @@ END MODULE module_interp_info
      END IF
 
      !  If this is a projection where the nest is over the pole, and
-     !  we are using the parent to interpolate the longitudes, then 
+     !  we are using the parent to interpolate the longitudes, then
      !  we are going to have longitude troubles.  If this is the case,
      !  stop the model right away.
 
@@ -6432,8 +4868,8 @@ END MODULE module_interp_info
      min_lat = +90
      DO nj = njts, MIN(njde-jstag,njte)
         DO ni = nits, MIN(nide-istag,nite)
-           max_lat = MAX ( nlat_in(ni,nj) , max_lat )       
-           min_lat = MIN ( nlat_in(ni,nj) , min_lat )       
+           max_lat = MAX ( nlat_in(ni,nj) , max_lat )
+           min_lat = MIN ( nlat_in(ni,nj) , min_lat )
         END DO
      END DO
 
@@ -6454,8 +4890,8 @@ END MODULE module_interp_info
         cj = compute_CGLL ( nj , jpos , nrj , jstag )
         DO ni = nits, MIN(nide-istag,nite)
            ci = compute_CGLL ( ni , ipos , nri , istag )
-           max_lon = MAX ( cfld_inp(ci,1,cj) , max_lon )       
-           min_lon = MIN ( cfld_inp(ci,1,cj) , min_lon )       
+           max_lon = MAX ( cfld_inp(ci,1,cj) , max_lon )
+           min_lon = MIN ( cfld_inp(ci,1,cj) , min_lon )
         END DO
      END DO
 
@@ -6512,7 +4948,7 @@ END MODULE module_interp_info
         !  |=========|=========|=========|=========|
 
         !  To interpolate to FG point 4, 5, or 6 we will use CG points: A through P.  It is
-        !  sufficient to find the lower left corner of a 4-point interpolation, and then extend 
+        !  sufficient to find the lower left corner of a 4-point interpolation, and then extend
         !  each side by one unit.
 
         !  Here are the lower left hand corners of the following FG points:
@@ -6534,7 +4970,7 @@ END MODULE module_interp_info
           !  Loop over each i-index on this tile for the nested domain.
 
            i_loop : DO ni = nits, MIN(nide-istag,nite)
- 
+
               !  The coarse grid location that is to the lower left of the FG point.
 
               ci = compute_CGLL ( ni , ipos , nri , istag )
@@ -6592,19 +5028,19 @@ END MODULE module_interp_info
 
                  !  I-direction location of "A", "E", "I", "M"
 
-                 cxm1 = nest_loc_of_cg ( ci-1 , ipos , nri , ioff ) 
+                 cxm1 = nest_loc_of_cg ( ci-1 , ipos , nri , ioff )
 
                  !  I-direction location of "B", "F", "J", "N"
 
-                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff ) 
+                 cxp0 = nest_loc_of_cg ( ci   , ipos , nri , ioff )
 
                  !  I-direction location of "C", "G", "K", "O"
 
-                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff ) 
+                 cxp1 = nest_loc_of_cg ( ci+1 , ipos , nri , ioff )
 
                  !  I-direction location of "D", "H", "L", "P"
 
-                 cxp2 = nest_loc_of_cg ( ci+2 , ipos , nri , ioff ) 
+                 cxp2 = nest_loc_of_cg ( ci+2 , ipos , nri , ioff )
 
                  !  Value at "a"
 
@@ -6636,19 +5072,19 @@ END MODULE module_interp_info
 
                  !  J-direction location of "A", "B", "C", "D"
 
-                 cym1 = nest_loc_of_cg ( cj-1 , jpos , nrj , joff ) 
+                 cym1 = nest_loc_of_cg ( cj-1 , jpos , nrj , joff )
 
-                 !  J-direction location of "E", "F", "G", "H" 
+                 !  J-direction location of "E", "F", "G", "H"
 
-                 cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff ) 
+                 cyp0 = nest_loc_of_cg ( cj   , jpos , nrj , joff )
 
                  !  J-direction location of "I", "J", "K", "L"
 
-                cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff ) 
+                cyp1 = nest_loc_of_cg ( cj+1 , jpos , nrj , joff )
 
                  !  J-direction location of "M", "N", "O", "P"
 
-                 cyp2 = nest_loc_of_cg ( cj+2 , jpos , nrj , joff ) 
+                 cyp2 = nest_loc_of_cg ( cj+2 , jpos , nrj , joff )
 
                  !  Value at "*"
 
@@ -6672,7 +5108,3 @@ END MODULE module_interp_info
     END DO
 
    END SUBROUTINE interp_fcn_lagr_ll
-#endif 
-! End of third block of ARW-only routines
-
- 

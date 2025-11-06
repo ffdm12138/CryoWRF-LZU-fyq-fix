@@ -258,7 +258,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -278,9 +278,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_dom_ti_real ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -290,7 +301,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -300,7 +311,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -310,7 +321,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -320,7 +331,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -331,7 +342,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -354,7 +365,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -377,7 +388,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -461,7 +472,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -481,9 +492,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_dom_ti_real ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -493,7 +515,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -503,7 +525,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -513,7 +535,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -523,7 +545,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_dom_ti_double ( Hndl, Element,   Data, &
                               locCount, Outcount, Status )
 #  else
@@ -534,7 +556,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -557,7 +579,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -580,7 +602,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -666,7 +688,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -686,9 +708,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_dom_ti_real ( Hndl, Element,   Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -698,7 +731,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -708,7 +741,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -718,7 +751,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -728,7 +761,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -739,7 +772,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -762,7 +795,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -785,7 +818,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -869,7 +902,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -889,9 +922,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_dom_ti_real ( Hndl, Element,   Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -901,7 +945,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -911,7 +955,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -921,7 +965,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -931,7 +975,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_dom_ti_double ( Hndl, Element,   Data, &
                               locCount,  Status )
 #  else
@@ -942,7 +986,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -965,7 +1009,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -988,7 +1032,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_dom_ti_double ( Hndl, Element,   Data, &
                                  locCount,  Status )
 #  else
@@ -1089,6 +1133,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
@@ -1247,6 +1297,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
@@ -1407,6 +1463,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
@@ -1565,6 +1627,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_double ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
@@ -1725,6 +1793,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_integer ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_integer ( Hndl, Element,   Data, &
@@ -1883,6 +1957,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_integer ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_integer ( Hndl, Element,   Data, &
@@ -2043,6 +2123,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_integer ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_integer ( Hndl, Element,   Data, &
@@ -2201,6 +2287,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_integer ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_integer ( Hndl, Element,   Data, &
@@ -2361,6 +2453,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_logical ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_logical ( Hndl, Element,   Data, &
@@ -2519,6 +2617,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_logical ( Hndl, Element,   Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_logical ( Hndl, Element,   Data, &
@@ -2679,6 +2783,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_logical ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_logical ( Hndl, Element,   Data, &
@@ -2837,6 +2947,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_logical ( Hndl, Element,   Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_logical ( Hndl, Element,   Data, &
@@ -2997,6 +3113,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_ti_char ( Hndl, Element,   Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_ti_char ( Hndl, Element,   Data, &
@@ -3157,6 +3279,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_ti_char ( Hndl, Element,   Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_ti_char ( Hndl, Element,   Data, &
@@ -3303,7 +3431,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3323,9 +3451,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3335,7 +3474,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3345,7 +3484,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3355,7 +3494,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3365,7 +3504,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3376,7 +3515,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3399,7 +3538,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3422,7 +3561,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3506,7 +3645,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3526,9 +3665,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3538,7 +3688,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3548,7 +3698,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3558,7 +3708,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3568,7 +3718,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount, Outcount, Status )
 #  else
@@ -3579,7 +3729,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3602,7 +3752,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3625,7 +3775,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -3711,7 +3861,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -3731,9 +3881,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3743,7 +3904,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3753,7 +3914,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3763,7 +3924,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3773,7 +3934,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3784,7 +3945,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -3807,7 +3968,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -3830,7 +3991,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -3914,7 +4075,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -3934,9 +4095,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3946,7 +4118,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3956,7 +4128,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3966,7 +4138,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3976,7 +4148,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                               locCount,  Status )
 #  else
@@ -3987,7 +4159,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -4010,7 +4182,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -4033,7 +4205,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
                                  locCount,  Status )
 #  else
@@ -4134,6 +4306,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -4292,6 +4470,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -4452,6 +4636,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -4610,6 +4800,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -4770,6 +4966,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -4928,6 +5130,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -5088,6 +5296,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -5246,6 +5460,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -5406,6 +5626,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -5564,6 +5790,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -5724,6 +5956,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -5882,6 +6120,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -6042,6 +6286,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_dom_td_char ( Hndl, Element, DateStr,  Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_dom_td_char ( Hndl, Element, DateStr,  Data, &
@@ -6202,6 +6452,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_dom_td_char ( Hndl, Element, DateStr,  Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_dom_td_char ( Hndl, Element, DateStr,  Data, &
@@ -6348,7 +6604,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6368,9 +6624,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_var_ti_real ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6380,7 +6647,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6390,7 +6657,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6400,7 +6667,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6410,7 +6677,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6421,7 +6688,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6444,7 +6711,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6467,7 +6734,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6551,7 +6818,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6571,9 +6838,30 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_var_ti_real ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_pnc_get_var_ti_real ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+#ifdef PIO
+      CASE ( IO_PIO )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6583,7 +6871,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6593,7 +6881,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6603,7 +6891,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6613,7 +6901,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -6624,7 +6912,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6647,7 +6935,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6670,7 +6958,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -6756,7 +7044,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -6776,9 +7064,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_var_ti_real ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6788,7 +7087,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6798,7 +7097,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6808,7 +7107,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6818,7 +7117,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6829,7 +7128,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -6852,7 +7151,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -6875,7 +7174,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -6959,7 +7258,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -6979,9 +7278,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_var_ti_real ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -6991,7 +7301,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -7001,7 +7311,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -7011,7 +7321,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -7021,7 +7331,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                               locCount,  Status )
 #  else
@@ -7032,7 +7342,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -7055,7 +7365,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -7078,7 +7388,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_var_ti_double ( Hndl, Element,  Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -7179,6 +7489,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -7337,6 +7653,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -7497,6 +7819,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -7655,6 +7983,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_double ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -7815,6 +8149,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -7973,6 +8313,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -8133,6 +8479,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -8291,6 +8643,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -8451,6 +8809,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -8609,6 +8973,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -8769,6 +9139,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -8927,6 +9303,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -9087,6 +9469,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_ti_char ( Hndl, Element,  Varname, Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_ti_char ( Hndl, Element,  Varname, Data, &
@@ -9247,6 +9635,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_ti_char ( Hndl, Element,  Varname, Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_ti_char ( Hndl, Element,  Varname, Data, &
@@ -9393,7 +9787,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9413,9 +9807,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9425,7 +9830,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9435,7 +9840,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9445,7 +9850,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9455,7 +9860,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9466,7 +9871,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9489,7 +9894,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9512,7 +9917,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9596,7 +10001,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9616,9 +10021,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status )
+#  else
+        CALL ext_ncdpar_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9628,7 +10044,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9638,7 +10054,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9648,7 +10064,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9658,7 +10074,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount, Outcount, Status )
 #  else
@@ -9669,7 +10085,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9692,7 +10108,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9715,7 +10131,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount, Outcount, Status )
 #  else
@@ -9801,7 +10217,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -9821,9 +10237,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -9833,7 +10260,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -9843,7 +10270,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -9853,7 +10280,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -9863,7 +10290,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -9874,7 +10301,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -9897,7 +10324,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -9920,7 +10347,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -10004,7 +10431,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef NETCDF
       CASE ( IO_NETCDF   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_ncd_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -10024,9 +10451,20 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+#  ifdef DOUBLE_PRECISION
+        CALL ext_ncdpar_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status )
+#  else
+        CALL ext_ncdpar_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status )
+#  endif
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -10036,7 +10474,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef PHDF5
       CASE ( IO_PHDF5   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_phdf5_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -10046,7 +10484,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef ESMFIO
       CASE ( IO_ESMF )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_esmf_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -10056,7 +10494,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef XXX
       CASE ( IO_XXX   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_xxx_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -10066,7 +10504,7 @@ IF ( Hndl .GT. -1 ) THEN
 #endif
 #ifdef YYY
       CASE ( IO_YYY   )
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
         CALL ext_yyy_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                               locCount,  Status )
 #  else
@@ -10077,7 +10515,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB1
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr1_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -10100,7 +10538,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef GRIB2
       CASE ( IO_GRIB2   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_gr2_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -10123,7 +10561,7 @@ IF ( Hndl .GT. -1 ) THEN
 #ifdef INTIO
       CASE ( IO_INTIO   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
-#  if ( RWORDSIZE == DWORDSIZE )
+#  ifdef DOUBLE_PRECISION
            CALL ext_int_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
                                  locCount,  Status )
 #  else
@@ -10224,6 +10662,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -10382,6 +10826,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -10542,6 +10992,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -10700,6 +11156,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -10860,6 +11322,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -11018,6 +11486,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -11178,6 +11652,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -11336,6 +11816,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -11496,6 +11982,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -11654,6 +12146,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount, Outcount, Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -11814,6 +12312,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -11972,6 +12476,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
+                              locCount,  Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -12132,6 +12642,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_get_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_get_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
@@ -12292,6 +12808,12 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, IWORDSIZE )
         ENDIF
 #endif
+#ifdef NETCDFPAR
+      CASE ( IO_NETCDFPAR   )
+        CALL ext_ncdpar_put_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
+                               Status ) 
+#endif
+
 #ifdef PNETCDF
       CASE ( IO_PNETCDF   )
         CALL ext_pnc_put_var_td_char ( Hndl, Element, DateStr, Varname, Data, &

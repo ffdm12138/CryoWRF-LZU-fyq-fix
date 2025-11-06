@@ -106,7 +106,7 @@
 
     LOGICAL :: yes_use_this_data
 
-    CHARACTER(10) :: check_which_switch 
+    CHARACTER(10) :: check_which_switch
     CHARACTER(10) :: my_string
 
 
@@ -159,11 +159,10 @@
       END IF
 #endif
 
-#if ( NMM_CORE != 1 )
     IF ( .NOT. dryrun ) THEN
-   
+
        !  Does this file exist?
-   
+
        CALL wrf_inquire_filename ( fid , fname , filestate , ierr )
        IF ( ( filestate .EQ. WRF_FILE_NOT_OPENED       ) .OR. &
             ( filestate .EQ. WRF_FILE_OPENED_FOR_WRITE ) ) THEN
@@ -173,10 +172,10 @@
 
        !  Determine is the input file we are reading is acceptable given the
        !  assumptions about the current version of the modeling system.
-   
+
        CALL is_this_data_ok_to_use ( fid , yes_use_this_data )
        IF ( ( yes_use_this_data ) .OR. ( config_flags%force_use_old_data ) ) THEN
-          WRITE(wrf_err_message,*)'Input data is acceptable to use: ' // TRIM(fname) 
+          WRITE(wrf_err_message,*)'Input data is acceptable to use: ' // TRIM(fname)
           CALL wrf_debug( 0 , wrf_err_message )
        ELSE
           CALL wrf_debug( 0 , 'File name that is causing troubles = ' // TRIM(fname) )
@@ -188,9 +187,7 @@
           CALL wrf_error_fatal( wrf_err_message )
        END IF
     END IF
-#endif
 
-#if ( NMM_CORE != 1 )
     ! Verify feature consistency between model input and model nml settings
 
     IF ( .NOT. dryrun ) THEN
@@ -231,14 +228,13 @@
         END IF
       END IF
     END IF
-#endif
 
       ! INPUT ONLY (KK)
 
       IF ( switch .EQ. restart_only ) THEN
 
         ! recover the restart alarms from input if available
- 
+
         CALL wrf_get_dom_ti_integer( fid , 'MAX_WRF_ALARMS', max_wrf_alarms_compare, 1, icnt, ierr )
         IF ( max_wrf_alarms_compare .NE. MAX_WRF_ALARMS ) THEN
           WRITE(wrf_err_message,*)'MAX_WRF_ALARMS different in restart file (',max_wrf_alarms_compare,&
@@ -249,13 +245,13 @@
             IF ( grid%alarms_created(i) .AND. .NOT. i .EQ. boundary_only ) THEN
               write(alarmname,'("WRF_ALARM_ISRINGING_",i2.2)')i
               CALL wrf_get_dom_ti_integer( fid, TRIM(alarmname), iring, 1, icnt, ierr )
-  
+
               write(alarmname,'("WRF_ALARM_SECS_TIL_NEXT_RING_",i2.2)')i
               CALL wrf_get_dom_ti_integer( fid, TRIM(alarmname), seconds, 1, icnt, ierr )
               IF ( ierr .EQ. 0 &
                    .AND. seconds .GE. 0 ) THEN  ! disallow negative intervals; can happen with wrfbdy datasets
                                                 ! which keep time differently
-  
+
                 ! Get and set interval so that we are sure to have both the
                 ! interval and first ring time set correctly
                 CALL WRFU_AlarmGet( grid%alarms(i), ringinterval=interval2 )
@@ -285,13 +281,13 @@
           ENDDO
         ENDIF
 
-     
+
      !OUTPUT ONLY (KK)
 
       IF ( switch .EQ. restart_only .AND. .NOT. config_flags%override_restart_timers ) THEN
 
         ! recover the restart alarms from input if available
- 
+
         CALL wrf_get_dom_ti_integer( fid , 'MAX_WRF_ALARMS', max_wrf_alarms_compare, 1, icnt, ierr )
         IF ( max_wrf_alarms_compare .NE. MAX_WRF_ALARMS ) THEN
           WRITE(wrf_err_message,*)'MAX_WRF_ALARMS different in restart file (',max_wrf_alarms_compare,&
@@ -302,13 +298,13 @@
             IF ( grid%alarms_created(i) .AND. .NOT. i .EQ. boundary_only ) THEN
               write(alarmname,'("WRF_ALARM_ISRINGING_",i2.2)')i
               CALL wrf_get_dom_ti_integer( fid, TRIM(alarmname), iring, 1, icnt, ierr )
-  
+
               write(alarmname,'("WRF_ALARM_SECS_TIL_NEXT_RING_",i2.2)')i
               CALL wrf_get_dom_ti_integer( fid, TRIM(alarmname), seconds, 1, icnt, ierr )
               IF ( ierr .EQ. 0 &
                    .AND. seconds .GE. 0 ) THEN  ! disallow negative intervals; can happen with wrfbdy datasets
                                                 ! which keep time differently
-  
+
                 ! Get and set interval so that we are sure to have both the
                 ! interval and first ring time set correctly
                 CALL WRFU_AlarmGet( grid%alarms(i), ringinterval=interval2 )
@@ -473,7 +469,7 @@
           CALL wrf_get_dom_ti_integer ( fid , 'i_parent_start' ,    itmp , 1 , icnt , ierr3 )
        ELSE IF ( ( ( switch .EQ. auxinput1_only ) .OR. ( switch .EQ. input_only ) ) .AND. ( grid%id .EQ. 1 ) ) THEN
           itmp  = config_flags%i_parent_start
-          ierr3 = 0 
+          ierr3 = 0
        END IF
        ierr = max( ierr, ierr3 )
        IF ( itmp .NE. config_flags%i_parent_start ) THEN
@@ -489,7 +485,7 @@
           CALL wrf_get_dom_ti_integer ( fid , 'j_parent_start' ,    itmp , 1 , icnt , ierr3 )
        ELSE IF ( ( ( switch .EQ. auxinput1_only ) .OR. ( switch .EQ. input_only ) ) .AND. ( grid%id .EQ. 1 ) ) THEN
           itmp  = config_flags%j_parent_start
-          ierr3 = 0 
+          ierr3 = 0
        END IF
        ierr = max( ierr, ierr3 )
        IF ( itmp .NE. config_flags%j_parent_start ) THEN
@@ -551,8 +547,6 @@
     CALL wrf_debug ( 300 , wrf_err_message )
     CALL nl_set_stand_lon ( grid%id , config_flags%stand_lon )
 
-#if ( NMM_CORE != 1 )
-
     CALL wrf_get_dom_ti_real ( fid , 'POLE_LAT' ,  config_flags%pole_lat , 1 , icnt , ierr )
     WRITE(wrf_err_message,*)'input_wrf: wrf_get_dom_ti_real for POLE_LAT returns ',config_flags%pole_lat
     CALL wrf_debug ( 300 , wrf_err_message )
@@ -568,15 +562,12 @@
 ! written by SI have P_TOP as a metadata item; the real program and wrf model have it as a
 ! state variable. This test is to supress non-fatal but confusing messages from the model complaining
 ! that P_TOP cannot be read from the metadata for this dataset.  JM 20040905
-!
-! Note, P_TOP is not defined in the NMM core.
 
     IF ( program_name(1:7) .EQ. "REAL_EM" ) THEN
       CALL wrf_get_dom_ti_real ( fid , 'P_TOP' ,  grid%p_top , 1 , icnt , ierr )
       WRITE(wrf_err_message,*)'input_wrf: wrf_get_dom_ti_real for P_TOP returns ',grid%p_top
       CALL wrf_debug ( 300 , wrf_err_message )
     ENDIF
-#endif
 
     IF ( switch .NE. boundary_only ) THEN
       CALL wrf_get_dom_ti_real ( fid , 'GMT' ,  config_flags%gmt , 1 , icnt , ierr )
@@ -645,7 +636,7 @@
     ! The default is set to 24 somewhere, from the number of categories
     ! in the traditional USGS dataset
 
-    IF ( ( switch .EQ. input_only )       .OR. & 
+    IF ( ( switch .EQ. input_only )       .OR. &
          ( switch .EQ. auxinput1_only )   .OR. &
          ( switch .EQ. auxinput2_only ) ) THEN
       call wrf_get_dom_ti_integer(fid, "NUM_LAND_CAT", num_land_cat_compare, 1, icnt, ierr)
@@ -676,7 +667,7 @@
     IF ( ( switch .EQ. auxinput1_only ) .AND. &
          ( first_date_nml .EQ. first_date_input ) )  THEN
        CALL wrf_get_dom_ti_integer ( fid, 'NUM_METGRID_SOIL_LEVELS', itmp, 1, icnt, ierr )
-   
+
        IF ( ierr .EQ. 0 ) THEN
 
 #if (EM_CORE == 1)
@@ -741,14 +732,16 @@
                 !ELSE IF ( ( config_flags%sf_surface_physics == NOAHMPSCHEME ) .and. ( itmp == LSMSCHEME ) ) then
                 !   ! All is well.  Noah-MP and Noah have compatible wrfinput files.
 
-                IF( ( (config_flags%sf_surface_physics == SNOWPACKSCHEME)       .or. & 
-&                           (config_flags%sf_surface_physics == LSMSCHEME)      .or. &
-&                           (config_flags%sf_surface_physics == NOAHMPSCHEME) ) &
-&                           .and. &
-&                         ( (itmp == SNOWPACKSCHEME) .or. &
-&                           (itmp == LSMSCHEME)      .or. &
+                IF( ( (config_flags%sf_surface_physics == SNOWPACKSCHEME)       .or. &
+                           (config_flags%sf_surface_physics == LSMSCHEME)      .or. &
+                           (config_flags%sf_surface_physics == NOAHMPSCHEME) ) &
+                           .and. &
+                         ( (itmp == SNOWPACKSCHEME) .or. &
+                           (itmp == LSMSCHEME)      .or. &
 &                           (itmp == NOAHMPSCHEME) ) ) then
-                   ! All is well. Noah-MP and Noah have compatible wrfinput files. 
+                   ! All is well. Noah-MP and Noah have compatible wrfinput files.
+                ELSE IF ( ( config_flags%sf_surface_physics == CTSMSCHEME ) ) then
+                   ! All is well.  CTSM doesn't care about the wrfinput file.
                 ELSE
                    call wrf_message("----------------- ERROR -------------------")
                    WRITE(wrf_err_message,'("namelist    : sf_surface_physics = ",I10)') config_flags%sf_surface_physics
@@ -815,7 +808,7 @@
     ! Test here to check that config_flags%sf_urban_physics in namelist
     ! is equal to the value listed the global attributes of the wrfinput files.
     ! We only perform this check if the WRF model has sf_urban_physics turned on.
-    ! If the WRF model runs with nml sf_urban_physics==0, then any setting of the 
+    ! If the WRF model runs with nml sf_urban_physics==0, then any setting of the
     ! sf_urban_physics in the metadata is acceptable, so not test is required.
 
     IF ( config_flags%sf_urban_physics /= 0 ) THEN
@@ -987,44 +980,6 @@
 
 #endif
 
-#if (NMM_CORE == 1)
-
-    IF      ( ( switch .EQ. auxinput1_only  ) .AND. &
-              ( config_flags%auxinput1_inname(1:8) .EQ. 'wrf_real' ) ) THEN
-
-       CALL wrf_get_dom_ti_integer ( fid , 'BOTTOM-TOP_GRID_DIMENSION' ,   kde_compare , 1 , icnt , ierr3 )
-
-       !  Test to make sure that the input data is the right size.
-
-       IF ( ( ide-1 .NE. ide_compare    ) .OR. &
-            ( kde   .NE. kde_compare    ) .OR. &
-            ( jde-1 .NE. jde_compare    ) .AND. ierr3 .EQ. 0 ) THEN
-          WRITE(wrf_err_message,*)'input_wrf.F: SIZE MISMATCH:  namelist ide-1,jde-1,kde=',ide-1,jde-1,kde,&
-                                  '; input data ide,jde,kde=',ide_compare , jde_compare , kde_compare
-          CALL wrf_debug( 100, wrf_err_message )
-       ENDIF
-
-       ELSEIF ( switch .EQ. auxinput1_only ) THEN          ! assume just WPS in this branch
-         IF ( ( ide-1                           .NE. ide_compare ) .OR. &
-            ( config_flags%num_metgrid_levels .NE. kde_compare ) .OR. &
-            ( jde-1                             .NE. jde_compare ) .AND. ierr3 .EQ. 0 ) THEN
-                WRITE(wrf_err_message,*)'input_wrf.F: SIZE MISMATCH:  ',&
-                 'namelist ide-1,jde-1,num_metgrid_levels=',ide-1,jde-1,config_flags%num_metgrid_levels,&
-                 '; input data ide,jde,num_metgrid_levels=',ide_compare , jde_compare , kde_compare
-                IF (ide-1 .eq. ide_compare .AND. jde-1 .EQ. jde_compare) THEN
-                  CALL wrf_message(wrf_err_message)
-                  CALL wrf_debug ( 0, "---- ERROR: appears that the vertical dimension is wrong - quitting" )
-                  count_fatal_error = count_fatal_error + 1
-                ELSE
-                  CALL wrf_message(wrf_err_message)
-                  CALL wrf_debug ( 0, "---- ERROR: appears that I or J dimensions are wrong - quitting" )
-                  count_fatal_error = count_fatal_error + 1
-                ENDIF
-         ENDIF
-       ENDIF
-
-#endif
-
 #if (DA_CORE == 1)
     ! Test here to check that config_flags%hypsometric_opt in namelist
     ! is equal to what is in the global attributes of the wrfinput files
@@ -1087,7 +1042,7 @@
           grid%hypsometric_opt = 1
           config_flags%hypsometric_opt = 1
 	  DO loop = 1 , grid%max_dom
-            CALL nl_set_hypsometric_opt ( loop , 1 ) 
+            CALL nl_set_hypsometric_opt ( loop , 1 )
           END DO
           WRITE(wrf_err_message,*)'NOTE:  Ideal cases always use hypsometric_opt=1, regardless of namelist setting'
           CALL wrf_debug( 1 , wrf_err_message )
@@ -1098,7 +1053,7 @@
 
         !  For backward compatibility.  If we do not find the hypsometric_opt defined
         !  in the input data, this is pre version 3.4.  Most likely, the hypsometric_opt
-        !  was the default value, 1.  
+        !  was the default value, 1.
 
         hypsometric_opt = -1
         CALL wrf_get_dom_ti_integer ( fid , 'HYPSOMETRIC_OPT' , hypsometric_opt , 1 , icnt , ierr )
@@ -1106,25 +1061,25 @@
           grid%hypsometric_opt = 1
           config_flags%hypsometric_opt = 1
 	  DO loop = 1 , grid%max_dom
-            CALL nl_set_hypsometric_opt ( loop , 1 ) 
+            CALL nl_set_hypsometric_opt ( loop , 1 )
           END DO
           WRITE(wrf_err_message,*)'Resetting the hypsometric_opt from default value of 2 to 1'
           CALL wrf_debug( 0 , wrf_err_message )
         END IF
        END IF
 
-       !  In pre v4.0 data, the moist potential temperature was entirely handled in the model. In 
+       !  In pre v4.0 data, the moist potential temperature was entirely handled in the model. In
        !  v4.0 and later, the pre-processors handle the moist potential temperature field directly.
 
        !                      Input from old data
-       !     
+       !
        !                        WRF NML Setting
        !                        ---------------
        !                  use_theta_m=1 | use_theta_m=0
        !                  ---------------------------
-       !                  |             |           | 
+       !                  |             |           |
        !         thetam=1 |   NO        |     OK    |
-       ! Input            |             |           | 
+       ! Input            |             |           |
        ! NML     ------------------------------------
        ! Setting          |             |           |
        !         thetam=0 |   NO        |     OK    |
@@ -1140,7 +1095,7 @@
           CALL wrf_debug ( 0, "---- ERROR: Cannot have old input data when requesting use_theta_m=1" )
           count_fatal_error = count_fatal_error + 1
        END IF
-     
+
 #endif
 
     ENDIF check_if_dryrun
@@ -1165,11 +1120,9 @@
         WRITE(wrf_err_message,*) '---- ERROR: Ran out of valid boundary conditions in file ',TRIM(fname)
         CALL wrf_error_fatal ( TRIM( wrf_err_message ) )
       ELSE
-#if ( NMM_CORE != 1 )
         WRITE(wrf_err_message,*) '---- ERROR: Could not find matching time in input file ',TRIM(fname)
         CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
         count_fatal_error = count_fatal_error + 1
-#endif
       ENDIF
     ELSE IF ( ierr .NE. WRF_WARN_NOTSUPPORTED .AND. ierr .NE. WRF_WARN_DRYRUN_READ) THEN
 !
@@ -1180,7 +1133,7 @@
         CASE ( input_only, auxinput1_only, auxinput2_only,       &
                auxinput3_only, auxinput4_only, auxinput5_only,  &
                auxinput6_only, auxinput7_only, auxinput8_only,  &
-               auxinput9_only, auxinput10_only )
+               auxinput9_only, auxinput10_only, auxinput17_only )
 #if ( WRF_CHEM == 1 )
            IF( (config_flags%io_style_emissions .eq. 1) .and.                                &
               ((switch.eq.auxinput5_only) .or. (switch.eq.auxinput6_only) .or. &
@@ -1191,7 +1144,7 @@
             CALL wrf_atotime( current_date(1:19), time )
             CALL domain_clock_get( grid, current_time=currtime, &
                                          current_timestr=currtimestr )
-#if (DA_CORE != 1) 
+#if (DA_CORE != 1)
             IF ( (switch .EQ. input_only) .and. (grid%id .EQ. 1) .and. (grid%itimestep .EQ. 0) ) THEN
                WRITE( wrf_err_message , * ) 'CURRENT DATE          = ',TRIM( currtimestr )
                CALL wrf_message ( trim(wrf_err_message) )
@@ -1239,7 +1192,7 @@
           CALL wrf_atotime( this_datestr(1:19), grid%this_bdy_time )
           CALL wrf_get_dom_td_char ( fid , 'NEXTBDYTIME' ,  current_date(1:19), next_datestr , ierr )
           CALL wrf_atotime( next_datestr(1:19), grid%next_bdy_time )
-         
+
           WRITE ( wrf_err_message , * ) 'LBC for restart: Starting valid date = ',this_datestr(1:19),', Ending valid date = ',next_datestr(1:19)
           CALL wrf_message( TRIM(wrf_err_message) )
           WRITE ( wrf_err_message , * ) 'LBC for restart: Restart time            = ',trim(currtimestr)
@@ -1256,7 +1209,7 @@
               !  While the lateral BC time is less than the restart time, advance forward to the next LBC time.
 
               icount = 0
-              DO WHILE ( ( currentTime .GE. grid%next_bdy_time ) .AND. ( icount < 10000 ) ) 
+              DO WHILE ( ( currentTime .GE. grid%next_bdy_time ) .AND. ( icount < 60000 ) ) 
                   CALL wrf_get_next_time(fid, current_date , ierr)
                   IF ( ierr .NE. 0 ) THEN
                      CALL wrf_debug ( 0, '---- ERROR: Cannot find a valid time to start the LBC during this restart, likely ran out of time periods to test' )
@@ -1269,7 +1222,7 @@
                   CALL wrf_message( TRIM(wrf_err_message) )
                   icount = icount + 1
               END DO
-             
+
               !  Now the LBC time either matches or is beyond the restart time.  If it matches, we are at the
               !  right time.  If we have gone too far, then back up one time period, and we are good to go.
 
@@ -1313,7 +1266,7 @@
 #endif
           IF ( wrf_dm_on_monitor() ) THEN
              write(a_message,*) 'THIS TIME ',this_datestr(1:19),', NEXT TIME ',next_datestr(1:19)
-             CALL wrf_message ( a_message ) 
+             CALL wrf_message ( a_message )
           END IF
           RETURN
        ENDIF
@@ -1337,7 +1290,7 @@
 #endif
 
     !  This test should go after all of the metadata is input, and before the gridded input is ingested.
-     
+
     IF ( count_fatal_error .GT. 0 ) THEN
        WRITE (wrf_err_message, FMT='(A,I6, A)') 'NOTE:  ', count_fatal_error, ' namelist vs input data inconsistencies found.'
        CALL wrf_message ( wrf_err_message )
@@ -1350,7 +1303,7 @@
          switch .EQ. restart_only    ) THEN
       newswitch = switch
       p => grid%head_statevars%next
-      DO WHILE ( ASSOCIATED( p ) ) 
+      DO WHILE ( ASSOCIATED( p ) )
         IF ( p%ProcOrient .NE. 'X' .AND. p%ProcOrient .NE. 'Y' ) THEN   ! no I/O for xposed variables
           IF ( p%Ndim .EQ. 0 ) THEN
             IF ((p%Restart.AND.switch.EQ.restart_only).OR.on_stream( p%streams,newswitch)) THEN
@@ -1442,9 +1395,9 @@
 #if ( ( EM_CORE == 1 ) && ( DA_CORE != 1 ) )
                   !  Vertical interpolation space is required if specified by user.
 
-                  if( TRIM(p%dimname1).EQ.'bottom_top'.OR.TRIM(p%dimname1).EQ.'bottom_top_stag') i_inter = 1 
+                  if( TRIM(p%dimname1).EQ.'bottom_top'.OR.TRIM(p%dimname1).EQ.'bottom_top_stag') i_inter = 1
 #endif
-                  
+
                   IF      ( p%Type .EQ. 'r' ) THEN
                     IF( (i_inter.eq.1.and.n_ref_m.ge.2).and.(switch.eq.history_only) ) THEN
                        em1_c = (p%em1 - 1)/n_ref_m +1
@@ -1892,24 +1845,21 @@
 
     RETURN
   END SUBROUTINE input_wrf
-    
-#if ( NMM_CORE != 1 )
+
   SUBROUTINE is_this_data_ok_to_use ( fid , yes_use_this_data )
 
     USE module_io
-   
+
     IMPLICIT NONE
 
     INTEGER , INTENT(IN)  :: fid
     LOGICAL , INTENT(OUT) :: yes_use_this_data
 
     !  Local vars
-  
+
     CHARACTER (LEN=1024) :: input_title_char
     LOGICAL :: skip_rigorous_and_return_right_away
     INTEGER :: ierr
-
-#include "version_decl"
 
     !  Make sure that the input data is consistent with the current code.
 
@@ -1957,19 +1907,19 @@
       CALL wrf_debug( 0 , wrf_err_message )
       yes_use_this_data = .FALSE.
     END IF
-    
+
   END SUBROUTINE is_this_data_ok_to_use
 
   FUNCTION check_which_switch (switch) RESULT (aux_thing)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: switch
     CHARACTER(10) :: aux_thing
-  
+
     CHARACTER(LEN=80) :: joe_message
     INTEGER :: switch_loop, start, end, count
-  
+
     aux_thing = 'auxinputxx'
-  
+
     start =   MAX_HISTORY + 1
     end   = 2*MAX_HISTORY
     count = 0
@@ -1979,12 +1929,10 @@
           WRITE(aux_thing,FMT='(a      )') 'wrfinput '
         ELSE IF ( count .LT. 10 ) THEN
           WRITE(aux_thing,FMT='(a,i1   )') 'auxinput',count
-        ELSE 
+        ELSE
           WRITE(aux_thing,FMT='(a,i2.2 )') 'auxinput',count
         END IF
       END IF
       count = count +1
     END DO
   END FUNCTION check_which_switch
-
-#endif

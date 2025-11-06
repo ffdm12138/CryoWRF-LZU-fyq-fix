@@ -16,11 +16,11 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNEC -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNEC -DNONSTANDARD_SYSTEM_SUBR CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -c   # -DRSL0_ONLY
 #-DNCARIBM_NOC99 -Xa -Kc99
 LDFLAGS_LOCAL   =       -Wl,-h nodefs
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -w -Chopt -Wf'-M noflunf -M nozdiv' -Wf,-L fmtlist transform,-pvctl fullmsg loopcnt=1000000 -f4 -Wf,-P i
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -28,7 +28,7 @@ FCNOOPT         =       -Cssafe
 FCDEBUG         =       # -g $(FCNOOPT)
 FORMAT_FIXED    =       -w -f3
 FORMAT_FREE     =       -w -f4
-FCSUFFIX        =       
+FCSUFFIX        =
 BYTESWAPIO      =       #-FIX_BYTE_SWAP_IF_NECESSARY_FOR_BIG_ENDIAN
 FCBASEOPTS_NO_G =       -w -Wf'-M noflunf -M nozdiv' $(FORMAT_FREE) $(BYTESWAPIO)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
@@ -39,12 +39,13 @@ AR              =      sxar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ls
-RLFLAGS		=	
+RLFLAGS		=
 #ranlib
-CC_TOOLS        =      cc 
+CC_TOOLS        =      cc
+
 
 ###########################################################
-#ARCH    Linux i486 i586 i686, gfortran compiler with gcc #serial smpar dmpar dm+sm
+#ARCH    Linux i486 i586 i686 armv7l aarch64, gfortran compiler with gcc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       GNU ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -61,10 +62,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -c  # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -72,15 +73,16 @@ FCNOOPT         =       -O0
 FCDEBUG         =       # -g $(FCNOOPT)  # -fbacktrace -ggdb -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-LIB_LOCAL       =       -L$(SNOWLIBS)/main_coupler -lcoupler \
+LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lcoupler \
                         -lstdc++ \
-                        -L$(SNOWLIBS)/snow_libs/lib -lmeteoio -lsnowpack
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
 LIB_EXTERNAL    =       -L/usr/lib/x86_64-linux-gnu
-
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
@@ -88,8 +90,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux i486 i586 i686, g95 compiler with gcc #serial dmpar
@@ -109,10 +112,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DF2CSTYLE # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 #-fast
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -131,8 +134,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, PGI compiler with gcc # serial smpar dmpar dm+sm
@@ -152,10 +156,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -174,8 +178,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le, PGI compiler with pgcc, SGI MPT # serial smpar dmpar dm+sm
@@ -195,10 +200,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -L$(MPI_ROOT)/lib -lmpi
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -217,8 +222,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le, PGI accelerator compiler with gcc # serial smpar dmpar dm+sm
@@ -238,7 +244,7 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -D_ACCEL  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -D_ACCEL  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
 CPLUSPLUSLIB    =
@@ -259,8 +265,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, ifort compiler with icc #serial smpar dmpar dm+sm
@@ -269,13 +276,13 @@ CC_TOOLS        =      $(SCC)
 #        respective makefile rules in the end of this file will result in longer compilation time, and, possibly
 #        Out Of Memory messages, but might produce binaries which are substantially faster.
 #
-#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm 
+#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm
 #        for latest info on how to build WRF with Intel compilers.
 #
 #        If you got Out Of Memory message, there are several options:
 #          1. Check your memory limits (ulimit -a), possibly increasing swap partitions size.
 #          2. Remove any debugging flags (-g, -check, -traceback).
-#          3. Force the problematic file to be compiled with less optimizations (see examples at the 
+#          3. Force the problematic file to be compiled with less optimizations (see examples at the
 #             end of this file), try -no-ip compiler flag.
 #
 #        This configuration is aimed at accuracy. To improve performance (at the expence of accuracy) you might
@@ -294,15 +301,15 @@ CC_TOOLS        =      $(SCC)
 #
 #        Suggestions for timing improvements from Craig Mattocks
 #
-#CFLAGS_LOCAL    =       -w -O3 -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars 
-#LDFLAGS_LOCAL   =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common 
+#CFLAGS_LOCAL    =       -w -O3 -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars
+#LDFLAGS_LOCAL   =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
 #FCBASEOPTS_NO_G =       -w -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common $(FORMAT_FREE) $(BYTESWAPIO)
 
 DESCRIPTION     =       INTEL ($SFC/$SCC)
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -313,10 +320,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -329,15 +336,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, Xeon Phi (MIC architecture) ifort compiler with icc # dm+sm
@@ -347,7 +355,7 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): Xeon Phi (MIC architecture)
 DMPARALLEL      =       1
 OMPCPP          =       -D_OPENMP
 OMP             =       -qopenmp -fpp -auto
-OMPCC           =       -qopenmp -fpp -auto
+OMPCC           =       -qopenmp 
 SFC             =       ifort -mmic
 SCC             =       icc -mmic
 CCOMP           =       icc -mmic
@@ -358,12 +366,12 @@ CC              =       $(DM_CC)
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DCHUNK=16 -DXEON_OPTIMIZED_WSM5 -DXEON_SIMD -DOPTIMIZE_CFL_TEST -DFSEEKO64_OK -DINTEL_YSU_KLUDGE  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DCHUNK=16 -DXEON_OPTIMIZED_WSM5 -DXEON_SIMD -DOPTIMIZE_CFL_TEST -DFSEEKO64_OK -DINTEL_YSU_KLUDGE  CONFIGURE_D_CTSM
 OPTNOSIMD       =
 OPTKNC          =       -fimf-precision=low -fimf-domain-exclusion=15 -opt-assume-safe-padding -opt-streaming-stores always -opt-streaming-cache-evict=0 -mP2OPT_hlo_pref_use_outer_strategy=F
 CFLAGS_LOCAL    =       -w -O3 $(OPTKNC) # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       $(OPTKNC)
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 $(OPTKNC)
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -376,15 +384,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -w -qopenmp -auto -ftz -fno-alias -fp-model fast=1 -no-prec-div -no-prec-sqrt $(FORMAT_FREE) $(BYTESWAPIO) -auto -align array64byte #-vec-report6
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =      gcc
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, Xeon (SNB with AVX mods) ifort compiler with icc # serial smpar dmpar dm+sm
@@ -394,10 +403,10 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): Xeon (SNB with AVX mods)
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
-SFC             =       ifort 
-SCC             =       icc 
-CCOMP           =       icc 
+OMPCC           =       # -qopenmp 
+SFC             =       ifort
+SCC             =       icc
+CCOMP           =       icc
 DM_FC           =       mpif90 -f90=$(SFC)
 DM_CC           =       mpicc -cc=$(SCC)
 FC              =       $(DM_FC)
@@ -405,12 +414,12 @@ CC              =       $(DM_CC)
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DCHUNK=64 -DXEON_OPTIMIZED_WSM5 -DOPTIMIZE_CFL_TEST  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DCHUNK=64 -DXEON_OPTIMIZED_WSM5 -DOPTIMIZE_CFL_TEST  CONFIGURE_D_CTSM
 OPTNOSIMD       =
 OPTAVX          =       -xAVX
 CFLAGS_LOCAL    =       -w -O3 $(OPTAVX) # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       $(OPTAVX)
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 $(OPTAVX)
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -423,15 +432,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -w $(OMP) -auto -ftz -fno-alias -fp-model fast=1 -no-prec-div -no-prec-sqrt $(FORMAT_FREE) $(BYTESWAPIO) -auto -align array64byte #-vec-report6
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =      gcc
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, ifort compiler with icc, SGI MPT #serial smpar dmpar dm+sm
@@ -440,13 +450,13 @@ CC_TOOLS        =      gcc
 #        respective makefile rules in the end of this file will result in longer compilation time, and, possibly
 #        Out Of Memory messages, but might produce binaries which are substantially faster.
 #
-#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm 
+#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm
 #        for latest info on how to build WRF with Intel compilers.
 #
 #        If you got Out Of Memory message, there are several options:
 #          1. Check your memory limits (ulimit -a), possibly increasing swap partitions size.
 #          2. Remove any debugging flags (-g, -check, -traceback).
-#          3. Force the problematic file to be compiled with less optimizations (see examples at the 
+#          3. Force the problematic file to be compiled with less optimizations (see examples at the
 #             end of this file), try -no-ip compiler flag.
 #
 #        This configuration is aimed at accuracy. To improve performance (at the expence of accuracy) you might
@@ -467,7 +477,7 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): SGI MPT
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -478,10 +488,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip -lmpi #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -494,15 +504,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, ifort compiler with icc, IBM POE #serial smpar dmpar dm+sm
@@ -516,7 +527,7 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): IBM POE
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -527,10 +538,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -543,15 +554,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    ia64 Linux ifort compiler with icc 9.x,10.x #serial smpar dmpar dm+sm
@@ -562,7 +574,7 @@ CC_TOOLS        =      $(SCC)
 #        possibly Out Of Memory messages, but might produce binaries
 #        which are substantially faster.
 #
-#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm 
+#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm
 #        for latest info on how to build WRF with Intel compilers.
 #
 #        If you get Out Of Memory messages, there are several options:
@@ -595,7 +607,7 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): ia64
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -606,10 +618,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -623,16 +635,17 @@ RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
 #FCBASEOPTS_NO_G =       -w -ftz -align all -fno-alias -IPF-fp-relaxed $(FORMAT_FREE) $(BYTESWAPIO)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-LIB_LOCAL       =       -L/usr/lib -lmpi 
-MODULE_SRCH_FLAG =     
+LIB_LOCAL       =       -L/usr/lib -lmpi
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux SGI Altix, ifort compiler with icc 9.x,10.x #serial smpar dmpar dm+sm
@@ -651,7 +664,7 @@ CC_TOOLS        =      $(SCC)
 #             optimization (see examples at the end of this file),
 #             try the -no-ip compiler flag.
 #
-#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm 
+#        Please visit http://www.intel.com/support/performancetools/sb/cs-028607.htm
 #        for latest info on how to build WRF with Intel compilers.
 #
 #        The default configuration is aimed at accuracy. To improve speed
@@ -672,13 +685,13 @@ CC_TOOLS        =      $(SCC)
 #        DM_CC and LIB_LOCAL settings as follows:
 #        DM_FC = $(SFC) -I$(MPI_HOME)/include
 #        DM_CC = $(SFC) -I$(MPI_HOME)/include
-#        LIB_LOCAL = -L$(MPI_HOME)/lib -lmpi 
+#        LIB_LOCAL = -L$(MPI_HOME)/lib -lmpi
 
 DESCRIPTION     =       INTEL ($SFC/$SCC): SGI Altix
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -689,10 +702,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -706,16 +719,17 @@ RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
 #FCBASEOPTS_NO_G =       -w -ftz -align all -fno-alias -IPF-fp-relaxed $(FORMAT_FREE) $(BYTESWAPIO)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-LIB_LOCAL       =       -L/usr/lib -lmpi 
-MODULE_SRCH_FLAG =     
+LIB_LOCAL       =       -L/usr/lib -lmpi
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux i486 i586 i686 x86_64 ppc64le, PathScale compiler with pathcc #serial dmpar
@@ -735,15 +749,15 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM -D__PATHSCALE__
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM -D__PATHSCALE__
 CFLAGS_LOCAL    =        # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O -OPT:Ofast:Olimit=5000
 FCREDUCEDOPT	=       $(FCOPTIM)
 FCNOOPT         =       -O0
-FCDEBUG         =       # -g $(FCNOOPT)  # -C -trapuv 
+FCDEBUG         =       # -g $(FCNOOPT)  # -C -trapuv
 FORMAT_FIXED    =       -fixedform
 FORMAT_FREE     =       -freeform
 FCSUFFIX        =
@@ -757,8 +771,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le, gfortran compiler with gcc  #serial smpar dmpar dm+sm
@@ -778,10 +793,12 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
+# to validate WRF correctness on aarch64 against x86_64; compile with x86 this alternate ARCH_LOCAL option; able to achieve identical output model on ubuntu 18.04 with gcc 10.2 (on graviton and intel processors)
+# ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM -DAARCH64_X86_CORRECTNESS_FIX
 CFLAGS_LOCAL    =       -w -O3 -c  # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -789,26 +806,28 @@ FCNOOPT		=       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -ggdb -fbacktrace -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-LIB_LOCAL       =       -L$(SNOWLIBS)/snow_libs/lib -lcoupler \
+LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/src -lcoupler \
                         -lstdc++ \
-                        -L$(SNOWLIBS)/snow_libs/lib -lmeteoio -lsnowpack
-
-MODULE_SRCH_FLAG =     
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -G
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Darwin (MACOS) PGI compiler with pgcc #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) PGI compiler with pgcc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       PGI ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -825,10 +844,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DMACOS # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -fast
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -836,7 +855,7 @@ FCNOOPT		=       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -C -Ktrap=fp -traceback
 FORMAT_FIXED    =       -Mfixed
 FORMAT_FREE     =       -Mfree
-FCSUFFIX        =       
+FCSUFFIX        =
 BYTESWAPIO      =       -byteswapio
 FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(OMP) # -Kieee -pc 64 -Ktrap=fp
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG) -Mnomod
@@ -850,14 +869,15 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      cc
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) intel compiler with icc #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) intel compiler with icc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       INTEL ($SFC/$SCC)
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -868,11 +888,11 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip -DMACOS #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars -DMACOS # -DRSL0_ONLY
 # increase stack size; also note that for OpenMP, set environment OMP_STACKSIZE 4G or greater
 LDFLAGS_LOCAL   =       -ip -Wl,-stack_addr,0xF10000000 -Wl,-stack_size,0x64000000 #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -896,8 +916,9 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      cc
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) intel compiler with clang EDIT FOR OPENMPI #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) intel compiler with clang EDIT FOR OPENMPI #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       INTEL ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -914,11 +935,11 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -DMACOS #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars -DMACOS # -DRSL0_ONLY
 # increase stack size; also note that for OpenMP, set environment OMP_STACKSIZE 4G or greater
 LDFLAGS_LOCAL   =       -Wl,-stack_addr,0xF10000000 -Wl,-stack_size,0x64000000 #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -941,8 +962,9 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      cc
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) g95 with gcc #serial dmpar
+#ARCH    Darwin x86_64 arm64, (MACOS) g95 with gcc #serial dmpar
 #
 DESCRIPTION     =       GNU ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -959,10 +981,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DG95 -DMACOS -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR -DRCONFIG_CHARLEN=64  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DG95 -DMACOS -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR -DRCONFIG_CHARLEN=64  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DMACOS -DF2CSTYLE # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 # -fast
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -983,10 +1005,11 @@ ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib -c
 RLFLAGS		=	-c
-CC_TOOLS        =      $(SCC) 
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Darwin (MACOS) gfortran with gcc #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) gfortran with gcc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       GNU ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -1003,10 +1026,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -c  -DMACOS # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1014,9 +1037,10 @@ FCNOOPT         =       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -fbacktrace -ggdb -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
@@ -1026,10 +1050,11 @@ ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
 RLFLAGS		=	-c
-CC_TOOLS        =      $(SCC) 
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Darwin (MACOS) gfortran with clang #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) gfortran with clang #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       GNU ($SFC/clang)
 DMPARALLEL      =       # 1
@@ -1046,10 +1071,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -c  -DMACOS # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1057,9 +1082,10 @@ FCNOOPT         =       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -fbacktrace -ggdb -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
@@ -1071,8 +1097,9 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      clang
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) xlf  #serial dmpar
+#ARCH    Darwin x86_64 arm64, (MACOS) xlf  #serial dmpar
 #
 DESCRIPTION     =       IBM ($SFC/$SCC)
 DMPARALLEL      =       # 1
@@ -1089,12 +1116,12 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =        -qrealsize=$(RWORDSIZE) -qintsize=4
-ARCH_LOCAL      =       -DMAC_KLUDGE -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMAC_KLUDGE -DF2CSTYLE -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DMACOS -DF2CSTYLE # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 -qarch=auto
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1103,18 +1130,19 @@ FCDEBUG         =       # -g $(FCNOOPT) -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -qsave -qmaxmem=32767 -qspillsize=32767 -w
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 MODULE_SRCH_FLAG =     -fmod=$(WRF_SRC_ROOT_DIR)/main
 TRADFLAG        =      CONFIGURE_TRADFLAG
-CPP             =      cpp CONFIGURE_CPPFLAGS 
+CPP             =      cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
 RLFLAGS		=	-c
-CC_TOOLS        =      $(SCC) 
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    AIX xlf compiler with xlc #serial smpar dmpar dm+sm
@@ -1135,14 +1163,14 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =        -qrealsize=$(RWORDSIZE) -qintsize=4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DNATIVE_MASSV  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DNATIVE_MASSV  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DNOUNDERSCORE # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -lmass -lmassv -bnoquiet # print diagnostic messages
 CPLUSPLUSLIB    =       -lC
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-# -qhot commented out in 3.0.1.1 release because of reported problems with 
+# -qhot commented out in 3.0.1.1 release because of reported problems with
 # model results under certain configurations. Use at your own risk.
-# -qstrict added in 3.6.1 release because of reported problems with 
+# -qstrict added in 3.6.1 release because of reported problems with
 # model stability under certain configurations. Use at your own risk.
 FCOPTIM         =       -O3 -qalias_size=209715200 -qstrict # -qhot
 FCREDUCEDOPT    =       -O2 # implies -qstrict
@@ -1151,18 +1179,19 @@ FCDEBUG         =       # -g $(FCNOOPT) -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -w -qspill=81920 -qmaxmem=-1 $(FORMAT_FREE) -qufmt=be $(BYTESWAPIO)  #-qflttrap=zerodivide:invalid:enable -qsigtrap -C # -qinitauto=7FF7FFFF
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =       #CONFIGURE_TRADFLAG  # causing troubles with xl cpp on AIX, -traditional removed fom default settings
 CPP             =       /lib/cpp CONFIGURE_CPPFLAGS
 AR              =       ar
 ARFLAGS         =       ru
 M4              =       m4 -B 20000
 RANLIB          =       ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =       cc
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, xlf compiler with xlc # serial smpar dmpar dm+sm
@@ -1183,37 +1212,38 @@ CC              =       CONFIGURE_CC
 LD              =        $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -qrealsize=$(RWORDSIZE) -qintsize=4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DNATIVE_MASSV  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DNATIVE_MASSV  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DNOUNDERSCORE # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -lmass_64 -lmassvp7_64 -q64 -bnoquiet # linking diagnostics
 CPLUSPLUSLIB    =       -lC
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-# -qhot commented out in 3.0.1.1 release because of reported problems with 
+# -qhot commented out in 3.0.1.1 release because of reported problems with
 # model results under certain configurations. Use at your own risk.
-# -qstrict added in 3.6.1 release because of reported problems with 
+# -qstrict added in 3.6.1 release because of reported problems with
 # model stability under certain configurations. Use at your own risk.
 FCOPTIM         =       -q64 -O3 -qstrict # -qhot
-# if linking problems with libxlsmp occur, try -qsmp=noauto 
+# if linking problems with libxlsmp occur, try -qsmp=noauto
 FCREDUCEDOPT    =       -q64 -O2
 FCNOOPT         =       -q64 -qnoopt -qstrict # -qsmp=noauto
 FCDEBUG         =       # -g $(FCNOOPT) -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -w -qspill=81920 -qmaxmem=-1 $(FORMAT_FREE) -qufmt=be $(BYTESWAPIO)  #-qflttrap=zerodivide:invalid:enable -qsigtrap -C # -qinitauto=7FF7FFFF
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
-TRADFLAG        =       
-# instead of the GNU CPP, the CPP shipped with XLF should be used, 
+MODULE_SRCH_FLAG =
+TRADFLAG        =
+# instead of the GNU CPP, the CPP shipped with XLF should be used,
 # which does not work with the -traditional flag
 CPP             =       $(XLF_BASE)/exe/cpp CONFIGURE_CPPFLAGS
 AR              =       ar
 ARFLAGS         =       ru
 M4              =       m4 -B 14000
 RANLIB          =       ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =       cc
+
 
 ###########################################################
 #ARCH    Cray XC CLE/Linux x86_64, PGI compiler with gcc # serial dmpar smpar dm+sm
@@ -1242,7 +1272,7 @@ CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
 # module load libfast to use Cray XT fast math library
 #LIB_LOCAL       =       -lfast_mv
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 # PGI recommended
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
@@ -1267,15 +1297,16 @@ FCSUFFIX        =
 BYTESWAPIO      =       -byteswapio
 FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(OPTERON_TYPE) $(OMP)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =    
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS $(TRADFLAG)
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Cray XE and XC CLE/Linux x86_64, Cray CCE compiler # serial dmpar smpar dm+sm
@@ -1290,8 +1321,8 @@ OMPCPP          =       # -D_OPENMP
 OMP             =       # -homp
 OMPCC           =       # -homp
 SFC             =       ftn $(NOOMP)
-SCC             =       cc 
-CCOMP           =       cc 
+SCC             =       cc
+CCOMP           =       cc
 DM_FC           =       ftn $(NOOMP)
 DM_CC           =       cc
 FC              =       $(DM_FC)
@@ -1299,15 +1330,15 @@ CC              =       $(DM_CC)
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -s integer32 -s real`expr 8 \* $(RWORDSIZE)`
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -O3  # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
+LDFLAGS_LOCAL   =
 # uncomment this for wrfda build
 #LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/external/fftpack/fftpack5 -lfftpack \
 #                        -L$(WRF_SRC_ROOT_DIR)/external/RSL_LITE -lrsl_lite
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-FCOPTIM         =       # -Ofp3 
+FCOPTIM         =       # -Ofp3
 FCREDUCEDOPT	=       $(FCOPTIM)
 FCNOOPT		=       -O1 -Ofp1 -Oipa0 -Onomodinline
 FCDEBUG         =       # -g -O0 # -K trap=fp -R bc
@@ -1317,15 +1348,16 @@ FCSUFFIX        =
 BYTESWAPIO      =       -h byteswapio
 FCBASEOPTS_NO_G =       -N1023 $(FORMAT_FREE) $(BYTESWAPIO) #-ra
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =      gcc
+
 
 ###########################################################
 #ARCH    Cray XC CLE/Linux x86_64, Xeon ifort compiler # serial dmpar smpar dm+sm
@@ -1335,10 +1367,10 @@ DESCRIPTION     =       INTEL ($SFC/$SCC): Cray XC
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ftn
-SCC             =       icc 
-CCOMP           =       icc 
+SCC             =       icc
+CCOMP           =       icc
 DM_FC           =       ftn
 DM_CC           =       cc
 FC              =       $(DM_FC)
@@ -1346,13 +1378,13 @@ CC              =       $(DM_CC)
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 OPTNOSIMD       =
 # set this to override Cray 'craype' module setting
 #OPTAVX          =       -xAVX
 CFLAGS_LOCAL    =       -w -O3 -ip $(OPTAVX) # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       $(OPTAVX)
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -ip -O3 $(OPTAVX)
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1366,21 +1398,22 @@ RECORDLENGTH    =       -assume byterecl
 #add -fp-model precise in FCBASEOPTS_NO_G to improve the accuracy of WRFPLUS check_AD test, suggested by Thomas Schwitalla.
 FCBASEOPTS_NO_G =       -w -ftz -fno-alias -align all -fp-model precise $(FORMAT_FREE) $(BYTESWAPIO) #-fp-model precise #-vec-report6
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-LIB_LOCAL       =       -L$(SNOWLIBS)/snow_libs/lib -lcoupler \
+LIB_LOCAL       =       -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf -lcoupler \
                         -lstdc++ \
-                        -L$(SNOWLIBS)/snow_libs/lib -lmeteoio -lsnowpack
-CFLAGS_LOCAL    =       -w -O3 -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars 
-LDFLAGS_LOCAL   =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common 
-
-MODULE_SRCH_FLAG =     
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/meteoio/lib -lmeteoio \
+                        -L$(WRF_SRC_ROOT_DIR)/phys/cryowrf/external/snowpack/lib -lsnowpack
+CFLAGS_LOCAL    =       -w -O3 -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars
+LDFLAGS_LOCAL   =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =      gcc
+
 
 
 ###########################################################
@@ -1405,11 +1438,11 @@ LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =        -qrealsize=$(RWORDSIZE) -qintsize=4
 # If system has even more processors, set VERY_LARGE_MAXPROC to that number
-ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768 -DBLUEGENE  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768 -DBLUEGENE  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DNOUNDERSCORE -DNCARIBM_NOC99 $(MPI_INC)   # -DRSL0_ONLY
 LIB_LOCAL       =       $(MPI_LIB)
 LDFLAGS_LOCAL   =       -Wl,--allow-multiple-definition -qstatic
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -qarch=440
 FCNOOPT		=       -qnoopt
@@ -1417,10 +1450,10 @@ FCDEBUG         =       # $(FCNOOPT) -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -w -qspill=20000 -qmaxmem=64000 $(FORMAT_FREE) -qufmt=be $(BYTESWAPIO) $(MPI_INC) #-qflttrap=zerodivide:invalid:enable -qsigtrap
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =       CONFIGURE_TRADFLAG
 # this might be different on different systems but we want the xlf version of cpp, not Linux's
 # NYBlue
@@ -1431,8 +1464,10 @@ AR              =       ar
 ARFLAGS         =       ru
 M4              =       m4 -B 14000
 RANLIB          =       ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =       cc
+
+
 ###########################################################
 #ARCH    Linux ppc64 BG /P xlf compiler with xlc # smpar dmpar dm+sm
 #     developed on surveyor.alcf.anl.gov (thanks to ANL/ALCF)
@@ -1454,11 +1489,11 @@ LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =        -qrealsize=$(RWORDSIZE) -qintsize=4
 # If system has even more processors, set VERY_LARGE_MAXPROC to that number
-ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768 -DBLUEGENE  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768 -DBLUEGENE  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DNOUNDERSCORE  # -DRSL0_ONLY
 LIB_LOCAL       =
 LDFLAGS_LOCAL   =       -Wl,--allow-multiple-definition,--relax -qstatic
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 -qnoipa -qarch=auto -qcache=auto -qtune=auto
 FCNOOPT		=       -qnoopt
@@ -1466,10 +1501,10 @@ FCDEBUG         =       # $(FCNOOPT) -g -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -w -qspill=20000 -qmaxmem=64000 $(FORMAT_FREE) -qufmt=be $(BYTESWAPIO) #-qflttrap=zerodivide:invalid:enable -qsigtrap
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =       CONFIGURE_TRADFLAG
 # this might be different on different systems but we want the xlf version of cpp, not Linux's
 # surveyor.alcf.anl.gov
@@ -1478,8 +1513,10 @@ AR              =       ar
 ARFLAGS         =       ru
 M4              =       m4 -B 14000
 RANLIB          =       ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =       cc
+
+
 ###########################################################
 #ARCH    Linux ppc64 IBM Blade Server xlf compiler with xlc # dmpar
 #    provided by Luis C. Cana Cascallar for IBM JS21 blade server, May 2009
@@ -1500,21 +1537,21 @@ LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =        -qrealsize=$(RWORDSIZE) -qintsize=4
 # If system has even more processors, set VERY_LARGE_MAXPROC to that number
-ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMOVE_NL_OUTSIDE_MODULE_CONFIGURE -DNONSTANDARD_SYSTEM_SUBR  -DVERY_LARGE_MAXPROC=36768  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DNOUNDERSCORE  # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
+LDFLAGS_LOCAL   =
 CPLUSPLUSLIB    =       -lC
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-FCOPTIM		=       -O3 -qtune=ppc970 -qarch=ppc970 
+FCOPTIM		=       -O3 -qtune=ppc970 -qarch=ppc970
 FCNOOPT		=       -qnoopt
 FCDEBUG         =       # -g $(FCNOOPT) -qfullpath
 FORMAT_FIXED    =       -qfixed
 FORMAT_FREE     =       -qfree=f90
 FCSUFFIX        =       -qsuffix=f=f90
-BYTESWAPIO      =       
+BYTESWAPIO      =
 FCBASEOPTS_NO_G =       -w -qspill=20000 -qmaxmem=32767 $(FORMAT_FREE) -qufmt=be $(BYTESWAPIO) #-qflttrap=zerodivide:invalid:enable -qsigtrap
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =       CONFIGURE_TRADFLAG
 # this might be different on different systems but we want the xlf version of cpp, not Linux
 CPP             =       /opt/ibmcmp/xlf/11.1/exe/cpp CONFIGURE_CPPFLAGS
@@ -1522,8 +1559,9 @@ AR              =       ar
 ARFLAGS         =       ru
 M4              =       m4 -B 14000
 RANLIB          =       ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =       xlc -q64
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, PGI compiler with pgcc # serial smpar dmpar dm+sm
@@ -1543,10 +1581,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1565,8 +1603,9 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    CYGWIN_NT i686, PGI compiler on Windows # serial smpar dmpar dm+sm
@@ -1586,19 +1625,19 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -D_WIN32  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -D_WIN32  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -DMEMCPY_FOR_BCOPY  # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       Ws2_32.lib # -lnetcdff
 CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
-FCOPTIM         =       -fastsse -Mvect=noaltcode -Mprefetch=distance:8 -Mfprelaxed -tp core2-64 # -Minfo=all 
+FCOPTIM         =       -fastsse -Mvect=noaltcode -Mprefetch=distance:8 -Mfprelaxed -tp core2-64 # -Minfo=all
 FCREDUCEDOPT    =       $(FCOPTIM)
 FCNOOPT         =       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -C -Ktrap=fp
 FORMAT_FIXED    =       -Mfixed
 FORMAT_FREE     =       -Mfree
 FCSUFFIX        =
-BYTESWAPIO      =       -byteswapio 
+BYTESWAPIO      =       -byteswapio
 FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 MODULE_SRCH_FLAG=       -module $(WRF_SRC_ROOT_DIR)/main
@@ -1608,8 +1647,9 @@ AR              =       ar
 ARFLAGS         =       cr
 M4              =       NA
 RANLIB          =       ranlib
-RLFLAGS		=	
-CC_TOOLS        =       $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =       $(SCC)
+
 
 LIB_EXTERNAL    = \
                      ../external/io_netcdf/libwrfio_nf.a CONFIGURE_NETCDF_PATH/lib/libnetcdf.lib \
@@ -1643,10 +1683,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
 FCREDUCEDOPT    =       $(FCOPTIM)
@@ -1665,11 +1705,12 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Darwin (MACOS) PGI compiler with pgcc -f90= #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) PGI compiler with pgcc -f90= #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       PGI ($SFC/$SCC): -f90=pgf90
 DMPARALLEL      =       # 1
@@ -1686,10 +1727,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -DMACOS # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM		=       -O2 -fast
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1697,7 +1738,7 @@ FCNOOPT		=       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -C -Ktrap=fp -traceback
 FORMAT_FIXED    =       -Mfixed
 FORMAT_FREE     =       -Mfree
-FCSUFFIX        =       
+FCSUFFIX        =
 BYTESWAPIO      =       -byteswapio
 FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(OMP)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG) -Mnomod
@@ -1711,14 +1752,15 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      cc
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) intel compiler with icc #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) intel compiler with icc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       INTEL ($SFC/$SCC): Open MPI
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -1729,11 +1771,11 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DMACOS -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip -DMACOS #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars -DMACOS # -DRSL0_ONLY
 # increase stack size; also note that for OpenMP, set environment OMP_STACKSIZE 4G or greater
 LDFLAGS_LOCAL   =       -ip -Wl,-stack_addr,0xF10000000 -Wl,-stack_size,0x64000000 #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1757,8 +1799,9 @@ RANLIB          =      ranlib
 RLFLAGS		=	-c
 CC_TOOLS        =      cc
 
+
 ###########################################################
-#ARCH    Darwin (MACOS) gfortran with gcc openmpi #serial smpar dmpar dm+sm
+#ARCH    Darwin x86_64 arm64, (MACOS) gfortran with gcc openmpi #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       GNU ($SFC/$SCC): Open MPI
 DMPARALLEL      =       # 1
@@ -1775,10 +1818,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR -DMACOS  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -c  -DMACOS # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1786,9 +1829,10 @@ FCNOOPT         =       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -fbacktrace -ggdb -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
 MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
@@ -1798,7 +1842,8 @@ ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
 RLFLAGS		=	-c
-CC_TOOLS        =      $(SCC) 
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    Linux x86_64 ppc64le i486 i586 i686, PGI compiler with pgcc -f90= # serial smpar dmpar dm+sm
@@ -1818,10 +1863,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -r$(RWORDSIZE) -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 # -DRSL0_ONLY
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3 #-fastsse -Mvect=noaltcode -Msmartalloc -Mprefetch=distance:8 -Mfprelaxed # -Minfo=all =Mneginfo=all
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1840,17 +1885,18 @@ AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -B 14000
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Linux x86_64 ppc64le i486 i586 i686 #serial smpar dmpar dm+sm
+#ARCH    Linux HSW/BDW x86_64 ppc64le i486 i586 i686, ifort compiler with icc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       INTEL ($SFC/$SCC): HSW/BDW
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -1861,10 +1907,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip -xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars -xCORE-AVX2 # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip -xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common -xCORE-AVX2
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1877,24 +1923,25 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) -xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common -xCORE-AVX2
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
-#ARCH    Linux KNL x86_64 ppc64le i486 i586 i686 #serial smpar dmpar dm+sm
+#ARCH    Linux KNL x86_64 ppc64le i486 i586 i686, ifort compiler with icc #serial smpar dmpar dm+sm
 #
 DESCRIPTION     =       INTEL ($SFC/$SCC): KNL MIC
 DMPARALLEL      =       # 1
 OMPCPP          =       # -D_OPENMP
 OMP             =       # -qopenmp -fpp -auto
-OMPCC           =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp 
 SFC             =       ifort
 SCC             =       icc
 CCOMP           =       icc
@@ -1905,10 +1952,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -w -O3 -ip -xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars -xMIC-AVX512 # -DRSL0_ONLY
 LDFLAGS_LOCAL   =       -ip -xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common -xMIC-AVX512
-CPLUSPLUSLIB    =       
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O3
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1921,15 +1968,16 @@ BYTESWAPIO      =       -convert big_endian
 RECORDLENGTH    =       -assume byterecl
 FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) -xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common -xMIC-AVX512
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      CONFIGURE_TRADFLAG
 CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4
 RANLIB          =      ranlib
-RLFLAGS		=	
-CC_TOOLS        =      $(SCC) 
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
 
 ###########################################################
 #ARCH    CYGWIN_NT i686 x86_64 Cygwin, gfortran compiler with gcc  #serial smpar dmpar dm+sm
@@ -1949,10 +1997,10 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       #-fdefault-real-8
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
-CFLAGS_LOCAL    =       -w -O3 -c
-LDFLAGS_LOCAL   =       
-CPLUSPLUSLIB    =       
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR CONFIGURE_D_CTSM
+CFLAGS_LOCAL    =       -w -O3 -c #
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
 ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
 FCOPTIM         =       -O2 -ftree-vectorize -funroll-loops
 FCREDUCEDOPT	=       $(FCOPTIM)
@@ -1960,19 +2008,21 @@ FCNOOPT		=       -O0
 FCDEBUG         =       # -g $(FCNOOPT) # -ggdb -fbacktrace
 FORMAT_FIXED    =       -ffixed-form
 FORMAT_FREE     =       -ffree-form -ffree-line-length-none
-FCSUFFIX        =       
+FCSUFFIX        =
+FCCOMPAT        =       
 BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
-FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
 FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
-MODULE_SRCH_FLAG =     
+MODULE_SRCH_FLAG =
 TRADFLAG        =      -traditional
 CPP             =      /lib/cpp -P
 AR              =      ar
 ARFLAGS         =      ru
 M4              =      m4 -G
 RANLIB          =      ranlib
-RLFLAGS		=	
+RLFLAGS		=
 CC_TOOLS        =      $(SCC)
+
 
 LIB_EXTERNAL    = \
                      $(WRF_SRC_ROOT_DIR)/external/io_netcdf/libwrfio_nf.a CONFIGURE_NETCDF_PATH/lib/libnetcdf.dll.a \
@@ -1989,7 +2039,276 @@ LIB_BUNDLED     = \
                      $(WRF_SRC_ROOT_DIR)/frame/module_internal_header_util.o \
                      $(WRF_SRC_ROOT_DIR)/frame/pack_utils.o
 
+###########################################################
+#ARCH   Linux   armv7l aarch64, gnu OpenMPI #serial smpar dmpar dm+sm
+#
+DESCRIPTION     =       GNU ($SFC/$SCC)
+DMPARALLEL      =       # 1
+OMPCPP          =       # -D_OPENMP
+OMP             =       # -fopenmp
+OMPCC           =       # -fopenmp
+SFC             =       gfortran
+SCC             =       gcc
+CCOMP           =       gcc
+DM_FC           =       mpif90 -f90=$(SFC)
+DM_CC           =       mpicc -cc=$(SCC)
+FC              =       CONFIGURE_FC
+CC              =       CONFIGURE_CC
+LD              =       $(FC)
+RWORDSIZE       =       CONFIGURE_RWORDSIZE
+PROMOTION       =       #-fdefault-real-8
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
+CFLAGS_LOCAL    =       -w -O3 -c -march=native # -DRSL0_ONLY
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
+ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
+FCOPTIM         =       -O3 -ftree-vectorize -funroll-loops -march=native
+FCREDUCEDOPT    =       $(FCOPTIM)
+FCNOOPT         =       -O0
+FCDEBUG         =       # -g $(FCNOOPT)  # -fbacktrace -ggdb -fcheck=bounds,do,mem,pointer -ffpe-trap=invalid,zero,overflow
+FORMAT_FIXED    =       -ffixed-form
+FORMAT_FREE     =       -ffree-form -ffree-line-length-none
+FCSUFFIX        =
+FCCOMPAT        =
+BYTESWAPIO      =       -fconvert=big-endian -frecord-marker=4
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(FCCOMPAT)
+FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
+MODULE_SRCH_FLAG =
+TRADFLAG        =      CONFIGURE_TRADFLAG
+CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
+AR              =      ar
+ARFLAGS         =      ru
+M4              =      m4 -G
+RANLIB          =      ranlib
+RLFLAGS         =
+CC_TOOLS        =      $(SCC)
+
+
+###########################################################
+#ARCH    AMD Linux x86_64, AOCC flang compiler with AOCC clang  #serial smpar dmpar dm+sm
+# Supported AMDARCH are znver1, znver2 and znver3 for ZEN1, ZEN2 and ZEN3 respectively
+# For optimized AMDFCFLAGS and AMDLDFLAGS, please reach out to toolchainsupport@amd.com
+#
+
+DESCRIPTION     =       AMD ($SFC/$SCC) :  AMD ZEN1/ ZEN2/ ZEN3 Architectures
+DMPARALLEL      =       1
+OMPCPP          =       -D_OPENMP
+OMP             =       -fopenmp
+OMPCC           =       -fopenmp
+SFC             =       flang
+SCC             =       clang
+CCOMP           =       clang
+DM_FC           =       mpif90
+DM_CC           =       mpicc
+FC              =       CONFIGURE_FC
+CC              =       CONFIGURE_CC
+LD              =       $(FC)
+RWORDSIZE       =       CONFIGURE_RWORDSIZE
+
+AMDARCH         =       -march=znver3
+AMDMATHLIB      =       -fveclib=AMDLIBM
+AMDLDFLAGS      =       -Wl,-mllvm -Wl,-enable-loop-reversal -Wl,-mllvm -Wl,-enable-gather -Wl,-mllvm -Wl,-vectorize-noncontigous-memory-aggressively
+AMDFCFLAGS      =
+
+PROMOTION       =       #-fdefault-real-8
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM -DRPC_TYPES=2
+CFLAGS_LOCAL    =       -w -c -m64 -Ofast -ffast-math $(AMDARCH)
+LDFLAGS_LOCAL   =       -m64 -Ofast -Mstack_arrays $(AMDARCH) $(AMDLDFLAGS) $(AMDMATHLIB) -lamdlibm -lomp
+CPLUSPLUSLIB    =
+ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
+FCOPTIM         =       -Ofast -ffast-math $(AMDARCH) -Mbyteswapio -Mstack_arrays -ftree-vectorize -Mbyteswapio -funroll-loops -finline-aggressive -finline-hint-functions $(AMDMATHLIB) $(AMDFCFLAGS)
+FCREDUCEDOPT    =       -O3 $(AMDARCH) -ffast-math -Mstack_arrays -DFCREDUCEDOPT
+FCNOOPT         =       -O0
+FCDEBUG         =       # -g $(FCNOOPT)
+FORMAT_FIXED    =       -Mfixed
+FORMAT_FREE     =       -Mfreeform
+FCSUFFIX        =
+BYTESWAPIO      =       -Mbyteswapio
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO)
+FCBASEOPTS      =       -Ofast -ffast-math $(FCBASEOPTS_NO_G) $(FCDEBUG)
+MODULE_SRCH_FLAG=
+TRADFLAG        =       -traditional
+CPP             =       /lib/cpp -P
+AR              =       llvm-ar
+ARFLAGS         =       ru
+M4              =       m4
+RANLIB          =       llvm-ranlib
+RLFLAGS         =
+CC_TOOLS        =       $(SCC)
+
+
 #insert new stanza here
+
+###########################################################
+#ARCH    Linux x86_64 ppc64le i486 i586 i686, Intel oneAPI compiler with icx #serial smpar dmpar dm+sm
+# This mirrors the above Intel build but changes ifort=>ifx icc=>icx
+
+DESCRIPTION     =       INTEL ($SFC/$SCC) : oneAPI LLVM
+DMPARALLEL      =       # 1
+OMPCPP          =       # -D_OPENMP
+OMP             =       # -qopenmp -fpp -auto
+OMPCC           =       # -qopenmp
+SFC             =       ifx
+SCC             =       icx
+CCOMP           =       icx
+DM_FC           =       mpif90 -f90=$(SFC)
+DM_CC           =       mpicc -cc=$(SCC)
+FC              =       CONFIGURE_FC
+CC              =       CONFIGURE_CC
+LD              =       $(FC)
+RWORDSIZE       =       CONFIGURE_RWORDSIZE
+PROMOTION       =       -real-size `expr 8 \* $(RWORDSIZE)` -i4
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_FUNC  CONFIGURE_D_CTSM
+CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars # -DRSL0_ONLY
+LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
+CPLUSPLUSLIB    =
+ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
+FCOPTIM         =       -O3
+FCREDUCEDOPT	=       $(FCOPTIM)
+FCNOOPT		=       -O0 -fno-inline -no-ip
+FCDEBUG         =       # -g $(FCNOOPT) -traceback # -fpe0 -check noarg_temp_created,bounds,format,output_conversion,pointers,uninit -ftrapuv -unroll0 -u
+FORMAT_FIXED    =       -FI
+FORMAT_FREE     =       -FR
+FCSUFFIX        =
+BYTESWAPIO      =       -convert big_endian
+RECORDLENGTH    =       -assume byterecl
+FCBASEOPTS_NO_G =       -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO) #-xHost -fp-model fast=2 -no-heap-arrays -no-prec-div -no-prec-sqrt -fno-common
+FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
+MODULE_SRCH_FLAG =
+TRADFLAG        =      CONFIGURE_TRADFLAG
+CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
+AR              =      ar
+ARFLAGS         =      ru
+M4              =      m4
+RANLIB          =      ranlib
+RLFLAGS		=
+CC_TOOLS        =      $(SCC)
+
+
+###########################################################
+#ARCH    Linux aarch64, armclang compiler OpenMPI # serial smpar dmpar dm+sm
+#
+DESCRIPTION     =      armclang ($SFC/$SCC): Aarch64
+DMPARALLEL      =      # 1
+OMPCPP          =      -fopenmp
+OMP             =      -fopenmp
+OMPCC           =      -fopenmp
+SFC             =      armflang
+SCC             =      armclang
+CCOMP           =      armclang
+DM_FC           =      mpif90
+DM_CC           =      mpicc -DMPI2_SUPPORT
+FC              =      CONFIGURE_FC
+CC              =      CONFIGURE_CC
+LD              =      $(FC)
+RWORDSIZE       =      CONFIGURE_RWORDSIZE
+PROMOTION       =
+ARCH_LOCAL      =
+CFLAGS_LOCAL    =      -w -O3 -c -Wno-implicit-function-declaration -Wno-int-conversion -Wno-implicit-int
+LDFLAGS_LOCAL   =      -fopenmp
+FCOPTIM         =      -Ofast -mcpu=native -funroll-loops
+FCREDUCEDOPT    =      $(FCOPTIM)
+FCNOOPT         =      -O0 -fopenmp -frecursive
+FCDEBUG         =      -g $(FCNOOPT)
+FORMAT_FIXED    =      -ffixed-form -ffixed-line-length-0
+FORMAT_FREE     =      -ffree-form -ffree-line-length-0
+FCSUFFIX        =
+BYTESWAPIO      =      -fconvert=big-endian -frecord-marker=4
+FCBASEOPTS      =      -w $(FORMAT_FREE) $(BYTESWAPIO)
+MODULE_SRCH_FLAG=      -I$(WRF_SRC_ROOT_DIR)/main
+TRADFLAG        =      -traditional-cpp
+CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
+AR              =      ar
+ARFLAGS         =      ru
+M4              =      m4 -B 14000
+RANLIB          =      ranlib
+RLFLAGS         =
+CC_TOOLS        =      $(SCC) -Wno-implicit-function-declaration -Wno-int-conversion -Wno-implicit-int
+
+###########################################################
+#ARCH    Linux aarch64, GCC compiler OpenMPI # serial smpar dmpar dm+sm
+#
+DESCRIPTION     =      GCC ($SFC/$SCC): Aarch64
+DMPARALLEL      =      # 1
+OMPCPP          =      -fopenmp
+OMP             =      -fopenmp
+OMPCC           =      -fopenmp
+SFC             =      gfortran
+SCC             =      gcc
+CCOMP           =      gcc
+DM_FC           =      mpif90
+DM_CC           =      mpicc -DMPI2_SUPPORT
+FC              =      CONFIGURE_FC
+CC              =      CONFIGURE_CC
+LD              =      $(FC)
+RWORDSIZE       =      CONFIGURE_RWORDSIZE
+PROMOTION       =
+ARCH_LOCAL      =      -DAARCH64_X86_CORRECTNESS_FIX
+CFLAGS_LOCAL    =      -w -O3 -c
+LDFLAGS_LOCAL   =      -fopenmp
+FCOPTIM         =      -Ofast -mcpu=native -funroll-loops -fno-expensive-optimizations -fno-reciprocal-math -fsigned-zeros -fno-unsafe-math-optimizations
+# for graviton 2 use the folowing flag
+#FCOPTIM         =      -Ofast -march=armv8.2-a+fp16+rcpc+dotprod -funroll-loops -fno-expensive-optimizations -fno-reciprocal-math -fsigned-zeros -fno-unsafe-math-optimizations
+FCREDUCEDOPT    =      $(FCOPTIM)
+FCNOOPT         =      -O0 -fopenmp -frecursive
+FCDEBUG         =      -g $(FCNOOPT)
+FORMAT_FIXED    =      -ffixed-form -ffixed-line-length-0 -fallow-argument-mismatch -fallow-invalid-boz
+FORMAT_FREE     =      -ffree-form -ffree-line-length-0 -fallow-argument-mismatch -fallow-invalid-boz
+FCSUFFIX        =
+BYTESWAPIO      =      -fconvert=big-endian -frecord-marker=4
+FCBASEOPTS      =      -w $(FORMAT_FREE) $(BYTESWAPIO)
+MODULE_SRCH_FLAG=      -I$(WRF_SRC_ROOT_DIR)/main
+TRADFLAG        =      -traditional-cpp
+CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
+AR              =      ar
+ARFLAGS         =      ru
+M4              =      m4 -B 14000
+RANLIB          =      ranlib
+RLFLAGS         =
+CC_TOOLS        =      $(SCC)
+
+###########################################################
+#ARCH    Linux aarch64, NVHPC compiler with nvc # serial smpar dmpar dm+sm
+#
+DESCRIPTION     =       NVHPC ($SFC/$SCC)
+DMPARALLEL      =       # 1
+OMPCPP          =       # -D_OPENMP
+OMP             =       # -mp -Minfo=mp -Mrecursive
+OMPCC           =       # -mp
+SFC             =       nvfortran
+SCC             =       nvc
+CCOMP           =       nvc
+DM_FC           =       mpif90
+DM_CC           =       mpicc
+FC              =       CONFIGURE_FC
+CC              =       CONFIGURE_CC
+LD              =       $(FC)
+RWORDSIZE       =       CONFIGURE_RWORDSIZE
+PROMOTION       =       -r$(RWORDSIZE) -i4
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+CFLAGS_LOCAL    =       -w -O3
+LDFLAGS_LOCAL   =
+CPLUSPLUSLIB    =
+ESMF_LDFLAG     =       $(CPLUSPLUSLIB)
+FCOPTIM         =       -O3 -fast -Mvect=noaltcode -Mprefetch=distance:8 # -Mfprelaxed # -Minfo=all =Mneginfo=all
+FCREDUCEDOPT  =       $(FCOPTIM)
+FCNOOPT               =       -O0
+FCDEBUG         =       # -g $(FCNOOPT)  # -C -Ktrap=fp -traceback
+FORMAT_FIXED    =       -Mfixed
+FORMAT_FREE     =       -Mfree
+FCSUFFIX        =
+BYTESWAPIO      =       -byteswapio
+FCBASEOPTS_NO_G =       -w $(FORMAT_FREE) $(BYTESWAPIO) $(OMP)
+FCBASEOPTS      =       $(FCBASEOPTS_NO_G) $(FCDEBUG)
+MODULE_SRCH_FLAG =     -module $(WRF_SRC_ROOT_DIR)/main
+TRADFLAG        =      CONFIGURE_TRADFLAG
+CPP             =      /lib/cpp CONFIGURE_CPPFLAGS
+AR              =      ar
+ARFLAGS         =      ru
+M4              =      m4 -B 14000
+RANLIB          =      ranlib
+RLFLAGS         =
+CC_TOOLS        =      $(SCC)
 
 ###########################################################
 #ARCH    Fujitsu FX10/FX100 Linux x86_64 SPARC64IXfx/SPARC64Xlfx, mpifrtpx and mpifccpx compilers #serial smpar dmpar dm+sm
@@ -2009,7 +2328,7 @@ CC              =       CONFIGURE_CC
 LD              =       $(FC)
 RWORDSIZE       =       CONFIGURE_RWORDSIZE
 PROMOTION       =       -CcdRR$(RWORDSIZE)
-ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  -DWRF_USE_CLM
+ARCH_LOCAL      =       -DNONSTANDARD_SYSTEM_SUBR  CONFIGURE_D_CTSM
 CFLAGS_LOCAL    =       -Kfast -Xg -DSUN # -DRSL0_ONLY
 LDFLAGS_LOCAL   =
 CPLUSPLUSLIB    =
@@ -2034,7 +2353,7 @@ RANLIB          =      ranlib
 RLFLAGS         =
 CC_TOOLS        =      /usr/bin/gcc -Wall
 
+
 #insert new stanza before the Fujitsu block, keep Fujitsu at the end of the list
 ###########################################################
 #ARCH  NULL
-
