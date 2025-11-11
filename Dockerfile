@@ -22,7 +22,6 @@ ENV DIR=${BASE_DIR}/libs \
     RUN_DIR=${BASE_DIR}/run \
     LD_LIBRARY_PATH="${BASE_DIR}/libs/lib:${BASE_DIR}/libs/netcdf/lib:${BASE_DIR}/libs/grib2/lib" \
     PATH=".:/home/wrfuser/.local/bin:${BASE_DIR}/libs/netcdf/bin:${BASE_DIR}/libs/bin:${PATH}"
- # ${BASE_DIR}/WRF/phys/cryowrf/snowpack/lib:${BASE_DIR}/WRF/phys/cryowrf/meteoio/lib" \
 
 # Compiler environment
 ENV CC=gcc \
@@ -232,14 +231,11 @@ RUN ln -sf ${BASE_DIR}/WRF/main/wrf.exe ${RUN_DIR}/ 2>/dev/null || true && \
     ln -sf ${BASE_DIR}/WPS/ungrib/src/ungrib.exe ${RUN_DIR}/ 2>/dev/null || true && \
     ln -sf ${BASE_DIR}/WPS/metgrid/src/metgrid.exe ${RUN_DIR}/ 2>/dev/null || true
 
-# Set LD_LIBRARY_PATH permanently for CRYOWRF libraries
-RUN echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/home/wrfuser/wrf-build/WRF/phys/cryowrf/external/snowpack/lib:/home/wrfuser/wrf-build/WRF/phys/cryowrf/external/meteoio/lib/lib"' >> /home/wrfuser/.bashrc
-
 # Set up working directory and entrypoint
 WORKDIR /home/wrfuser
 ENTRYPOINT ["/bin/bash"]
 
 # Container metadata
 LABEL description="WRF atmospheric model build environment" \
-      wrf_version="4.7+" \
+      wrf_version="4.7.1" \
       ubuntu_version="24.04"
