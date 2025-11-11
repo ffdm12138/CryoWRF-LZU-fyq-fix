@@ -93,9 +93,9 @@ build-wrf:
     - cp main/real.exe "$DIR/bin/"
     - cp main/ndown.exe "$DIR/bin/" 2>/dev/null || true
     - cp main/tc.exe "$DIR/bin/" 2>/dev/null || true
+    # Copy entire WRF build directory for WPS
+    - cp -r "$CI_PROJECT_DIR" "$DIR/WRF"
   artifacts:
     paths:
-      - build/bin/
-      - build/libs/
-      - compile.log
-    expire_in: 5h
+      - build/
+    expire_in: 1 week
