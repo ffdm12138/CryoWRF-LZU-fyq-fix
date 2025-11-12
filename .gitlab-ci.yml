@@ -93,8 +93,15 @@ build-wrf:
     - cp main/real.exe "$DIR/bin/"
     - cp main/ndown.exe "$DIR/bin/" 2>/dev/null || true
     - cp main/tc.exe "$DIR/bin/" 2>/dev/null || true
-    # Copy entire WRF build directory for WPS
-    - cp -r "$CI_PROJECT_DIR" "$DIR/WRF"
+    # Copy entire WRF build directory for WPS (excluding build dir to avoid circular copy)
+    - mkdir -p "$DIR/WRF"
+    - tar -C "$CI_PROJECT_DIR" --exclude='build' -cf - . | tar -C "$DIR/WRF" -xf -
+    # Verify critical WRF files were copied for WPS
+    - test -f "$DIR/WRF/configure.wrf" || (echo "ERROR - configure.wrf not copied!" && exit 1)
+    - test -f "$DIR/WRF/external/io_netcdf/libwrfio_nf.a" || (echo "ERROR - libwrfio_nf.a not copied!" && exit 1)
+    - test -d "$DEPLIBS/grib2" || (echo "ERROR - Jasper library missing!" && exit 1)
+    - echo "Build artifacts verified and ready for WPS"
+    - ls -lh "$DIR/bin/" "$DEPLIBS/grib2/lib/" "$DIR/WRF/external/io_netcdf/"
   artifacts:
     paths:
       - build/
