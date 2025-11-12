@@ -93,14 +93,31 @@ build-wrf:
     - cp main/real.exe "$DIR/bin/"
     - cp main/ndown.exe "$DIR/bin/" 2>/dev/null || true
     - cp main/tc.exe "$DIR/bin/" 2>/dev/null || true
-    # Copy entire WRF build directory for WPS (excluding build dir to avoid circular copy)
+    # Copy only necessary WRF files for WPS (minimal artifact size)
     - mkdir -p "$DIR/WRF"
-    - tar -C "$CI_PROJECT_DIR" --exclude='build' -cf - . | tar -C "$DIR/WRF" -xf -
+    - echo "Copying minimal WRF artifacts for WPS..."
+    # Copy configure.wrf (required by WPS configure script)
+    - cp configure.wrf "$DIR/WRF/"
+    # Copy WRF I/O libraries (required for WPS linking)
+    - mkdir -p "$DIR/WRF/external/io_netcdf" "$DIR/WRF/external/io_grib1" "$DIR/WRF/external/io_grib_share" "$DIR/WRF/external/io_int"
+    - cp -r external/io_netcdf/*.a external/io_netcdf/*.h "$DIR/WRF/external/io_netcdf/" 2>/dev/null || true
+    - cp -r external/io_grib1/*.a external/io_grib1/*.h "$DIR/WRF/external/io_grib1/" 2>/dev/null || true
+    - cp -r external/io_grib_share/*.a external/io_grib_share/*.h "$DIR/WRF/external/io_grib_share/" 2>/dev/null || true
+    - cp -r external/io_int/*.a external/io_int/*.h "$DIR/WRF/external/io_int/" 2>/dev/null || true
+    # Copy grib1 subdirectories (needed by WPS metgrid)
+    - cp -r external/io_grib1/grib1_util external/io_grib1/MEL_grib1 external/io_grib1/WGRIB "$DIR/WRF/external/io_grib1/" 2>/dev/null || true
+    # Copy WRF frame objects and modules (required by WPS geogrid/metgrid)
+    - mkdir -p "$DIR/WRF/frame"
+    - cp frame/module_driver_constants.o frame/pack_utils.o frame/module_machine.o frame/module_internal_header_util.o "$DIR/WRF/frame/" 2>/dev/null || true
+    - cp frame/*.mod "$DIR/WRF/frame/" 2>/dev/null || true
+    # Copy include directory
+    - mkdir -p "$DIR/WRF/inc"
+    - cp inc/*.h inc/*.inc "$DIR/WRF/inc/" 2>/dev/null || true
     # Verify critical WRF files were copied for WPS
     - test -f "$DIR/WRF/configure.wrf" || (echo "ERROR - configure.wrf not copied!" && exit 1)
     - test -f "$DIR/WRF/external/io_netcdf/libwrfio_nf.a" || (echo "ERROR - libwrfio_nf.a not copied!" && exit 1)
     - test -d "$DEPLIBS/grib2" || (echo "ERROR - Jasper library missing!" && exit 1)
-    - echo "Build artifacts verified and ready for WPS"
+    - echo "Minimal WRF artifacts ready for WPS ($(du -sh $DIR/WRF | cut -f1))"
     - ls -lh "$DIR/bin/" "$DEPLIBS/grib2/lib/" "$DIR/WRF/external/io_netcdf/"
   artifacts:
     paths:
