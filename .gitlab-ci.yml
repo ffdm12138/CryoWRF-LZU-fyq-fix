@@ -31,6 +31,8 @@ stages:
 ensure-artifacts:
   stage: prepare
   image: ubuntu:24.04
+  tags:
+    - docker
   script:
     - apt-get update && apt-get install -y curl jq
     - |
@@ -102,6 +104,8 @@ ensure-artifacts:
 build-dependencies:
   stage: dependencies
   image: ubuntu:24.04
+  tags:
+    - docker
   needs:
     - job: ensure-artifacts
       optional: true
@@ -160,6 +164,8 @@ build-dependencies:
 build-wrf:
   stage: wrf
   image: ubuntu:24.04
+  tags:
+    - docker
   dependencies:
     - build-dependencies
   needs:
