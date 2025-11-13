@@ -111,12 +111,17 @@ build-dependencies:
       optional: true
       artifacts: true
   rules:
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Artifacts needed, must build (or SKIP_BUILD not set)
-      when: always
     - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
       when: always
-    - when: never  # Skip otherwise (artifacts exist)
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Triggered for artifact check
+      when: always
   script:
+    # Check if we should skip (artifacts already exist)
+    - |
+      if [ "$SKIP_BUILD" = "true" ]; then
+        echo "Artifacts already exist, skipping build"
+        exit 0
+      fi
     # Install dependencies
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
@@ -145,6 +150,7 @@ build-dependencies:
 
     # Build Jasper library (meteoio, snowpack, and coupler will be built by WRF)
     - echo "Building Jasper..."
+    - mkdir -p "$DIR"
     - mkdir -p "$DEPLIBS/grib2"
     - cd "$DIR"
     - wget https://www2.mmm.ucar.edu/wrf/OnLineTutorial/compile_tutorial/tar_files/jasper-1.900.1.tar.gz -O jasper.tar.gz
@@ -175,12 +181,17 @@ build-wrf:
       artifacts: true
     - job: build-dependencies
   rules:
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Artifacts needed, must build (or SKIP_BUILD not set)
-      when: always
     - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
       when: always
-    - when: never  # Skip otherwise (artifacts exist)
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Triggered for artifact check
+      when: always
   script:
+    # Check if we should skip (artifacts already exist)
+    - |
+      if [ "$SKIP_BUILD" = "true" ]; then
+        echo "Artifacts already exist, skipping build"
+        exit 0
+      fi
     # Install dependencies
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
