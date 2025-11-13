@@ -42,12 +42,12 @@ build-dependencies:
         echo "From branch: $CRYOWRF_BRANCH"
         echo "Pipeline ID: $CRYOWRF_PIPELINE_ID"
         echo "=============================================="
-        cd WRF/phys/cryowrf
+        cd phys/cryowrf
         # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
         git fetch origin
         git checkout $CRYOWRF_COMMIT_SHA
-        cd ../../..
+        cd ../..
         echo "Successfully checked out CRYOWRF commit $CRYOWRF_COMMIT_SHA"
       fi
 
@@ -87,12 +87,12 @@ build-wrf:
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
         echo "=== Testing with CRYOWRF commit $CRYOWRF_COMMIT_SHA ==="
-        cd WRF/phys/cryowrf
+        cd phys/cryowrf
         # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
         git fetch origin
         git checkout $CRYOWRF_COMMIT_SHA
-        cd ../../..
+        cd ../..
       fi
 
     - mkdir -p "$DIR/bin"
