@@ -19,86 +19,9 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
-  - prepare
   - dependencies
   - wrf
   - integration
-
-# Ensure WRF build artifacts are available
-# This job allows WPS to request that WRF build artifacts exist for the latest master build.
-# It provides a fast path when artifacts are already available, avoiding unnecessary rebuilds.
-# If artifacts exist, sets SKIP_BUILD=true; otherwise sets SKIP_BUILD=false to continue with build stages.
-ensure-artifacts:
-  stage: prepare
-  image: ubuntu:24.04
-  tags:
-    - docker
-  script:
-    - apt-get update && apt-get install -y curl jq
-    - |
-      # Get project ID
-      PROJECT_ID="${CI_PROJECT_ID}"
-      echo "Checking for existing WRF build artifacts on latest master commit..."
-
-      # Get latest commit SHA on master branch
-      LATEST_COMMIT=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
-        "${CI_API_V4_URL}/projects/${PROJECT_ID}/repository/branches/master" \
-        | jq -r '.commit.id // empty')
-
-      [ -z "$LATEST_COMMIT" ] && echo "ERROR: Could not get latest master commit" && exit 1
-      echo "Latest master commit: ${LATEST_COMMIT}"
-
-      # Find pipeline with build-wrf artifacts for this commit
-      # (Check recent pipelines since there might be ensure-artifacts-only runs)
-      echo "Searching for build-wrf artifacts for commit ${LATEST_COMMIT}..."
-      RECENT_PIPELINES=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
-        "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines?ref=master&sha=${LATEST_COMMIT}&per_page=5")
-
-      # Check each pipeline for successful build-wrf job with artifacts (excluding current pipeline)
-      FOUND_ARTIFACTS=""
-      for PIPELINE_ID in $(echo "$RECENT_PIPELINES" | jq -r '.[].id'); do
-        # Skip current pipeline
-        if [ "$PIPELINE_ID" = "$CI_PIPELINE_ID" ]; then
-          echo "Skipping current pipeline ${PIPELINE_ID}"
-          continue
-        fi
-
-        echo "Checking pipeline ${PIPELINE_ID}..."
-
-        JOB_DATA=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
-          "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}/jobs" \
-          | jq -r '.[] | select(.name=="build-wrf") | select(.status=="success") | select(.artifacts_file != null)')
-
-        if [ -n "$JOB_DATA" ]; then
-          JOB_ID=$(echo "$JOB_DATA" | jq -r '.id')
-          echo "✓ Found successful build-wrf artifacts in pipeline ${PIPELINE_ID}, job ${JOB_ID}"
-          FOUND_ARTIFACTS="true"
-          echo "SKIP_BUILD=true" > build.env
-          echo "ARTIFACT_PIPELINE_ID=${PIPELINE_ID}" >> build.env
-          echo "ARTIFACT_JOB_ID=${JOB_ID}" >> build.env
-          echo "LATEST_MASTER_COMMIT=${LATEST_COMMIT}" >> build.env
-          break
-        fi
-      done
-
-      if [ -z "$FOUND_ARTIFACTS" ]; then
-        echo "No build-wrf artifacts found for latest master commit"
-      fi
-
-      if [ -n "$FOUND_ARTIFACTS" ]; then
-        echo "=== Artifacts available for latest master, build stages will be skipped ==="
-        exit 0
-      fi
-
-      echo "=== No artifacts found for latest master commit, continuing with build stages ==="
-      echo "SKIP_BUILD=false" > build.env
-      echo "LATEST_MASTER_COMMIT=${LATEST_COMMIT}" >> build.env
-  artifacts:
-    reports:
-      dotenv: build.env
-  rules:
-    - if: '$ENSURE_ARTIFACTS == "true"'  # Only run when explicitly requested
-    - when: never
 
 # Build all dependencies: Jasper, MeteoIO, Snowpack, and CryoWRF coupler
 build-dependencies:
@@ -106,17 +29,6 @@ build-dependencies:
   image: ubuntu:24.04
   tags:
     - docker
-  needs:
-    - job: ensure-artifacts
-      optional: true
-      artifacts: true
-  rules:
-    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
-      when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Triggered for artifact check but no artifacts found
-      when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD == "true"'  # Artifacts exist, skip this job entirely
-      when: never
   script:
     # Install dependencies
     - apt-get update
@@ -172,18 +84,7 @@ build-wrf:
   dependencies:
     - build-dependencies
   needs:
-    - job: ensure-artifacts
-      optional: true
-      artifacts: true
     - job: build-dependencies
-      optional: true
-  rules:
-    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
-      when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Triggered for artifact check but no artifacts found
-      when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD == "true"'  # Artifacts exist, skip this job entirely
-      when: never
   script:
     # Install dependencies
     - apt-get update
