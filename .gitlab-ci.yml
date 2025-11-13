@@ -46,31 +46,41 @@ ensure-artifacts:
       [ -z "$LATEST_COMMIT" ] && echo "ERROR: Could not get latest master commit" && exit 1
       echo "Latest master commit: ${LATEST_COMMIT}"
 
-      # Find SUCCESSFUL pipeline for this specific commit (exclude current running pipeline)
-      PIPELINE_ID=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
-        "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines?ref=master&sha=${LATEST_COMMIT}&status=success&per_page=1" \
-        | jq -r '.[0].id // empty')
+      # Find pipeline with build-wrf artifacts for this commit
+      # (Check recent pipelines since there might be ensure-artifacts-only runs)
+      echo "Searching for build-wrf artifacts for commit ${LATEST_COMMIT}..."
+      RECENT_PIPELINES=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
+        "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines?ref=master&sha=${LATEST_COMMIT}&per_page=5")
 
-      # Check if this commit has a completed successful pipeline with build-wrf artifacts
+      # Check each pipeline for successful build-wrf job with artifacts (excluding current pipeline)
       FOUND_ARTIFACTS=""
-      if [ -n "$PIPELINE_ID" ] && [ "$PIPELINE_ID" != "$CI_PIPELINE_ID" ]; then
-        echo "Found successful pipeline ${PIPELINE_ID} for this commit"
+      for PIPELINE_ID in $(echo "$RECENT_PIPELINES" | jq -r '.[].id'); do
+        # Skip current pipeline
+        if [ "$PIPELINE_ID" = "$CI_PIPELINE_ID" ]; then
+          echo "Skipping current pipeline ${PIPELINE_ID}"
+          continue
+        fi
+
+        echo "Checking pipeline ${PIPELINE_ID}..."
 
         JOB_DATA=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
           "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}/jobs" \
-          | jq -r '.[] | select(.name=="build-wrf") | select(.artifacts_file != null)')
+          | jq -r '.[] | select(.name=="build-wrf") | select(.status=="success") | select(.artifacts_file != null)')
 
         if [ -n "$JOB_DATA" ]; then
           JOB_ID=$(echo "$JOB_DATA" | jq -r '.id')
-          echo "✓ Found artifacts for latest master commit in job ${JOB_ID}"
+          echo "✓ Found successful build-wrf artifacts in pipeline ${PIPELINE_ID}, job ${JOB_ID}"
           FOUND_ARTIFACTS="true"
           echo "SKIP_BUILD=true" > build.env
           echo "ARTIFACT_PIPELINE_ID=${PIPELINE_ID}" >> build.env
           echo "ARTIFACT_JOB_ID=${JOB_ID}" >> build.env
           echo "LATEST_MASTER_COMMIT=${LATEST_COMMIT}" >> build.env
+          break
         fi
-      else
-        echo "No completed successful pipeline found for latest master commit"
+      done
+
+      if [ -z "$FOUND_ARTIFACTS" ]; then
+        echo "No build-wrf artifacts found for latest master commit"
       fi
 
       if [ -n "$FOUND_ARTIFACTS" ]; then
