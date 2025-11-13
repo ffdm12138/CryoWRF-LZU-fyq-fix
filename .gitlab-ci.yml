@@ -109,10 +109,11 @@ build-dependencies:
   needs:
     - job: ensure-artifacts
       optional: true
+      artifacts: true
   rules:
-    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
+    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Artifacts needed, must build (or SKIP_BUILD not set)
       when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD == "false"'  # Artifacts needed, must build
+    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
       when: always
     - when: never  # Skip otherwise (artifacts exist)
   script:
@@ -171,11 +172,12 @@ build-wrf:
   needs:
     - job: ensure-artifacts
       optional: true
+      artifacts: true
     - job: build-dependencies
   rules:
-    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
+    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD != "true"'  # Artifacts needed, must build (or SKIP_BUILD not set)
       when: always
-    - if: '$ENSURE_ARTIFACTS == "true" && $SKIP_BUILD == "false"'  # Artifacts needed, must build
+    - if: '$ENSURE_ARTIFACTS != "true"'  # Normal build (not artifact check)
       when: always
     - when: never  # Skip otherwise (artifacts exist)
   script:
