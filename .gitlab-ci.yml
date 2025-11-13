@@ -46,15 +46,15 @@ ensure-artifacts:
       [ -z "$LATEST_COMMIT" ] && echo "ERROR: Could not get latest master commit" && exit 1
       echo "Latest master commit: ${LATEST_COMMIT}"
 
-      # Find pipeline for this specific commit
+      # Find SUCCESSFUL pipeline for this specific commit (exclude current running pipeline)
       PIPELINE_ID=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
-        "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines?ref=master&sha=${LATEST_COMMIT}&per_page=1" \
+        "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines?ref=master&sha=${LATEST_COMMIT}&status=success&per_page=1" \
         | jq -r '.[0].id // empty')
 
-      # Check if this commit's pipeline has build-wrf job with artifacts
+      # Check if this commit has a completed successful pipeline with build-wrf artifacts
       FOUND_ARTIFACTS=""
-      if [ -n "$PIPELINE_ID" ]; then
-        echo "Found pipeline ${PIPELINE_ID} for this commit"
+      if [ -n "$PIPELINE_ID" ] && [ "$PIPELINE_ID" != "$CI_PIPELINE_ID" ]; then
+        echo "Found successful pipeline ${PIPELINE_ID} for this commit"
 
         JOB_DATA=$(curl -sS --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" \
           "${CI_API_V4_URL}/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}/jobs" \
@@ -69,6 +69,8 @@ ensure-artifacts:
           echo "ARTIFACT_JOB_ID=${JOB_ID}" >> build.env
           echo "LATEST_MASTER_COMMIT=${LATEST_COMMIT}" >> build.env
         fi
+      else
+        echo "No completed successful pipeline found for latest master commit"
       fi
 
       if [ -n "$FOUND_ARTIFACTS" ]; then
