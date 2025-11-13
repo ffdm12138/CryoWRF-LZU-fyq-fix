@@ -34,6 +34,22 @@ build-dependencies:
     # Initialize submodules
     - git submodule sync --recursive
     - git submodule update --init --recursive
+    # If triggered from CRYOWRF, checkout the specific commit
+    - |
+      if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
+        echo "=== Integration Test Triggered from CRYOWRF ==="
+        echo "Testing with CRYOWRF commit: $CRYOWRF_COMMIT_SHA"
+        echo "From branch: $CRYOWRF_BRANCH"
+        echo "Pipeline ID: $CRYOWRF_PIPELINE_ID"
+        echo "=============================================="
+        cd WRF/phys/cryowrf
+        # Fetch using CI job token for authentication
+        git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
+        git fetch origin
+        git checkout $CRYOWRF_COMMIT_SHA
+        cd ../../..
+        echo "Successfully checked out CRYOWRF commit $CRYOWRF_COMMIT_SHA"
+      fi
 
     # Build Jasper library (meteoio, snowpack, and coupler will be built by WRF)
     - echo "Building Jasper..."
@@ -67,6 +83,17 @@ build-wrf:
     # Initialize submodules
     - git submodule sync --recursive
     - git submodule update --init --recursive
+    # If triggered from CRYOWRF, checkout the specific commit
+    - |
+      if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
+        echo "=== Testing with CRYOWRF commit $CRYOWRF_COMMIT_SHA ==="
+        cd WRF/phys/cryowrf
+        # Fetch using CI job token for authentication
+        git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
+        git fetch origin
+        git checkout $CRYOWRF_COMMIT_SHA
+        cd ../../..
+      fi
 
     - mkdir -p "$DIR/bin"
     - cd "$CI_PROJECT_DIR"
