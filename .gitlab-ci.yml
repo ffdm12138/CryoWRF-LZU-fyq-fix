@@ -48,7 +48,8 @@ build-dependencies:
         cd phys/cryowrf
         # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
-        git fetch origin
+        # Fetch the specific branch that contains the commit
+        git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
         # Update submodules to match this commit (meteoio, snowpack, etc.)
         git submodule update --init --recursive
@@ -100,7 +101,8 @@ build-wrf:
         cd phys/cryowrf
         # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
-        git fetch origin
+        # Fetch the specific branch that contains the commit
+        git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
         # Update submodules to match this commit (meteoio, snowpack, etc.)
         git submodule update --init --recursive
