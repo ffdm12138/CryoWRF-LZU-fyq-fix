@@ -3155,9 +3155,12 @@ CONTAINS
            ENDIF
 
            !!!!!!!!!! CALL TO SNOWPACK LSM
+           if (I == 87 .and. J == 96 .and. DX <= 500) then
+                write(*,*) 'TSK before SNOWPACK call jippa', TSK(i,j)
+           endif
 
            call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold,t_phy,qv_curr,   &
-                            u_phy,v_phy,swdown,glw,p8w,rainbl,tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
+                            u_phy,v_phy,swnorm,swdown,glw,p8w,rainbl,tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
                             znt,ids,ide,jds,jde,kds,kde,ims,ime,jms,jme,kms,kme,i_start(ij),i_end(ij),             &
                             j_start(ij),j_end(ij),kts,kte,          &
                             in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch,ice_fluxq,ice_fluxN,           &
@@ -3205,13 +3208,40 @@ CONTAINS
             endif
 
             if( snpack_mode == 'land' ) then
-               T2(I,J)  = T2_snpack(I,J)
-               Q2(I,J)  = Q2_snpack(I,J)
-               TH2(I,J) = T2(I,J) * (1.E5/PSFC(i,j))**RCP
+               if (ISLTYP(I,J) .ne. 14) then
+                  T2(I,J)  = T2_snpack(I,J)
+                  Q2(I,J)  = Q2_snpack(I,J)
+                  TH2(I,J) = T2(I,J) * (1.E5/PSFC(i,j))**RCP
+               else
+                  ! Calculate Q2 over the sea
+                 IF(CQS2_sea(I,J).lt.1.E-5) then
+                   Q2_SEA(I,J) = QSFC_SEA(I,J)
+                 ELSE
+                   Q2_SEA(I,J) = QSFC_SEA(I,J) - QFX_sea(I,J)/(PSFC(I,J)/(R_d * TSK_sea(I,J))*CQS2_sea(I,J))
+                 ENDIF
+
+                ! Calculate T2 over the sea
+                 IF(CHS2_sea(I,J).lt.1.E-5) then
+                   T2_SEA(I,J) = TSK_sea(I,J)
+                 ELSE
+                   T2_SEA(I,J) = TSK_sea(I,J) - HFX_sea(I,J)/(PSFC(I,J)/(R_d * TSK_sea(I,J))*CP*CHS2_sea(I,J))
+                 ENDIF
+                
+                ! Calculate TH2 over ice and sea (not required before fractionation but to keep it in one place)
+                 TH2(I,J)     = T2(I,J)*(1.E5/PSFC(I,J))**RCP
+                 TH2_SEA(I,J) = T2_SEA(I,J)*(1.E5/PSFC(I,J))**RCP
+
+                endif
+
             endif
 
            ENDDO
            ENDDO
+
+           if (I == 87 .and. J == 96 .and. DX <= 500) then
+                write(*,*) 'TSK after SNOWPACK call joppa', TSK(i,j)
+           endif
+
 
 if( snpack_mode == 'antarctica' ) then
 !jref: sfc diagnostics - calculate diagnostics before fractionation of seaice happens (F. Gerber, 2020-08-13)

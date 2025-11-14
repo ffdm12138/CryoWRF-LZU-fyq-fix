@@ -9,7 +9,7 @@ CONTAINS
                   DZ8W,       DT,       DX,            & ! IN : Model configuration 
 	        IVGTYP,   ISLTYP,    & ! IN : Vegetation/Soil characteristics
 		 XLAND,     XICE,XICE_THRES,  & ! IN : Vegetation/Soil characteristics
-                   T3D,     QV3D,     U_PHY,    V_PHY,   SWDOWN,      GLW,  & ! IN : Forcing
+                T3D,     QV3D,     U_PHY,    V_PHY,   SWNORM,    SWDOWN,      GLW,  & ! IN : Forcing
 		 P8W3D,PRECIP_IN,        & ! IN : Forcing
                    TSK,      HFX,      QFX,        LH,   & ! IN/OUT LSM eqv
                 ALBEDO,    & ! IN/OUT LSM eqv
@@ -79,6 +79,7 @@ CONTAINS
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  QV3D      ! 3D water vapor mixing ratio [kg/kg_dry]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  U_PHY     ! 3D U wind component [m/s]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  V_PHY     ! 3D V wind component [m/s]
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWNORM    ! solar down at surface slope normal [W m-2]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDOWN    ! solar down at surface [W m-2]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
@@ -292,7 +293,6 @@ CONTAINS
     real :: divQx, divQy,tmp_divQ
     double precision :: l_in_hsalt
     double precision :: l_psi_s
-    double precision :: l_z0_roughness
     double precision :: l_loc_sza, l_tau_qc, l_tau_qi
     double precision :: l_tau_qc_tot, l_tau_qi_tot
     real, dimension(ims:ime,snc_N,jms:jme)  :: U_SFC,V_SFC,VW_SFC
@@ -305,6 +305,7 @@ CONTAINS
     real :: prof_const_a,prof_const_b
     integer :: c_x,c_y,iii,jjj,ccci,cccj
     real :: min_d,d
+    INTEGER :: topo_shading, slope_rad   
 
     character*256 :: snpack_mode
     call nl_get_snpack_mode  (1, snpack_mode)
@@ -316,7 +317,6 @@ CONTAINS
     in_N_lb = 0.0
     in_hsalt = 0.0
     snpack_psi_s = 0.0
-    l_z0_roughness = 0.002
     sfc_T = 0.0
     sfc_Q = 0.0
 do j = jts,jte
@@ -330,7 +330,7 @@ do i = its,ite
 
 u_right = U_PHY(I+1,1,J)
 u_left  = U_PHY(I-1,1,J)
-u_up    = U_PHY(I,1,J+1)
+
 u_down  = U_PHY(I,1,J-1)
 
 v_right = V_PHY(I+1,1,J)
@@ -531,8 +531,12 @@ endif
        Q_ML   = QV3D(I,1,J)/(1.0+QV3D(I,1,J))         ! convert from mixing ratio to specific humidity [kg/kg]
        U_ML   = U_PHY(I,1,J)                          ! u-wind at interface [m/s]
        V_ML   = V_PHY(I,1,J)                          ! v-wind at interface [m/s]i
-
-       SWDN   = SWDOWN(I,J)                           ! shortwave down from SW scheme [W/m2]
+       IF (topo_shading ==1 .AND. slope_rad ==1) THEN 
+               SWDN   = SWNORM(I,J)                           ! shortwave down slope normal [W/m2]
+               write(*,*) 'uses SWNORM'
+       ELSE
+               SWDN   = SWDOWN(I,J)                           ! shortwave down from SW scheme [W/m2]
+       ENDIF
        LWDN   = GLW(I,J)                              ! total longwave down from LW scheme [W/m2]
        P_ML   =(P8W3D(I,KTS+1,J)+P8W3D(I,KTS,J))*0.5  ! surface pressure defined at intermediate level [Pa]
 	                                              !    consistent with temperature, mixing ratio
@@ -568,8 +572,11 @@ endif
       !!!! snpack-ANTARCTICA: HERE THE CODE SPLITS BETWEEN LAND WITH ICE (isltyp==8) AND LAND WITHOUT ICE
       !!!! snpack-LAND : no if block here
       IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
-&         ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
-
+          ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
+         !write(*,*) 'This is snpack mode land and soiltype not equal to 14'
+         !write(*,*) ' point I, ', I, 'J ', J, ' bopbopbop '
+         !write(*,*) 'in_TA: ', in_TA
+         !write(*,*) 'real(T_ML,8): ', real(T_ML,8)  
 
          in_H   = real(Z_ML,8)    ! (1) 
          in_TA  = real(T_ML,8)    ! (2)
@@ -596,8 +603,12 @@ endif
          out_SNOW   = 0.0 
          out_SNOWH  = 0.0 
 
-         ! Use initial estimate for log_z_z0, will be updated after Snowpack call
-         log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
+         if (snpack_mode == 'antarctica') then 
+            log_z_z0 = log(real(Z_ML,8)/real(0.002,8))
+         else
+            log_z_z0 = log(real(Z_ML,8)/real(0.01,8))  !0.002 set fixed for roughness
+            !length?
+         endif
 
          in_UST = real(UST_V(I,J),8)
          in_SFP = real(PSFC,8)
@@ -667,15 +678,12 @@ endif
   &                          l_ebug_low_bc,l_ebug_raine,l_ebug_totale,arr_T,arr_thick,arr_volI,arr_volW, &
   &                          arr_volV,arr_rg,arr_rb,arr_dd,arr_sp,arr_cdot,arr_meta,arr_depd,arr_graintype,arr_mk,tmp_bs_bool, &
   &                          l_sn_nlayers,l_rho_v, l_bs_bdg_total, qi_in, qni_in,bs_K, bs_mass_turb,    &
-  &                          bs_number_turb,l_in_hsalt,l_psi_s,l_z0_roughness, l_loc_sza,l_tau_qc,l_tau_qi, &
+  &                          bs_number_turb,l_in_hsalt,l_psi_s, l_loc_sza,l_tau_qc,l_tau_qi, &
   &                          l_tau_qc_tot,l_tau_qi_tot )
 
     UST_V(I,J)    = real(in_UST,4)
     in_hsalt(I,J) = real(l_in_hsalt,4)
     snpack_psi_s(I,J) = real(l_psi_s,4)
-    
-    ! Recalculate log_z_z0 using dynamic roughness length from Snowpack
-    log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
 
     total_sfc_SQ_QFX = sfc_SQ_QFX(I,J)
     total_sfc_SQ_HFX = sfc_SQ_HFX(I,J)
@@ -718,17 +726,31 @@ endif
     m_budg_melt(I,J)    =    m_budg_melt(I,J)     +  real(l_mbug_melt,  4)
     m_budg_refreeze(I,J)=    m_budg_refreeze(I,J) +  real(l_mbug_refreeze,4)   
 
+    if (DT>=1.0) then
 
-    e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4)
-    e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4)
-    e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4)
-    e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4)
-    e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4)
-    e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4)
-    e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4)
-    e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4)
-    e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4)
+        e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4)
+        e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4)
+        e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4)
+        e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4)
+        e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4)
+        e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4)
+        e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4)
+        e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4)
+        e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4)
 
+    endif
+    if (DT<1.0) then
+        
+        e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4) * DT  
+        e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4) * DT
+        e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4) * DT
+        e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4) * DT
+        e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4) * DT
+        e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4) * DT
+        e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4) * DT 
+        e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4) * DT
+        e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4) * DT
+    endif
 
     TSK(I,J)            =  real(out_TSK,4)
 
@@ -741,21 +763,26 @@ endif
       FSNO   = 0.0
     endif
     
-    if ( out_SNOWH .gt. 0 ) then
-         ! Use dynamic roughness length computed by Snowpack
-         Z0WRF = real(l_z0_roughness,4)
-    else
-      Z0WRF = Z0(I,J)
-    endif
-    
-    TGB    = 0.0 
-    FVEGMP = 0.0 
-    IRB    = 0.0 !FIRA
-    SHB    = 0.0
-    
-    !Z0WRF  = 0.002
+      if ( out_SNOWH .gt. 0 ) then
+         if (snpack_mode == 'antarctica') then 
+            Z0WRF = 0.002! log(real(Z_ML,8)/real(0.002,8))
+         else
+            Z0WRF = 0.01 ! log(real(Z_ML,8)/real(0.2,8)) ! changed from 0.002 to
+               ! 0.01 by Rainette
+            if (I == 87 .and. J == 96 .and. DX <= 500) then
+                write(*,*) 'code entered in section rewrite Z0 bopbopbop', Z0WRF
+            endif
+         endif
+      else
+        Z0WRF = Z0(I,J)
+      endif
+      TGB    = 0.0 
+      FVEGMP = 0.0 
+      IRB    = 0.0 !FIRA
+      SHB    = 0.0
+      write(*,*)  'Z0 is equal to: ', Z0WRF
 
-  ! FROM SNOWPACK
+     ! FROM SNOWPACK
     TRAD = real(out_TSK,4)
     FSH  = real(out_HFX,4)
     LH (I,J) = real(out_QFX,4)
@@ -764,23 +791,22 @@ endif
     else
        QFX (I,J) = real(out_QFX/real(2.8440E06,8) ,4) + total_sfc_SQ_QFX
     endif
-  ! FROM SNOWPACK
+     ! FROM SNOWPACK
     SWE    = real(out_SNOW,4)
     SNDPTH = real(out_SNOWH,4)
     QSFC1D = real(out_QSFC,4)
     EMISSI = 0.98
     SALB   = real(out_ALBEDO,4)
 
-    prof_const_a = (out_HFX /(l_rho_v*1004.67*IN_UST*0.4))
-    prof_const_b = (QFX(I,J)/(l_rho_v*IN_UST*0.4)) 
-  ! compute T2 and Q2
-
+    prof_const_a = (out_HFX /(l_rho_v*1004.67*real(in_UST,4)*0.4))
+    prof_const_b = (QFX(I,J)/(l_rho_v*real(in_UST,4)*0.4)) 
+     ! compute T2 and Q2
 
 
     T2_snpack(I,J) = real(out_TSK  - prof_const_a*(max((log(2.0/Z0WRF)-real(l_psi_s,4)),0.7)),4)
     Q2_snpack(I,J) = real(out_QSFC - prof_const_b*(max((log(2.0/Z0WRF)-real(l_psi_s,4)),0.7)),4)
 
-  ! compute U10 and V10
+     ! compute U10 and V10
     U10_snpack(I,J) = (real(in_UST,4)/real(0.4,4))*(max((log(10.0/Z0WRF)-real(l_psi_s,4)),0.7)) * U_ML/real(in_VW,4)
     V10_snpack(I,J) = (real(in_UST,4)/real(0.4,4))*(max((log(10.0/Z0WRF)-real(l_psi_s,4)),0.7)) * V_ML/real(in_VW,4)
 
@@ -789,9 +815,34 @@ endif
 !            write(*,*) 'in sfc:',itimestep,out_TSK,out_HFX,QFX(I,J),in_UST, &
 !                    & Z0WRF,SNOWH(I,J),l_psi_s,T2_snpack(I,J),Q2_snpack(I,J),out_QSFC
 !    endif
+    if (I == 87 .and. J == 96 .and. DX <= 500) then
+       write(*,*) 'Debug Info for I=96, J=87 domain dx= ', DX, 'find bipbipbip:'
+        write(*,*) 'in_TA: ', in_TA
+        write(*,*) 'T2_snpack(I,J): ', T2_snpack(I,J)
+        write(*,*) 'snpack_psi_s(I,J): ', real(l_psi_s,4)
+        write(*,*) 'prof_const_a: ', prof_const_a
+        write(*,*) 'prof_const_b: ', prof_const_b
+        write(*,*) 'out_TSK: ', out_TSK
+        write(*,*) 'out_HFX: ', real(out_HFX,4)
+        write(*,*) 'Z0WRF: ', Z0WRF, ' Z0: ', Z0(I,J)
+        write(*,*) 'SNDPTH: ', SNDPTH, ' out_SNOWH: ', out_SNOWH
+        write(*,*) 'l_rho_v: ', l_rho_v
+        write(*,*) 'IN_UST: ', IN_UST
+        write(*,*) 'Q2_snpack: ', Q2_snpack(I,J)
+        write(*,*) 'SWNORM: ', SWNORM(I,J)
+        write(*,*) 'l_ebug_sw_in: ', l_ebug_sw_in
+        write(*,*) 'SWDOWN: ', SWDOWN(I,J)
+    endif
 
+      !T2_snpack(I,J) = in_TA
+      !Q2_snpack(I,J) = real(Q_ML,8)
+      !U10_snpack(I,J)=U_ML
+      !V10_snpack(I,J)=V_ML
 
-  ! sfc_T,sfc_Q
+    if (I == 87 .and. J == 96 .and. DX <= 500) then
+      write(*,*) 'new T2_snpack: ', T2_snpack(I,J)
+    endif
+     ! sfc_T,sfc_Q
     sfc_T(I,1:snc_N,J) = real(TRAD  - prof_const_a*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)
     sfc_Q(I,1:snc_N,J) = real(QSFC1D - prof_const_b*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)
    
