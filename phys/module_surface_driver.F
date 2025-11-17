@@ -3159,7 +3159,8 @@ CONTAINS
            !!!!!!!!!! CALL TO SNOWPACK LSM
 
            call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold, &
-	                    FRACTIONAL_SEAICE,t_phy,qv_curr,   &
+	                    FRACTIONAL_SEAICE,t_phy,qv_curr,u_phy,v_phy,swnorm,swdown,glw,p8w,rainbl, &
+                            tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
                             znt,ids,ide,jds,jde,kds,kde,ims,ime,jms,jme,kms,kme,i_start(ij),i_end(ij),             &
                             j_start(ij),j_end(ij),kts,kte,          &
                             in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch,ice_fluxq,ice_fluxN,           &
