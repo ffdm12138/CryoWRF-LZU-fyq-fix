@@ -293,6 +293,7 @@ CONTAINS
     real :: divQx, divQy,tmp_divQ
     double precision :: l_in_hsalt
     double precision :: l_psi_s
+    double precision :: l_z0_roughness
     double precision :: l_loc_sza, l_tau_qc, l_tau_qi
     double precision :: l_tau_qc_tot, l_tau_qi_tot
     real, dimension(ims:ime,snc_N,jms:jme)  :: U_SFC,V_SFC,VW_SFC
@@ -317,6 +318,7 @@ CONTAINS
     in_N_lb = 0.0
     in_hsalt = 0.0
     snpack_psi_s = 0.0
+    l_z0_roughness = 0.002
     sfc_T = 0.0
     sfc_Q = 0.0
 do j = jts,jte
@@ -330,7 +332,7 @@ do i = its,ite
 
 u_right = U_PHY(I+1,1,J)
 u_left  = U_PHY(I-1,1,J)
-
+u_up    = U_PHY(I,1,J+1)
 u_down  = U_PHY(I,1,J-1)
 
 v_right = V_PHY(I+1,1,J)
@@ -572,11 +574,8 @@ endif
       !!!! snpack-ANTARCTICA: HERE THE CODE SPLITS BETWEEN LAND WITH ICE (isltyp==8) AND LAND WITHOUT ICE
       !!!! snpack-LAND : no if block here
       IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
-          ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
-         !write(*,*) 'This is snpack mode land and soiltype not equal to 14'
-         !write(*,*) ' point I, ', I, 'J ', J, ' bopbopbop '
-         !write(*,*) 'in_TA: ', in_TA
-         !write(*,*) 'real(T_ML,8): ', real(T_ML,8)  
+&         ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
+
 
          in_H   = real(Z_ML,8)    ! (1) 
          in_TA  = real(T_ML,8)    ! (2)
@@ -603,12 +602,8 @@ endif
          out_SNOW   = 0.0 
          out_SNOWH  = 0.0 
 
-         if (snpack_mode == 'antarctica') then 
-            log_z_z0 = log(real(Z_ML,8)/real(0.002,8))
-         else
-            log_z_z0 = log(real(Z_ML,8)/real(0.01,8))  !0.002 set fixed for roughness
-            !length?
-         endif
+         ! Use initial estimate for log_z_z0, will be updated after Snowpack call
+         log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
 
          in_UST = real(UST_V(I,J),8)
          in_SFP = real(PSFC,8)
@@ -678,12 +673,15 @@ endif
   &                          l_ebug_low_bc,l_ebug_raine,l_ebug_totale,arr_T,arr_thick,arr_volI,arr_volW, &
   &                          arr_volV,arr_rg,arr_rb,arr_dd,arr_sp,arr_cdot,arr_meta,arr_depd,arr_graintype,arr_mk,tmp_bs_bool, &
   &                          l_sn_nlayers,l_rho_v, l_bs_bdg_total, qi_in, qni_in,bs_K, bs_mass_turb,    &
-  &                          bs_number_turb,l_in_hsalt,l_psi_s, l_loc_sza,l_tau_qc,l_tau_qi, &
+  &                          bs_number_turb,l_in_hsalt,l_psi_s,l_z0_roughness, l_loc_sza,l_tau_qc,l_tau_qi, &
   &                          l_tau_qc_tot,l_tau_qi_tot )
 
     UST_V(I,J)    = real(in_UST,4)
     in_hsalt(I,J) = real(l_in_hsalt,4)
     snpack_psi_s(I,J) = real(l_psi_s,4)
+    
+    ! Recalculate log_z_z0 using dynamic roughness length from Snowpack
+    log_z_z0 = log(real(Z_ML,8)/real(l_z0_roughness,8))
 
     total_sfc_SQ_QFX = sfc_SQ_QFX(I,J)
     total_sfc_SQ_HFX = sfc_SQ_HFX(I,J)
@@ -764,23 +762,18 @@ endif
     endif
     
       if ( out_SNOWH .gt. 0 ) then
-         if (snpack_mode == 'antarctica') then 
-            Z0WRF = 0.002! log(real(Z_ML,8)/real(0.002,8))
-         else
-            Z0WRF = 0.01 ! log(real(Z_ML,8)/real(0.2,8)) ! changed from 0.002 to
-               ! 0.01 by Rainette
-            if (I == 87 .and. J == 96 .and. DX <= 500) then
-                write(*,*) 'code entered in section rewrite Z0 bopbopbop', Z0WRF
-            endif
-         endif
+         ! Use dynamic roughness length computed by Snowpack
+         Z0WRF = real(l_z0_roughness,4)
       else
         Z0WRF = Z0(I,J)
       endif
+    
       TGB    = 0.0 
       FVEGMP = 0.0 
       IRB    = 0.0 !FIRA
       SHB    = 0.0
-      write(*,*)  'Z0 is equal to: ', Z0WRF
+    
+    !Z0WRF  = 0.002
 
      ! FROM SNOWPACK
     TRAD = real(out_TSK,4)
@@ -798,9 +791,10 @@ endif
     EMISSI = 0.98
     SALB   = real(out_ALBEDO,4)
 
-    prof_const_a = (out_HFX /(l_rho_v*1004.67*real(in_UST,4)*0.4))
-    prof_const_b = (QFX(I,J)/(l_rho_v*real(in_UST,4)*0.4)) 
+    prof_const_a = (out_HFX /(l_rho_v*1004.67*IN_UST*0.4))
+    prof_const_b = (QFX(I,J)/(l_rho_v*IN_UST*0.4)) 
      ! compute T2 and Q2
+
 
 
     T2_snpack(I,J) = real(out_TSK  - prof_const_a*(max((log(2.0/Z0WRF)-real(l_psi_s,4)),0.7)),4)
@@ -815,33 +809,8 @@ endif
 !            write(*,*) 'in sfc:',itimestep,out_TSK,out_HFX,QFX(I,J),in_UST, &
 !                    & Z0WRF,SNOWH(I,J),l_psi_s,T2_snpack(I,J),Q2_snpack(I,J),out_QSFC
 !    endif
-    if (I == 87 .and. J == 96 .and. DX <= 500) then
-       write(*,*) 'Debug Info for I=96, J=87 domain dx= ', DX, 'find bipbipbip:'
-        write(*,*) 'in_TA: ', in_TA
-        write(*,*) 'T2_snpack(I,J): ', T2_snpack(I,J)
-        write(*,*) 'snpack_psi_s(I,J): ', real(l_psi_s,4)
-        write(*,*) 'prof_const_a: ', prof_const_a
-        write(*,*) 'prof_const_b: ', prof_const_b
-        write(*,*) 'out_TSK: ', out_TSK
-        write(*,*) 'out_HFX: ', real(out_HFX,4)
-        write(*,*) 'Z0WRF: ', Z0WRF, ' Z0: ', Z0(I,J)
-        write(*,*) 'SNDPTH: ', SNDPTH, ' out_SNOWH: ', out_SNOWH
-        write(*,*) 'l_rho_v: ', l_rho_v
-        write(*,*) 'IN_UST: ', IN_UST
-        write(*,*) 'Q2_snpack: ', Q2_snpack(I,J)
-        write(*,*) 'SWNORM: ', SWNORM(I,J)
-        write(*,*) 'l_ebug_sw_in: ', l_ebug_sw_in
-        write(*,*) 'SWDOWN: ', SWDOWN(I,J)
-    endif
 
-      !T2_snpack(I,J) = in_TA
-      !Q2_snpack(I,J) = real(Q_ML,8)
-      !U10_snpack(I,J)=U_ML
-      !V10_snpack(I,J)=V_ML
 
-    if (I == 87 .and. J == 96 .and. DX <= 500) then
-      write(*,*) 'new T2_snpack: ', T2_snpack(I,J)
-    endif
      ! sfc_T,sfc_Q
     sfc_T(I,1:snc_N,J) = real(TRAD  - prof_const_a*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)
     sfc_Q(I,1:snc_N,J) = real(QSFC1D - prof_const_b*(max((log(real(snc_Z(I,:,J),4)/Z0WRF)-real(l_psi_s,4)),0.7)),4)

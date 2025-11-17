@@ -3155,9 +3155,6 @@ CONTAINS
            ENDIF
 
            !!!!!!!!!! CALL TO SNOWPACK LSM
-           if (I == 87 .and. J == 96 .and. DX <= 500) then
-                write(*,*) 'TSK before SNOWPACK call jippa', TSK(i,j)
-           endif
 
            call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold,t_phy,qv_curr,   &
                             u_phy,v_phy,swnorm,swdown,glw,p8w,rainbl,tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
