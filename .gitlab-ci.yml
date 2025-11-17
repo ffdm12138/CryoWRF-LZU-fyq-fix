@@ -16,7 +16,12 @@ variables:
   DEBIAN_FRONTEND: "noninteractive"
   JASPERLIB: "$DEPLIBS/grib2/lib"
   JASPERINC: "$DEPLIBS/grib2/include"
-  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 0
+  GIT_SUBMODULE_DEPTH: 0
+  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 1
+  FF_ENABLE_JOB_CLEANUP: "true"
+  GIT_STRATEGY: fetch
 
 stages:
   - dependencies
@@ -34,13 +39,9 @@ build-dependencies:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Allow file protocol for GitLab's submodule optimization
+    # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Initialize first-level submodules
-    - git submodule sync
-    - git submodule update --init
-    # Initialize nested submodules in phys/cryowrf (snowpack, meteoio)
-    - cd phys/cryowrf && git submodule sync && git submodule update --init && cd ../..
+    # Submodules are already initialized by GitLab CI with GIT_SUBMODULE_STRATEGY: recursive
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -102,13 +103,9 @@ build-wrf:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Allow file protocol for GitLab's submodule optimization
+    # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Initialize first-level submodules
-    - git submodule sync
-    - git submodule update --init
-    # Initialize nested submodules in phys/cryowrf (snowpack, meteoio)
-    - cd phys/cryowrf && git submodule sync && git submodule update --init && cd ../..
+    # Submodules are already initialized by GitLab CI with GIT_SUBMODULE_STRATEGY: recursive
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
