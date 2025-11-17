@@ -327,16 +327,14 @@ CONTAINS
      &          ,irr_start_hour,irr_num_hours,irr_start_julianday     &
      &          ,irr_end_julianday,irr_freq,irr_ph,irr_rand_field     &
      &          ,in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch,ice_fluxq,ice_fluxN &
-     &          ,ta_sn_avg,rh_sn_avg,vw_sn_avg,dw_sn_avg,iswr_sn_avg,ilwr_sn_avg,psum_sn_avg,qi_sn_avg,qni_sn_avg &
-     &          ,hfx_sn_avg,qfx_sn_avg,snow_sn_avg,snowh_sn_avg,albedo_sn_avg &
      &          ,m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe,m_budg_melt,m_budg_refreeze &
      &          ,e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib,e_budg_latent,e_budg_low_bc,e_budg_raine &
      &          ,e_budg_totale,in_glo_counter,sn_T,sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd &
-     &          ,sn_graintype,sn_mk, bs_bool,sn_nlayers,snc_Z,snc_N,snpack_layers_to_save,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ,sfc_SN &
+     &          ,sn_graintype,sn_mk, bs_bool,sn_nlayers,snc_Z,snc_N,snpack_layers_to_save,sn_qs,sn_ns,sfc_SQ,sfc_SN & 
      &          ,sfc_meanR,sfc_SQ_HFX ,sfc_SQ_QFX,corr_q_for_rad &
      &          ,corr_N_for_rad,exch_h,bs_qi,bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift &
-     &          ,sfc_u_angle,sfc_v_angle, bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,snpack_psi_s &
-     &          ,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot )
+     &          ,sfc_u_angle,sfc_v_angle, bs_sfc_qi_advt,bs_sfc_qni_advt,VW_SFC,snpack_dt,snpack_write_dt,snpack_psi_s &
+     &          ,loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot,znt_mean )
 
 
    USE module_state_description, ONLY : SFCLAYSCHEME              &
@@ -1493,9 +1491,6 @@ CONTAINS
    !! CRYOWRF
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: in_drift,in_conc,in_csalt,in_q_lb,in_N_lb,in_bs_m_exch
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: ice_fluxq,ice_fluxN
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: ta_sn_avg,rh_sn_avg,vw_sn_avg,dw_sn_avg,iswr_sn_avg,ilwr_sn_avg
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: psum_sn_avg,qi_sn_avg,qni_sn_avg
-   real, optional, dimension(ims:ime,jms:jme),intent(inout) :: hfx_sn_avg,qfx_sn_avg,snow_sn_avg,snowh_sn_avg,albedo_sn_avg
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_precip,m_budg_erosion,m_budg_sublim,m_budg_deposit,m_budg_swe
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: m_budg_melt,m_budg_refreeze
    real, optional, dimension(ims:ime,jms:jme),intent(inout) :: e_budg_lw_in,e_budg_lw_out,e_budg_sw_in,e_budg_sw_out,e_budg_sensib
@@ -1522,7 +1517,6 @@ CONTAINS
    integer, dimension(ims:ime,jms:jme),intent(inout) :: sn_nlayers
    integer,intent(in) :: snc_N
    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: snc_Z,sn_ns,sn_qs
-   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_T,sfc_Q,sfc_RH
    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_SQ,sfc_SN,sfc_meanR
    real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_SQ_HFX,sfc_SQ_QFX
    real,dimension(ims:ime,jms:jme), intent(inout) :: corr_q_for_rad,corr_N_for_rad
@@ -1530,14 +1524,16 @@ CONTAINS
    real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi,bs_qni
    real,dimension(ims:ime,jms:jme), intent(inout) :: in_hsalt,snpack_psi_s
    real,dimension(ims:ime,jms:jme), intent(inout) :: global_bs_bdg_div,global_bs_bdg_xch
-   real,dimension(ims:ime,snc_N,jms:jme) :: sfc_qi_drift,sfc_qni_drift
-   real,dimension(ims:ime,snc_N,jms:jme) :: bs_sfc_qi_advt,bs_sfc_qni_advt
-   real,dimension(ims:ime,jms:jme) :: sfc_u_angle,sfc_v_angle
-   real,dimension(ims:ime,jms:jme) :: Q2_snpack,T2_snpack
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sfc_qi_drift,sfc_qni_drift
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: bs_sfc_qi_advt,bs_sfc_qni_advt 
+   real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_u_angle,sfc_v_angle
+   real,dimension(ims:ime,jms:jme) :: Q2_snpack,T2_snpack,RMOL_OLD
    real,dimension(ims:ime,jms:jme) :: U10_snpack,V10_snpack
    real,intent(in) :: snpack_dt,snpack_write_dt
 
    real,dimension(ims:ime,jms:jme), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
+   real,dimension(ims:ime,jms:jme), intent(out) :: znt_mean
+   real,dimension(ims:ime,snc_N,jms:jme), intent(out) :: VW_SFC
    character*256 :: snpack_mode
 ! To accommodate shared physics
    character*256 :: errmsg
@@ -2072,6 +2068,12 @@ CONTAINS
        ENDDO
      ENDDO
      !$OMP END PARALLEL DO
+
+     ! Compute and store reciprocal Obukhov length using results of land surface scheme over land with ice
+     ! and over sea ice (for previous time step) before they are overwritten by surface layer scheme;
+     ! UST is always > 0, at least if using MYNN surface layer scheme (wind speed >= 0.1 m s-1 
+     ! over open water and sea ice) and SNOWPACK land surface scheme
+     RMOL_OLD = (-1.0) * 0.4 * 9.81 * HFX / ( RHO(:,kms,:)*1004.67 * TSK * UST**3.0 ) ! added by A. Sigmund, Apr 2024
 
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij, i, j, k )
@@ -3156,7 +3158,8 @@ CONTAINS
 
            !!!!!!!!!! CALL TO SNOWPACK LSM
 
-           call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold,t_phy,qv_curr,   &
+           call snowpacklsm(inest,itimestep,xlat,xlong,dz8w,dt,dx,ivgtyp,isltyp,xland,xice,xice_threshold, &
+	                    FRACTIONAL_SEAICE,t_phy,qv_curr,   &
                             u_phy,v_phy,swdown,glw,p8w,rainbl,tsk,hfx,qfx,lh,albedo,snow,snowh,emiss,qsfc,z0, &
                             znt,ids,ide,jds,jde,kds,kde,ims,ime,jms,jme,kms,kme,i_start(ij),i_end(ij),             &
                             j_start(ij),j_end(ij),kts,kte,          &
@@ -3167,13 +3170,13 @@ CONTAINS
                             e_budg_low_bc,e_budg_raine,e_budg_totale,in_glo_counter,sn_T,                          &
                             sn_thick,sn_volI,sn_volW,sn_volV,sn_rg,sn_rb,sn_dd,sn_sp,sn_cdot,sn_meta,sn_depd,     &
                             sn_graintype,sn_mk, &
-                            bs_bool,sn_nlayers, snc_Z,snc_N,sn_qs,sn_ns,sfc_T,sfc_Q,sfc_RH,sfc_SQ,sfc_SN,         &
+                            bs_bool,sn_nlayers, snc_Z,snc_N,sn_qs,sn_ns,sfc_SQ,sfc_SN,         &
                             sfc_meanR,sfc_SQ_HFX,sfc_SQ_QFX,rho,corr_q_for_rad,corr_N_for_rad,exch_h,bs_qi,     &
                             bs_qni,in_hsalt,global_bs_bdg_div,global_bs_bdg_xch,sfc_qi_drift,sfc_qni_drift,       &
-                            sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,snpack_dt,snpack_write_dt,  &
+                            sfc_u_angle,sfc_v_angle,bs_sfc_qi_advt,bs_sfc_qni_advt,VW_SFC,snpack_dt,snpack_write_dt,  &
                             NUM_SOIL_LAYERS,SMOIS,TSLB,SH2O,snpack_layers_to_save,snpack_psi_s, &
                             Q2_snpack,T2_snpack,U10_snpack,V10_snpack,UST,loc_sza,tau_qc, &
-                            tau_qi,tau_qc_tot,tau_qi_tot)
+                            tau_qi,tau_qc_tot,tau_qi_tot,rmol,RMOL_OLD,ZNT_SEA,znt_mean)
 
 
             !!! CALL TO SEAICE_NOAH to deal with sea_ice points

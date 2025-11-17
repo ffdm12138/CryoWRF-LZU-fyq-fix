@@ -119,7 +119,7 @@ CONTAINS
     INTEGER, INTENT(IN)                           ::  k_start, k_end
     LOGICAL, INTENT(IN), OPTIONAL                 ::  f_flux
 
-    LOGICAL, INTENT(IN), OPTIONAL                 :: restart_flag  
+    LOGICAL, INTENT(IN), OPTIONAL                 :: restart_flag
 
     LOGICAL, INTENT(IN), OPTIONAL :: feedback_is_ready  ! For WRF-CMAQ coupled model, indicates feedback information is available
 
@@ -328,8 +328,8 @@ BENCH_START(rad_driver_tim)
      &        ,couple_farms=config_flags%couple_farms                     &
 #endif
 ! WRF-Solar EPS: FARMS
-     &       ,multi_perturb=config_flags% multi_perturb                   & 
-     &       ,pert_farms=config_flags%pert_farms                          & 
+     &       ,multi_perturb=config_flags% multi_perturb                   &
+     &       ,pert_farms=config_flags%pert_farms                          &
      &       ,perts_albedo=grid%pert3d(:,:,:,P_PALBEDO)                   &
      &       ,perts_aod=grid%pert3d(:,:,:,P_PAOD)                         &
      &       ,perts_angstrom=grid%pert3d(:,:,:,P_PANGSTROM)               &
@@ -473,7 +473,7 @@ BENCH_START(rad_driver_tim)
      &         ,diffuse_frac=grid%diffuse_frac &
      &         ,obscur=grid%ECOBSC, mask=grid%ECMASK                       &
      &         ,elat_track=grid%elat_track,elon_track=grid%elon_track      &
-     &         ,SW_ECLIPSE=config_flags%ra_sw_eclipse                      &         
+     &         ,SW_ECLIPSE=config_flags%ra_sw_eclipse                      &
      &         ,IS_CAMMGMP_USED = grid%is_CAMMGMP_used    &
      &         ,cw_rad=grid%cw_rad                     &
      &         ,shcu_physics=config_flags%shcu_physics                     &
@@ -576,7 +576,7 @@ BENCH_START(surf_driver_tim)
       endif
 
 !  Ensure WRF_Chem is compiled if bio_emiss_opt is tested, and add flag to read MEGANv2.1
-!  file if bio_emiss_opt is set properly (even if chem_opt == 0).  
+!  file if bio_emiss_opt is set properly (even if chem_opt == 0).
 !  Also explicitly set do_bioe to .false. if chem_opt <= 0.   BJG 3/28/19
 #if( WRF_USE_CLM == 1) && (WRF_CHEM == 1)
       if( config_flags%bio_emiss_opt == MEGAN2_CLM ) then
@@ -689,8 +689,8 @@ BENCH_START(surf_driver_tim)
      &        ,TMOML=grid%TMOML,ISWATER=iswater                                     &
      &        ,OML_RELAXATION_TIME=grid%OML_RELAXATION_TIME                         &
      &        ,shalwater_z0=config_flags%shalwater_z0                               &
-     &        ,water_depth=grid%water_depth                                         & 
-     &        ,shalwater_depth=config_flags%shalwater_depth                         & 
+     &        ,water_depth=grid%water_depth                                         &
+     &        ,shalwater_depth=config_flags%shalwater_depth                         &
      &        ,lakedepth2d=grid%lakedepth2d,    savedtke12d=grid%savedtke12d        &
      &        ,snowdp2d=grid%snowdp2d,          h2osno2d=grid%h2osno2d              & !lake
      &        ,snl2d=grid%snl2d,                t_grnd2d=grid%t_grnd2d              &
@@ -991,7 +991,7 @@ BENCH_START(surf_driver_tim)
      &        , FIFRACT=grid%FIFRACT  , IRNUMSI=grid%IRNUMSI ,IRNUMMI=grid%IRNUMMI   &
      &        , IRNUMFI=grid%IRNUMFI  , IRWATSI=grid%IRWATSI ,IRWATMI=grid%IRWATMI   &
      &        , IRWATFI=grid%IRWATFI  , IRELOSS=grid%IRELOSS ,IRSIVOL=grid%IRSIVOL   &
-     &        , IRMIVOL=grid%IRMIVOL  , IRFIVOL=grid%IRFIVOL ,IRRSPLH=grid%IRRSPLH   &                       
+     &        , IRMIVOL=grid%IRMIVOL  , IRFIVOL=grid%IRFIVOL ,IRRSPLH=grid%IRRSPLH   &
 ! Noah-MP tile drainage
      &        , QTDRAIN=grid%QTDRAIN  , TD_FRACTION=grid%TD_FRACTION                 &
 ! Optional hydro variables in NOAHMP
@@ -1084,7 +1084,7 @@ BENCH_START(surf_driver_tim)
      &        ,field_sf=grid%field_sf                                                & !SPP
      &        ,spp_pbl=config_flags%spp_pbl,pattern_spp_pbl=grid%pattern_spp_pbl     & !SPP
   ! WRF-Solar EPS: Noah LSM
-     &        ,multi_perturb=config_flags% multi_perturb                             & 
+     &        ,multi_perturb=config_flags% multi_perturb                             &
      &        ,pert_noah=config_flags%pert_noah                                      &
      &        ,perts_qvapor=grid%pert3d(:,:,:,P_PQVAPOR)                             &
      &        ,perts_th=grid%pert3d(:,:,:,P_PTH)                                     &
@@ -1117,8 +1117,7 @@ BENCH_START(surf_driver_tim)
      &        ,snc_Z=grid%snc_Z,snc_N=config_flags%num_bs_sfc_layers                                    & ! Blowing snow
      &        ,snpack_layers_to_save=config_flags%no_snpack_lay_to_sav                                  & ! Blowing snow
      &        ,sn_qs=grid%sn_qs,sn_ns=grid%sn_ns                                                        & ! Blowing snow
-     &        ,sfc_T=grid%sfc_T,sfc_Q=grid%sfc_Q,sfc_RH=grid%sfc_RH,sfc_SQ=grid%sfc_SQ                  & ! Blowing snow
-     &        ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR                                              & ! Blowing snow
+     &        ,sfc_SQ=grid%sfc_SQ,sfc_SN=grid%sfc_SN,sfc_meanR=grid%sfc_meanR                           & ! Blowing snow
      &        ,sfc_SQ_HFX=grid%sfc_SQ_HFX,sfc_SQ_QFX=grid%sfc_SQ_QFX                                    & ! Blowing snow
      &        ,corr_q_for_rad=grid%corr_q_for_rad,corr_N_for_rad=grid%corr_N_for_rad                    & ! Blowing snow
      &        ,exch_h=grid%exch_h,bs_qi=moist(ims,kms,jms,P_bs_qi)                                      & ! Blowing snow
@@ -1128,11 +1127,11 @@ BENCH_START(surf_driver_tim)
      &        ,sfc_qni_drift=grid%sfc_qni_drift,sfc_u_angle=grid%sfc_u_angle                            & ! Blowing snow
      &        ,sfc_v_angle=grid%sfc_v_angle                                                             & ! Blowing snow
      &        ,bs_sfc_qi_advt=grid%bs_sfc_qi_advt,bs_sfc_qni_advt=grid%bs_sfc_qni_advt                  & ! Blowing snow
-     &        ,snpack_dt=config_flags%snpack_dt                                                         & ! Blowing snow
+     &        ,VW_SFC=grid%VW_SFC,snpack_dt=config_flags%snpack_dt                                      & ! Blowing snow
      &        ,snpack_write_dt=config_flags%snpack_write_dt,snpack_psi_s=grid%snpack_psi_s              & ! Blowing snow
      &        ,loc_sza=grid%sza,tau_qc=grid%tau_qc,tau_qi=grid%tau_qi,tau_qc_tot=grid%tau_qc_tot        & ! Blowing snow
      &        ,tau_qi_tot=grid%tau_qi_tot                                                               & ! Blowing snow
-   )
+     &        ,znt_mean=grid%znt_mean )                                                                   ! Blowing snow
 
 #ifdef WRF_HYDRO
         if(HYDRO_dt .gt. 1 ) call wrf_drv_HYDRO(HYDRO_dt, grid,  &
@@ -1699,7 +1698,7 @@ BENCH_START(shcu_driver_tim)
      &             ,PBLHAVG=grid%PBLHAVG, TKEAVG=grid%TKEAVG              &
      &             ,BL_PBL_PHYSICS=config_flags%bl_pbl_physics            &
   ! WRF-Solar EPS
-     &             ,multi_perturb=config_flags%multi_perturb              & 
+     &             ,multi_perturb=config_flags%multi_perturb              &
      &             ,pert_deng=config_flags%pert_deng                      &
      &             ,perts_qvapor=grid%pert3d(:,:,:,P_PQVAPOR)             &
      &             ,perts_qcloud=grid%pert3d(:,:,:,P_PQCLOUD)             &
