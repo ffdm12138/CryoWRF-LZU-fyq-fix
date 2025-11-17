@@ -9,7 +9,7 @@ CONTAINS
                   DZ8W,       DT,       DX,            & ! IN : Model configuration 
 	        IVGTYP,   ISLTYP,    & ! IN : Vegetation/Soil characteristics
 		 XLAND,     XICE,XICE_THRES,FRACTIONAL_SEAICE,  & ! IN : Vegetation/Soil characteristics
-                   T3D,     QV3D,     U_PHY,    V_PHY,   SWDOWN,      GLW,  & ! IN : Forcing
+                T3D,     QV3D,     U_PHY,    V_PHY,   SWNORM,    SWDOWN,      GLW,  & ! IN : Forcing
 		 P8W3D,PRECIP_IN,        & ! IN : Forcing
                    TSK,      HFX,      QFX,        LH,   & ! IN/OUT LSM eqv
                 ALBEDO,    & ! IN/OUT LSM eqv
@@ -80,6 +80,7 @@ CONTAINS
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  QV3D      ! 3D water vapor mixing ratio [kg/kg_dry]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  U_PHY     ! 3D U wind component [m/s]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  V_PHY     ! 3D V wind component [m/s]
+    REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWNORM    ! solar down at surface slope normal [W m-2]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  SWDOWN    ! solar down at surface [W m-2]
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  GLW       ! longwave down at surface [W m-2]
     REAL,    DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(IN   ) ::  P8W3D     ! 3D pressure, valid at interface [Pa]
@@ -308,6 +309,7 @@ CONTAINS
     real :: rmol_old_loc,rmol_loc,psi_m_zref,psi_m_znew,psi_s_zref,psi_s_znew,ratio_log_m,ratio_log_s
     integer :: c_x,c_y,iii,jjj,ccci,cccj
     real :: min_d,d
+    INTEGER :: topo_shading, slope_rad   
 
     character*256 :: snpack_mode
     call nl_get_snpack_mode  (1, snpack_mode)
@@ -589,8 +591,12 @@ endif
        Q_ML   = QV3D(I,1,J)/(1.0+QV3D(I,1,J))         ! convert from mixing ratio to specific humidity [kg/kg]
        U_ML   = U_PHY(I,1,J)                          ! u-wind at interface [m/s]
        V_ML   = V_PHY(I,1,J)                          ! v-wind at interface [m/s]i
-
-       SWDN   = SWDOWN(I,J)                           ! shortwave down from SW scheme [W/m2]
+       IF (topo_shading ==1 .AND. slope_rad ==1) THEN 
+               SWDN   = SWNORM(I,J)                           ! shortwave down slope normal [W/m2]
+               write(*,*) 'uses SWNORM'
+       ELSE
+               SWDN   = SWDOWN(I,J)                           ! shortwave down from SW scheme [W/m2]
+       ENDIF
        LWDN   = GLW(I,J)                              ! total longwave down from LW scheme [W/m2]
        P_ML   =(P8W3D(I,KTS+1,J)+P8W3D(I,KTS,J))*0.5  ! surface pressure defined at intermediate level [Pa]
 	                                              !    consistent with temperature, mixing ratio
@@ -776,17 +782,31 @@ endif
     m_budg_melt(I,J)    =    m_budg_melt(I,J)     +  real(l_mbug_melt,  4)
     m_budg_refreeze(I,J)=    m_budg_refreeze(I,J) +  real(l_mbug_refreeze,4)   
 
+    if (DT>=1.0) then
 
-    e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4)
-    e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4)
-    e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4)
-    e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4)
-    e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4)
-    e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4)
-    e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4)
-    e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4)
-    e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4)
+        e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4)
+        e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4)
+        e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4)
+        e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4)
+        e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4)
+        e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4)
+        e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4)
+        e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4)
+        e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4)
 
+    endif
+    if (DT<1.0) then
+        
+        e_budg_lw_in(I,J)   =    e_budg_lw_in(I,J)    +  real(l_ebug_lw_in     ,4) * DT  
+        e_budg_lw_out(I,J)  =    e_budg_lw_out(I,J)   +  real(l_ebug_lw_out    ,4) * DT
+        e_budg_sw_in(I,J)   =    e_budg_sw_in(I,J)    +  real(l_ebug_sw_in     ,4) * DT
+        e_budg_sw_out(I,J)  =    e_budg_sw_out(I,J)   +  real(l_ebug_sw_out    ,4) * DT
+        e_budg_sensib(I,J)  =    e_budg_sensib(I,J)   +  real(l_ebug_sens    ,4) * DT
+        e_budg_latent(I,J)  =    e_budg_latent(I,J)   +  real(l_ebug_lat    ,4) * DT
+        e_budg_low_bc(I,J)  =    e_budg_low_bc(I,J)   +  real(l_ebug_low_bc  ,4) * DT 
+        e_budg_raine(I,J)   =    e_budg_raine(I,J)    +  real(l_ebug_raine   ,4) * DT
+        e_budg_totale(I,J)  =    e_budg_totale(I,J)   +  real(l_ebug_totale  ,4) * DT
+    endif
 
     TSK(I,J)            =  real(out_TSK,4)
 
@@ -799,21 +819,21 @@ endif
       FSNO   = 0.0
     endif
     
-    if ( out_SNOWH .gt. 0 ) then
+      if ( out_SNOWH .gt. 0 ) then
          ! Use dynamic roughness length computed by Snowpack
          Z0WRF = real(l_z0_roughness,4)
-    else
-      Z0WRF = Z0(I,J)
-    endif
+      else
+        Z0WRF = Z0(I,J)
+      endif
     
-    TGB    = 0.0 
-    FVEGMP = 0.0 
-    IRB    = 0.0 !FIRA
-    SHB    = 0.0
+      TGB    = 0.0 
+      FVEGMP = 0.0 
+      IRB    = 0.0 !FIRA
+      SHB    = 0.0
     
     !Z0WRF  = 0.002
 
-  ! FROM SNOWPACK
+     ! FROM SNOWPACK
     TRAD = real(out_TSK,4)
     FSH  = real(out_HFX,4)
     LH (I,J) = real(out_QFX,4)
@@ -822,7 +842,7 @@ endif
     else
        QFX (I,J) = real(out_QFX/real(2.8440E06,8) ,4) + total_sfc_SQ_QFX
     endif
-  ! FROM SNOWPACK
+     ! FROM SNOWPACK
     SWE    = real(out_SNOW,4)
     SNDPTH = real(out_SNOWH,4)
     QSFC1D = real(out_QSFC,4)

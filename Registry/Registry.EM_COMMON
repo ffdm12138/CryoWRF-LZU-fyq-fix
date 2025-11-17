@@ -3173,7 +3173,7 @@ package   sprinkler      sf_surf_irr_alloc==3        -             state:irrigat
 
 
 package   lesscheme      bl_pbl_physics==0           -             -
-package   ysuscheme      bl_pbl_physics==1           -             -
+package   ysuscheme      bl_pbl_physics==1           -             state:tke_pbl,el_pbl,DELTA_YSU,WSTAR_YSU
 package   myjpblscheme   bl_pbl_physics==2           -             state:tke_pbl,el_pbl
 package   gfsscheme      bl_pbl_physics==3           -             -
 package   qnsepblscheme  bl_pbl_physics==4           -             state:tke_pbl,el_pbl,massflux_EDKF,entr_EDKF,detr_EDKF,thl_up,thv_up,rv_up,rt_up,rc_up,u_up,v_up,frac_up,rc_mf

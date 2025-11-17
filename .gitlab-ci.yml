@@ -16,7 +16,7 @@ variables:
   DEBIAN_FRONTEND: "noninteractive"
   JASPERLIB: "$DEPLIBS/grib2/lib"
   JASPERINC: "$DEPLIBS/grib2/include"
-  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: none
 
 stages:
   - dependencies
@@ -34,9 +34,11 @@ build-dependencies:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Initialize submodules
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
+    # Initialize first-level submodules
+    - git submodule sync
+    - git submodule update --init
+    # Initialize nested submodules in phys/cryowrf (snowpack, meteoio)
+    - cd phys/cryowrf && git submodule sync && git submodule update --init && cd ../..
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -75,6 +77,13 @@ build-dependencies:
     paths:
       - build/libs
     expire_in: 2h
+  rules:
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Skip if just checking artifacts
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
 
 # Build WRF with CRYOWRF integration
 build-wrf:
@@ -91,9 +100,11 @@ build-wrf:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Initialize submodules
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
+    # Initialize first-level submodules
+    - git submodule sync
+    - git submodule update --init
+    # Initialize nested submodules in phys/cryowrf (snowpack, meteoio)
+    - cd phys/cryowrf && git submodule sync && git submodule update --init && cd ../..
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -164,6 +175,13 @@ build-wrf:
     paths:
       - build/
     expire_in: 3 days
+  rules:
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Skip if just checking artifacts
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
 
 # Trigger CRYOWRF-WPS build to verify WPS builds with this WRF version
 trigger-wps-build:
