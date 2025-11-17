@@ -75,6 +75,13 @@ build-dependencies:
     paths:
       - build/libs
     expire_in: 2h
+  rules:
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Skip if just checking artifacts
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
 
 # Build WRF with CRYOWRF integration
 build-wrf:
@@ -164,6 +171,13 @@ build-wrf:
     paths:
       - build/
     expire_in: 3 days
+  rules:
+    - if: '$ENSURE_ARTIFACTS == "true"'  # Skip if just checking artifacts
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
 
 # Trigger CRYOWRF-WPS build to verify WPS builds with this WRF version
 trigger-wps-build:
