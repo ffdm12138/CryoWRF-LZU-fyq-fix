@@ -27,6 +27,7 @@ stages:
   - dependencies
   - wrf
   - integration
+  - publish
 
 # Build all dependencies: Jasper, MeteoIO, Snowpack, and CryoWRF coupler
 build-dependencies:
@@ -141,11 +142,17 @@ build-wrf:
     # Check if WRF executables were created
     - test -f main/wrf.exe || (echo "WRF compilation failed! Check compile.log" && exit 1)
     - test -f main/real.exe || (echo "real.exe compilation failed! Check compile.log" && exit 1)
-    # Copy executables to build directory
+    # Copy executables
     - cp main/wrf.exe "$DIR/bin/"
     - cp main/real.exe "$DIR/bin/"
     - cp main/ndown.exe "$DIR/bin/" 2>/dev/null || true
     - cp main/tc.exe "$DIR/bin/" 2>/dev/null || true
+    # Copy CRYOWRF libraries and runtime data
+    - cp -rL external/cryowrf/lib "$DIR/"
+    - cp -r run "$DIR/"
+    # Verify
+    - test -f "$DIR/lib/libmeteoio.so"
+    - test -f "$DIR/lib/libsnowpack.so"
     # Copy only necessary WRF files for WPS (minimal artifact size)
     - mkdir -p "$DIR/WRF"
     - echo "Copying minimal WRF artifacts for WPS..."
@@ -205,4 +212,25 @@ trigger-wps-build:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
     - if: '$CI_COMMIT_BRANCH'
+      when: always
+
+# Publish tagged releases to package registry (permanent storage)
+publish-release:
+  stage: publish
+  image: curlimages/curl:latest
+  dependencies:
+    - build-wrf
+  needs:
+    - job: build-wrf
+  script:
+    - echo "Publishing release ${CI_COMMIT_TAG} to package registry"
+    - cd build
+    - tar czf cryowrf-wrf-${CI_COMMIT_TAG}.tar.gz bin lib run WRF libs
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+           --upload-file cryowrf-wrf-${CI_COMMIT_TAG}.tar.gz \
+           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/cryowrf-wrf/${CI_COMMIT_TAG}/cryowrf-wrf-${CI_COMMIT_TAG}.tar.gz"
+    - echo "Published to package registry - available permanently"
+  rules:
+    - if: '$CI_COMMIT_TAG'
       when: always

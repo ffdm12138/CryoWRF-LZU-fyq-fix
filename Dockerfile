@@ -210,13 +210,18 @@ RUN cd ${BASE_DIR}/WRF && \
 # Stage 3.5: Analysis stage where we can examine the log even if build failed  
 FROM wrf-build-attempt AS wrf-build
 
-# Stage 4: Build WPS
+# Stage 4: Build WPS from CRYOWRF-WPS repository
 FROM wrf-build AS wps-build
 RUN cd ${BASE_DIR} && \
-    git clone https://github.com/wrf-model/WPS.git && \
+    git clone https://git.wsl.ch/atmospheric-models/CRYOWRF-WPS.git WPS && \
     cd WPS && \
     export WRF_DIR=${BASE_DIR}/WRF && \
+    export JASPER=$DIR/grib2 && \
+    export JASPER_ROOT=$DIR/grib2 && \
+    export NETCDF_classic=1 && \
     printf "${WPS_CONFIGURE_OPTION}\n" | ./configure && \
+    sed -i 's/FFLAGS\s*=/& -fallow-argument-mismatch -fallow-invalid-boz/' configure.wps && \
+    sed -i 's/F77FLAGS\s*=/& -fallow-argument-mismatch -fallow-invalid-boz/' configure.wps && \
     ./compile > log.compile 2>&1
 
 # Final stage: Runtime environment
