@@ -40,3 +40,4 @@ rsl.error.*
 
 build/
 .gitlab-ci-local/
+cryowrf-builds/
