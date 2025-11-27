@@ -22,6 +22,7 @@ variables:
   GIT_SUBMODULE_UPDATE_FLAGS: --jobs 1
   FF_ENABLE_JOB_CLEANUP: "true"
   GIT_STRATEGY: fetch
+  GIT_ALLOW_PROTOCOL: "https:ssh:git:file"
 
 stages:
   - dependencies
