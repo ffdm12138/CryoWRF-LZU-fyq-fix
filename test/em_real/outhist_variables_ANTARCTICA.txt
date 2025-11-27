@@ -16,7 +16,7 @@
 +:h:24:E_BUDG_LOWBC,E_BUDG_RAINE,E_BUDG_dU
 +:h:24:sfc_meanR,sfc_bs_HFX,sfc_bs_QFX,bs_meanR,bs_div,bs_xch
 +:h:24:bs_qi_sublim3d,sn_qi_sublim3d,bs_qi_drift,bs_qni_drift,sn_qs,sn_ns,bs_qi_advect,bs_qni_advect
-+:h:24:SNOW_DRIFT,SNOW_CONC_SALTATION,SURFACE_SNOW_MIX_RATIO,SURFACE_SNOW_NUMBER_MIX_RATIO,SALTATION_HEIGHT
++:h:24:SNOW_DRIFT,SURFACE_SNOW_MIX_RATIO,SURFACE_SNOW_NUMBER_MIX_RATIO,SALTATION_HEIGHT
 +:h:24:bs_qi,bs_qni,bs_sublim
 +:h:12:SN_THICK,SNPACK_T,SN_RG,SN_RB,SN_DD,SN_SP,SN_VOLI,SN_VOLV,SN_VOLW,SN_CDOT,SN_METAMO
 +:h:12:sn_graintype,sn_mk
