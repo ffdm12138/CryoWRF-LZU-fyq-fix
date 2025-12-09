@@ -143,6 +143,7 @@ build-wrf:
     # Check if WRF executables were created
     - test -f main/wrf.exe || (echo "WRF compilation failed! Check compile.log" && exit 1)
     - test -f main/real.exe || (echo "real.exe compilation failed! Check compile.log" && exit 1)
+    - test -f external/io_netcdf/diffwrf || (echo "diffwrf compilation failed! Check compile.log" && exit 1)
     # Copy executables
     - cp main/wrf.exe "$DIR/bin/"
     - cp main/real.exe "$DIR/bin/"
