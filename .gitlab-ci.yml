@@ -16,7 +16,7 @@ variables:
   DEBIAN_FRONTEND: "noninteractive"
   JASPERLIB: "$DEPLIBS/grib2/lib"
   JASPERINC: "$DEPLIBS/grib2/include"
-  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: normal
   GIT_DEPTH: 0
   GIT_SUBMODULE_DEPTH: 0
   GIT_SUBMODULE_UPDATE_FLAGS: --jobs 1
@@ -43,7 +43,21 @@ build-dependencies:
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
     # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Submodules are already initialized by GitLab CI with GIT_SUBMODULE_STRATEGY: recursive
+    # Manually handle nested submodules in cryowrf (GitLab's recursive strategy fails on nested submodules
+    # when the required commit is on a non-default branch)
+    - |
+      echo "=== Initializing nested submodules in phys/cryowrf ==="
+      cd phys/cryowrf
+      # First clone nested submodules (checkout might fail if commit is on non-default branch, that's OK)
+      git submodule update --init --recursive || true
+      # Now they're cloned - configure to fetch all branches, not just default
+      git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
+      # Fetch all refs including non-default branches
+      git submodule foreach --recursive 'git fetch --all --tags'
+      # Now update to correct commits - should succeed since all refs are fetched
+      git submodule update --recursive
+      cd ../..
+      echo "=== Nested submodules initialized ==="
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -58,8 +72,13 @@ build-dependencies:
         # Fetch the specific branch that contains the commit
         git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Update submodules to match this commit (meteoio, snowpack, etc.)
-        git submodule update --init --recursive
+        # Clone nested submodules (checkout might fail, that's OK)
+        git submodule update --init --recursive || true
+        # Configure to fetch all branches and fetch
+        git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
+        git submodule foreach --recursive 'git fetch --all --tags'
+        # Now update to correct commits
+        git submodule update --recursive
         cd ../..
         echo "Successfully checked out CRYOWRF commit $CRYOWRF_COMMIT_SHA with its submodules"
       fi
@@ -107,7 +126,21 @@ build-wrf:
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
     # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Submodules are already initialized by GitLab CI with GIT_SUBMODULE_STRATEGY: recursive
+    # Manually handle nested submodules in cryowrf (GitLab's recursive strategy fails on nested submodules
+    # when the required commit is on a non-default branch)
+    - |
+      echo "=== Initializing nested submodules in phys/cryowrf ==="
+      cd phys/cryowrf
+      # First clone nested submodules (checkout might fail if commit is on non-default branch, that's OK)
+      git submodule update --init --recursive || true
+      # Now they're cloned - configure to fetch all branches, not just default
+      git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
+      # Fetch all refs including non-default branches
+      git submodule foreach --recursive 'git fetch --all --tags'
+      # Now update to correct commits - should succeed since all refs are fetched
+      git submodule update --recursive
+      cd ../..
+      echo "=== Nested submodules initialized ==="
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -118,8 +151,13 @@ build-wrf:
         # Fetch the specific branch that contains the commit
         git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Update submodules to match this commit (meteoio, snowpack, etc.)
-        git submodule update --init --recursive
+        # Clone nested submodules (checkout might fail, that's OK)
+        git submodule update --init --recursive || true
+        # Configure to fetch all branches and fetch
+        git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
+        git submodule foreach --recursive 'git fetch --all --tags'
+        # Now update to correct commits
+        git submodule update --recursive
         cd ../..
       fi
 
