@@ -48,8 +48,10 @@ build-dependencies:
     - |
       echo "=== Initializing nested submodules in phys/cryowrf ==="
       cd phys/cryowrf
-      # First clone nested submodules (checkout might fail if commit is on non-default branch, that's OK)
-      git submodule update --init --recursive || true
+      # Sync URLs from .gitmodules to .git/config (ensures origin is properly configured)
+      git submodule sync --recursive
+      # Clone nested submodules with --force to handle partial/corrupted state
+      git submodule update --init --recursive --force || true
       # Now they're cloned - configure to fetch all branches, not just default
       git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
       # Fetch all refs including non-default branches
@@ -72,8 +74,9 @@ build-dependencies:
         # Fetch the specific branch that contains the commit
         git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Clone nested submodules (checkout might fail, that's OK)
-        git submodule update --init --recursive || true
+        # Sync URLs and clone nested submodules
+        git submodule sync --recursive
+        git submodule update --init --recursive --force || true
         # Configure to fetch all branches and fetch
         git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
         git submodule foreach --recursive 'git fetch --all --tags'
@@ -131,8 +134,10 @@ build-wrf:
     - |
       echo "=== Initializing nested submodules in phys/cryowrf ==="
       cd phys/cryowrf
-      # First clone nested submodules (checkout might fail if commit is on non-default branch, that's OK)
-      git submodule update --init --recursive || true
+      # Sync URLs from .gitmodules to .git/config (ensures origin is properly configured)
+      git submodule sync --recursive
+      # Clone nested submodules with --force to handle partial/corrupted state
+      git submodule update --init --recursive --force || true
       # Now they're cloned - configure to fetch all branches, not just default
       git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
       # Fetch all refs including non-default branches
@@ -151,8 +156,9 @@ build-wrf:
         # Fetch the specific branch that contains the commit
         git fetch origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Clone nested submodules (checkout might fail, that's OK)
-        git submodule update --init --recursive || true
+        # Sync URLs and clone nested submodules
+        git submodule sync --recursive
+        git submodule update --init --recursive --force || true
         # Configure to fetch all branches and fetch
         git submodule foreach --recursive 'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
         git submodule foreach --recursive 'git fetch --all --tags'
