@@ -262,30 +262,29 @@ include ../configure.wrf
 non_nmm : $(MODULES) $(FIRE_MODULES) $(OBJS) $(DIAGNOSTIC_MODULES_EM)
 
 submodules :
+	@if [ ! -d noahmp ] || [ ! -d MYNN-EDMF ] || [ ! -f cryowrf/Makefile ]; then \
+		echo "ERROR: Submodules are not initialized." ; \
+		echo "Please run:" ; \
+		echo "  git submodule update --init --recursive" ; \
+		echo "or check out the branch/commit you want in phys/cryowrf before building." ; \
+		exit 1 ; \
+	fi
 	@if [ \( ! -f module_sf_noahmpdrv.F \) -o \( ! -f module_sf_noahmp_glacier.F \) -o \
 	      \( ! -f module_sf_noahmp_groundwater.F \) -o \( ! -f module_sf_noahmplsm.F \) ] ; then \
-		echo Pulling in NoahMP submodule ; \
-		( cd .. ; git submodule update --init --recursive ) ; \
+		echo Setting up NoahMP symlinks ; \
 		ln -sf noahmp/drivers/wrf/module_sf_noahmpdrv.F . ; \
 		ln -sf noahmp/src/module_sf_noahmp_glacier.F . ; \
 		ln -sf noahmp/src/module_sf_noahmp_groundwater.F . ; \
 		ln -sf noahmp/src/module_sf_noahmplsm.F . ; \
 		( cd ../run ; ln -sf ../phys/noahmp/parameters/MPTABLE.TBL . ) ; \
-	else \
-		echo No action required for NoahMP submodule ; \
 	fi
 	@if [ \( ! -f module_bl_mynnedmf.F \) -o \( ! -f module_bl_mynedmf_common.F \) -o \
 	      \( ! -f module_bl_mynnedmf_driver.F \) ] ; then \
-	      	echo Pulling in MYNN-EDMF submodule ; \
-		( cd .. ; git submodule update --init --recursive ) ; \
+		echo Setting up MYNN-EDMF symlinks ; \
 		ln -sf MYNN-EDMF/module_bl_mynnedmf.F90 module_bl_mynnedmf.F ; \
 		ln -sf MYNN-EDMF/WRF/module_bl_mynnedmf_common.F90 module_bl_mynnedmf_common.F ; \
 		ln -sf MYNN-EDMF/WRF/module_bl_mynnedmf_driver.F90 module_bl_mynnedmf_driver.F ; \
-	else \
-		echo No action required for MYNN-EDMF submodule ; \
 	fi
-	@echo Initializing CRYOWRF submodules
-	@( cd .. ; git submodule update --init --recursive )
 	@echo Building CRYOWRF external libraries
 	@mkdir -p ../external/cryowrf
 	@( if [ ! -f ../external/cryowrf/lib/libmeteoio.so ]; then \
