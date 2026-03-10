@@ -593,7 +593,7 @@ endif
        V_ML   = V_PHY(I,1,J)                          ! v-wind at interface [m/s]i
        IF (topo_shading ==1 .AND. slope_rad ==1) THEN 
                SWDN   = SWNORM(I,J)                           ! shortwave down slope normal [W/m2]
-               write(*,*) 'uses SWNORM'
+               !write(*,*) 'uses SWNORM'
        ELSE
                SWDN   = SWDOWN(I,J)                           ! shortwave down from SW scheme [W/m2]
        ENDIF
@@ -1070,9 +1070,9 @@ endif
 
     call wrf_get_myproc( myproc )
 
-    write(*,*) ' MY PROC: ', myproc
+    !write(*,*) ' MY PROC: ', myproc
     call nl_get_snpack_mode  ( id, snpack_mode)
-    write(*,*) 'SNPACK_MODE: ', snpack_mode
+    !write(*,*) 'SNPACK_MODE: ', snpack_mode
 
     counter_snowpoints=0
     do J=jts,jtf
@@ -1083,10 +1083,10 @@ endif
             endif
          enddo
     enddo
-    write(*,*) 'AFTER: counter snowpoints: ', counter_snowpoints
+    !write(*,*) 'AFTER: counter snowpoints: ', counter_snowpoints
 
-    write(*,*) 'IS TIME STEP present ? : DT == ', dt
-    write(*,*) 'WHAT IS THE ID AND THE MAX ID ? : ID, MAX_DOM == ', id, max_domains
+    !write(*,*) 'IS TIME STEP present ? : DT == ', dt
+    !write(*,*) 'WHAT IS THE ID AND THE MAX ID ? : ID, MAX_DOM == ', id, max_domains
 
     call nl_get_max_dom ( id, l_maxdom)
     call initialize_global_f(l_maxdom,id)
@@ -1134,9 +1134,9 @@ endif
                      arr_mk = real(sn_mk(I,1:snpack_layers_to_save,J),8)
 
                      if(snpack_nlayers(I,J) .eq. 0) then
-                          write(*,*) 'OH MIEN GOTTTT : ', I,J,snpack_nlayers(I,J),id,sn_from_file
+                          !write(*,*) 'OH MIEN GOTTTT : ', I,J,snpack_nlayers(I,J),id,sn_from_file
                           if ( (id .gt. 1) .and. ( .not. (sn_from_file) )) then
-                             write(*,*) ' creating snowpack from thin air @ ', id, I,J
+                             !write(*,*) ' creating snowpack from thin air @ ', id, I,J
                              arr_T(1:40) = real(263.15,8)
                              arr_thick(1:40) = real(0.25,8)
                              arr_volI(1:40) = real(0.5,8)  
@@ -1156,7 +1156,7 @@ endif
                      endif
  
                 if(new_alloc) then
-                   write(*,*) 'NEW ALLOC MUST BE DONE for GRID: ',id, I,J
+                   !write(*,*) 'NEW ALLOC MUST BE DONE for GRID: ',id, I,J
                    call init_snowpack(id,counter_snowpoints,snpack_layers_to_save,real(XLAT(I,J),8),real(XLONG(I,J),8), &
     &                                 real(HT(I,J),8),real(263.15,8),real(dt,8)/real(60.0,8),I,J, &
     &                                 simulation_start_year,simulation_start_month,simulation_start_day,simulation_start_hour,&
@@ -1167,7 +1167,7 @@ endif
                 SNOWH(I,J) = real(tmp_snowh,4)
                 SNOW(I,J) = real(tmp_snow,4)
                 else
-                   write(*,*) 'OLD ALLOC CONTINUED for GRID: ',id, I,J
+                   !write(*,*) 'OLD ALLOC CONTINUED for GRID: ',id, I,J
                 endif
              else
   
