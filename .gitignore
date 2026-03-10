@@ -37,6 +37,7 @@ wrfout_d*
 rsl.out.*
 rsl.error.*
 *.log
+*.sno
 
 build/
 .gitlab-ci-local/
