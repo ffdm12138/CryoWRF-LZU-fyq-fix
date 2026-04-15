@@ -73,6 +73,7 @@ CONTAINS
     REAL,                                            INTENT(IN   ) ::  DX        ! horizontal grid spacing [m]
     INTEGER, DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  IVGTYP    ! vegetation type
     INTEGER, DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  ISLTYP    ! soil type
+
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XLAND     ! =2 ocean; =1 land/seaice
     REAL,    DIMENSION( ims:ime,          jms:jme ), INTENT(IN   ) ::  XICE      ! fraction of grid that is seaice
     REAL,                                            INTENT(IN   ) ::  XICE_THRES! fraction of grid determining seaice
@@ -456,7 +457,7 @@ do i=its,ite
 
        ZNT_MEAN(I,J) = ZNT(I,J)
 
-    ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
+    ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8 .and. IVGTYP(I,J) == 15) .or. &
  &          ( snpack_mode == 'land' )) THEN ! land (with ice)
       
        if ( SNOWH(I,J) .gt. 0 ) then
@@ -465,10 +466,9 @@ do i=its,ite
           ZNT_MEAN(I,J) = Z0(I,J)
        endif
 
-    ELSE ! should not happen
-      
-       PRINT *,'STOP AS THERE IS A LAND SURFACE WITHOUT ICE AT I=',I,'J=',J
-       STOP
+    ELSE ! land without snow/ice (e.g., rock outcrops with LU_INDEX=16)
+
+       ZNT_MEAN(I,J) = Z0(I,J)
 
     ENDIF
 
@@ -631,7 +631,7 @@ endif
 
       !!!! snpack-ANTARCTICA: HERE THE CODE SPLITS BETWEEN LAND WITH ICE (isltyp==8) AND LAND WITHOUT ICE
       !!!! snpack-LAND : no if block here
-      IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+      IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
 &         ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
 
 
@@ -928,7 +928,7 @@ endif
         JJLOOP : DO J = jts , jte
 
 
-           IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+           IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
 &              ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))  ) then
 
            else
@@ -941,7 +941,7 @@ endif
                       ccci = i + iii
                       cccj = j + jjj
 
-                 if ( ( ((snpack_mode == 'antarctica') .and. (isltyp(ccci,cccj) == 8)) .or. &
+                 if ( ( ((snpack_mode == 'antarctica') .and. (isltyp(ccci,cccj) == 8) .and. (IVGTYP(ccci,cccj) == 15)) .or. &
 &                     ((snpack_mode == 'land') .and. (isltyp(ccci,cccj) .ne. 14)) )  .and. &
 &                      (sn_nlayers(ccci,cccj) .gt. 0) ) then
                       !if( (ISLTYP(ccci,cccj) == 8) .and. (sn_nlayers(ccci,cccj) .gt. 0)  ) then
@@ -949,11 +949,11 @@ endif
                            if(min_d .eq. 0.0) then
                               d = min_d
                            endif
-                           if(d .le. min_d) then
+                           ope: if(d .le. min_d) then
                               min_d = d
                               c_x = ccci
-                              c_y = cccj 
-                           endif
+                              c_y = cccj
+                           endif ope
                       endif 
                    enddo
                 enddo    
@@ -988,7 +988,7 @@ endif
   END SUBROUTINE snowpacklsm
 !------------------------------------------------------
 
-  SUBROUTINE snowpack_init (SNOW,SNOWH,ISLTYP,XLAT,XLONG, &
+  SUBROUTINE snowpack_init (SNOW,SNOWH,ISLTYP,IVGTYP,XLAT,XLONG, &
        ids,ide, jds,jde, kds,kde,                &
        ims,ime, jms,jme, kms,kme,                &
        its,ite, jts,jte, kts,kte,                &
@@ -1048,6 +1048,7 @@ endif
 
     REAL,    DIMENSION( ims:ime, jms:jme ), INTENT(INOUT)    ::     SNOW,SNOWH
     INTEGER, DIMENSION( ims:ime, jms:jme ), INTENT(IN)   :: ISLTYP
+    INTEGER, DIMENSION( ims:ime, jms:jme ), INTENT(IN)   :: IVGTYP
     REAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) :: XLAT,XLONG         !latitude
     REAL, DIMENSION(ims:ime,jms:jme), INTENT(IN) , OPTIONAL :: HT          !terrain height (m)
     integer, optional, dimension(ims:ime,jms:jme), intent(inout) :: in_glo_counter
@@ -1077,7 +1078,7 @@ endif
     counter_snowpoints=0
     do J=jts,jtf
          do I=its,itf
-            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
 &               ((snpack_mode == 'land')  .and. (ISLTYP(I,J) .ne. 14)) ) then
                counter_snowpoints = counter_snowpoints + 1
             endif
@@ -1112,7 +1113,7 @@ endif
        counter_snowpoints=0
        do J=jts,jtf
           do I=its,itf
-            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
 &               ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))     ) then
 
                 counter_snowpoints = counter_snowpoints + 1
