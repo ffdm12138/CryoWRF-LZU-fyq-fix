@@ -242,22 +242,22 @@ CONTAINS
 
     real :: add_to_top_qi,add_to_top_ni
     integer :: l_sn_nlayers
-    double precision, dimension(snpack_layers_to_save) :: arr_T
+    double precision, allocatable, dimension(:) :: arr_T
 
-    double precision, dimension(snpack_layers_to_save) :: arr_thick
-    double precision, dimension(snpack_layers_to_save) :: arr_volI
-    double precision, dimension(snpack_layers_to_save) :: arr_volW
-    double precision, dimension(snpack_layers_to_save) :: arr_volV
-    double precision, dimension(snpack_layers_to_save) :: arr_rg
+    double precision, allocatable, dimension(:) :: arr_thick
+    double precision, allocatable, dimension(:) :: arr_volI
+    double precision, allocatable, dimension(:) :: arr_volW
+    double precision, allocatable, dimension(:) :: arr_volV
+    double precision, allocatable, dimension(:) :: arr_rg
 
-    double precision, dimension(snpack_layers_to_save) :: arr_rb
-    double precision, dimension(snpack_layers_to_save) :: arr_dd
-    double precision, dimension(snpack_layers_to_save) :: arr_sp
-    double precision, dimension(snpack_layers_to_save) :: arr_cdot
-    double precision, dimension(snpack_layers_to_save) :: arr_meta
-    double precision, dimension(snpack_layers_to_save) :: arr_depd
-    double precision, dimension(snpack_layers_to_save) :: arr_graintype
-    double precision, dimension(snpack_layers_to_save) :: arr_mk
+    double precision, allocatable, dimension(:) :: arr_rb
+    double precision, allocatable, dimension(:) :: arr_dd
+    double precision, allocatable, dimension(:) :: arr_sp
+    double precision, allocatable, dimension(:) :: arr_cdot
+    double precision, allocatable, dimension(:) :: arr_meta
+    double precision, allocatable, dimension(:) :: arr_depd
+    double precision, allocatable, dimension(:) :: arr_graintype
+    double precision, allocatable, dimension(:) :: arr_mk
 
     double precision :: l_rho_v
     logical,intent(in) :: bs_bool
@@ -461,7 +461,7 @@ do i=its,ite
  &          ( snpack_mode == 'land' )) THEN ! land (with ice)
       
        if ( SNOWH(I,J) .gt. 0 ) then
-          ZNT_MEAN(I,J) = 0.002
+          ZNT_MEAN(I,J) = ZNT(I,J)
        else
           ZNT_MEAN(I,J) = Z0(I,J)
        endif
@@ -538,6 +538,21 @@ if( (snpack_mode == 'land') .and. (SNOWH(I,J) .le. 0.2)  ) then
 endif
 
 !!!!!!!!!! END OF BLOWING SNOW SURFACE MASS BALANCE and SFC LAYER ADVECTION
+
+    allocate(arr_T(snpack_layers_to_save))
+    allocate(arr_thick(snpack_layers_to_save))
+    allocate(arr_volI(snpack_layers_to_save))
+    allocate(arr_volW(snpack_layers_to_save))
+    allocate(arr_volV(snpack_layers_to_save))
+    allocate(arr_rg(snpack_layers_to_save))
+    allocate(arr_rb(snpack_layers_to_save))
+    allocate(arr_dd(snpack_layers_to_save))
+    allocate(arr_sp(snpack_layers_to_save))
+    allocate(arr_cdot(snpack_layers_to_save))
+    allocate(arr_meta(snpack_layers_to_save))
+    allocate(arr_depd(snpack_layers_to_save))
+    allocate(arr_graintype(snpack_layers_to_save))
+    allocate(arr_mk(snpack_layers_to_save))
 
     second_counter = 0
     counter_snowpoints = 0
@@ -883,7 +898,10 @@ endif
 !                    & Z0WRF,SNOWH(I,J),l_psi_s,T2_snpack(I,J),Q2_snpack(I,J),out_QSFC
 !    endif
 
-   ENDIF ! glacial split ends 
+   ENDIF ! glacial split ends
+
+          IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+&             ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14)) ) THEN
 
 ! INPUT/OUTPUT
              m_budg_deposit(I,J) =    m_budg_deposit(I,J)  +  real(l_mbug_deposit   ,4)
@@ -903,21 +921,25 @@ endif
              Z0       (I,J)                = Z0WRF
              ZNT      (I,J)                = Z0WRF
              ZNT_MEAN (I,J)                = Z0WRF ! update as change of snow height might have changed the roughness length
-         
+
              in_drift(I,J) = real(l_in_drift,4)
              in_conc(I,J)  = real(l_in_conc,4)
              in_csalt(I,J) = real(l_in_csalt,4)
              in_q_lb(I,J)  = real(l_in_q_lb,4)
              in_N_lb(I,J)  = real(l_in_N_lb,4)
 
-             ice_fluxq(I,J) = 0.0 
-             ice_fluxN(I,J) = 0.0 
+             ice_fluxq(I,J) = 0.0
+             ice_fluxN(I,J) = 0.0
+
+          ENDIF ! snowpack points only
 
           ENDIF                                                         ! endif of land-sea test
 
       ENDDO ILOOP                                                       ! of I loop
    ENDDO JLOOP                                                          ! of J loop
 
+    deallocate(arr_T, arr_thick, arr_volI, arr_volW, arr_volV, arr_rg)
+    deallocate(arr_rb, arr_dd, arr_sp, arr_cdot, arr_meta, arr_depd, arr_graintype, arr_mk)
 
 !!! expanding the sn_XXX arrays to have non-zero values even for points that are 'in ocean' at the moment. 
 !!! This is done so that when the downscaling is done for the nested domain, points in the high resolution coastline
