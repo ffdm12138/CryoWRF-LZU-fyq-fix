@@ -3289,6 +3289,18 @@ if( snpack_mode == 'antarctica' ) then
                    Q2(I,J)  = Q2_snpack(I,J)
                    T2(I,J)  = T2_snpack(I,J)
                    TH2(I,J) = T2(i,j)*(1.E5/PSFC(i,j))**RCP
+              ELSEIF ( (XLAND(I,J)-1.5) .LT. 0.0 ) THEN ! non-glacier land (e.g. rock outcrops IVGTYP=16)
+                 IF(CHS2(I,J) .lt. 1.E-5) THEN
+                    T2(I,J) = TSK(I,J)
+                 ELSE
+                    T2(I,J) = TSK(I,J) - HFX(I,J)/(PSFC(I,J)/(R_d * TSK(I,J))*CP*CHS2(I,J))
+                 ENDIF
+                 IF(CQS2(I,J) .lt. 1.E-5) THEN
+                    Q2(I,J) = QSFC(I,J)
+                 ELSE
+                    Q2(I,J) = QSFC(I,J) - QFX(I,J)/(PSFC(I,J)/(R_d * TSK(I,J))*CQS2(I,J))
+                 ENDIF
+                 TH2(I,J) = T2(I,J)*(1.E5/PSFC(I,J))**RCP
               ELSE
                  T2(I,J)  = FVEGXY(I,J)*T2MVXY(I,J) + (1.-FVEGXY(I,J))*T2MBXY(I,J)
                  Q2(I,J)  = FVEGXY(I,J)*Q2MVXY(I,J) + (1.-FVEGXY(I,J))*Q2MBXY(I,J)
