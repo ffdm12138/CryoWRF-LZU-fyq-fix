@@ -457,7 +457,7 @@ do i=its,ite
 
        ZNT_MEAN(I,J) = ZNT(I,J)
 
-    ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8 .and. IVGTYP(I,J) == 15) .or. &
+    ELSEIF (((snpack_mode == 'antarctica') .and. ISLTYP(I,J) == 8) .or. &
  &          ( snpack_mode == 'land' )) THEN ! land (with ice)
       
        if ( SNOWH(I,J) .gt. 0 ) then
@@ -646,7 +646,7 @@ endif
 
       !!!! snpack-ANTARCTICA: HERE THE CODE SPLITS BETWEEN LAND WITH ICE (isltyp==8) AND LAND WITHOUT ICE
       !!!! snpack-LAND : no if block here
-      IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+      IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
 &         ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14))   ) then
 
 
@@ -900,7 +900,7 @@ endif
 
    ENDIF ! glacial split ends
 
-          IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+          IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
 &             ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14)) ) THEN
 
 ! INPUT/OUTPUT
@@ -950,7 +950,7 @@ endif
         JJLOOP : DO J = jts , jte
 
 
-           IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+           IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
 &              ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))  ) then
 
            else
@@ -963,7 +963,7 @@ endif
                       ccci = i + iii
                       cccj = j + jjj
 
-                 if ( ( ((snpack_mode == 'antarctica') .and. (isltyp(ccci,cccj) == 8) .and. (IVGTYP(ccci,cccj) == 15)) .or. &
+                 if ( ( ((snpack_mode == 'antarctica') .and. (isltyp(ccci,cccj) == 8)) .or. &
 &                     ((snpack_mode == 'land') .and. (isltyp(ccci,cccj) .ne. 14)) )  .and. &
 &                      (sn_nlayers(ccci,cccj) .gt. 0) ) then
                       !if( (ISLTYP(ccci,cccj) == 8) .and. (sn_nlayers(ccci,cccj) .gt. 0)  ) then
@@ -1100,7 +1100,7 @@ endif
     counter_snowpoints=0
     do J=jts,jtf
          do I=its,itf
-            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
 &               ((snpack_mode == 'land')  .and. (ISLTYP(I,J) .ne. 14)) ) then
                counter_snowpoints = counter_snowpoints + 1
             endif
@@ -1135,7 +1135,7 @@ endif
        counter_snowpoints=0
        do J=jts,jtf
           do I=its,itf
-            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8) .and. (IVGTYP(I,J) == 15)) .or. &
+            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
 &               ((snpack_mode == 'land') .and. (ISLTYP(I,J) .ne. 14))     ) then
 
                 counter_snowpoints = counter_snowpoints + 1
