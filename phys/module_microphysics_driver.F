@@ -3582,11 +3582,11 @@ if(bool_snow_sublimation) then
          bs_sublim_qni(k) = 0.0
        endif ! END OF IF STATEMENT FOR QI_FINAL/QNI_FINAL greater than a threshold
 
-       if(abs(bs_sublim_qi(k)) .le. 1.0e-8) then
-             bs_sublim_qi(k) = 0.0
-             bs_sublim_qni(k) = 0.0
-       endif
-
+       !if(abs(bs_sublim_qi(k)) .le. 1.0e-8) then
+       !      bs_sublim_qi(k) = 0.0
+       !      bs_sublim_qni(k) = 0.0
+       !endif
+       
 
     enddo ! END LOOP OVER K
 
