@@ -48,6 +48,8 @@ build-dependencies:
     - |
       echo "=== Initializing nested submodules in phys/cryowrf ==="
       cd phys/cryowrf
+      # Fetch using CI job token for authentication (needed for git.wsl.ch nested submodules)
+      git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
       # Sync URLs from .gitmodules to .git/config (ensures proper remote configuration)
       git submodule sync --recursive
       # Clone and checkout nested submodules
