@@ -900,9 +900,6 @@ endif
 
    ENDIF ! glacial split ends
 
-          IF( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
-&             ((snpack_mode == 'land' ) .and. (ISLTYP(I,J) .ne. 14)) ) THEN
-
 ! INPUT/OUTPUT
              m_budg_deposit(I,J) =    m_budg_deposit(I,J)  +  real(l_mbug_deposit   ,4)
              TSK      (I,J)                = TRAD
@@ -930,8 +927,6 @@ endif
 
              ice_fluxq(I,J) = 0.0
              ice_fluxN(I,J) = 0.0
-
-          ENDIF ! snowpack points only
 
           ENDIF                                                         ! endif of land-sea test
 
