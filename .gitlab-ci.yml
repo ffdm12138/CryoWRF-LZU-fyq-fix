@@ -16,7 +16,7 @@ variables:
   DEBIAN_FRONTEND: "noninteractive"
   JASPERLIB: "$DEPLIBS/grib2/lib"
   JASPERINC: "$DEPLIBS/grib2/include"
-  GIT_SUBMODULE_STRATEGY: normal
+  GIT_SUBMODULE_STRATEGY: none
   GIT_DEPTH: 0
   GIT_SUBMODULE_DEPTH: 0
   GIT_SUBMODULE_UPDATE_FLAGS: --jobs 1
@@ -41,21 +41,17 @@ build-dependencies:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Manually handle nested submodules in cryowrf (GitLab's recursive strategy fails on nested submodules
-    # when the required commit is on a non-default branch)
+    - git config --global fetch.recurseSubmodules false
+    # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
+    - git submodule update --init
+    # Handle nested submodules in phys/cryowrf explicitly
     - |
-      echo "=== Initializing nested submodules in phys/cryowrf ==="
       cd phys/cryowrf
-      # Fetch using CI job token for authentication (needed for git.wsl.ch nested submodules)
       git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
-      # Sync URLs from .gitmodules to .git/config (ensures proper remote configuration)
       git submodule sync --recursive
-      # Clone and checkout nested submodules
       git submodule update --init --recursive --force
       cd ../..
-      echo "=== Nested submodules initialized ==="
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
@@ -65,12 +61,9 @@ build-dependencies:
         echo "Pipeline ID: $CRYOWRF_PIPELINE_ID"
         echo "=============================================="
         cd phys/cryowrf
-        # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
-        # Fetch the specific branch that contains the commit
-        git fetch origin "$CRYOWRF_BRANCH"
+        git fetch --no-recurse-submodules origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Sync URLs and checkout nested submodules for this CRYOWRF commit
         git submodule sync --recursive
         git submodule update --init --recursive --force
         cd ../..
@@ -118,30 +111,25 @@ build-wrf:
     - apt-get update
     - apt-get install -y git wget build-essential cmake csh curl perl m4 gfortran gcc g++ make python3
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
-    # Allow file protocol for GitLab's submodule optimization (safety measure)
     - git config --global protocol.file.allow always
-    # Manually handle nested submodules in cryowrf (GitLab's recursive strategy fails on nested submodules
-    # when the required commit is on a non-default branch)
+    - git config --global fetch.recurseSubmodules false
+    # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
+    - git submodule update --init
+    # Handle nested submodules in phys/cryowrf explicitly
     - |
-      echo "=== Initializing nested submodules in phys/cryowrf ==="
       cd phys/cryowrf
-      # Sync URLs from .gitmodules to .git/config (ensures proper remote configuration)
+      git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
       git submodule sync --recursive
-      # Clone and checkout nested submodules
       git submodule update --init --recursive --force
       cd ../..
-      echo "=== Nested submodules initialized ==="
     # If triggered from CRYOWRF, checkout the specific commit
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
         echo "=== Testing with CRYOWRF commit $CRYOWRF_COMMIT_SHA ==="
         cd phys/cryowrf
-        # Fetch using CI job token for authentication
         git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
-        # Fetch the specific branch that contains the commit
-        git fetch origin "$CRYOWRF_BRANCH"
+        git fetch --no-recurse-submodules origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
-        # Sync URLs and checkout nested submodules for this CRYOWRF commit
         git submodule sync --recursive
         git submodule update --init --recursive --force
         cd ../..
