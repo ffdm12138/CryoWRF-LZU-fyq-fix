@@ -44,7 +44,9 @@ build-dependencies:
     - git config --global protocol.file.allow always
     - git config --global fetch.recurseSubmodules false
     # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
-    - git submodule update --init
+    # Sync first to reset any stale remote URLs from previous runner executions
+    - git submodule sync
+    - git submodule update --init --force
     # Handle nested submodules in phys/cryowrf explicitly
     - |
       cd phys/cryowrf
@@ -114,7 +116,9 @@ build-wrf:
     - git config --global protocol.file.allow always
     - git config --global fetch.recurseSubmodules false
     # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
-    - git submodule update --init
+    # Sync first to reset any stale remote URLs from previous runner executions
+    - git submodule sync
+    - git submodule update --init --force
     # Handle nested submodules in phys/cryowrf explicitly
     - |
       cd phys/cryowrf
