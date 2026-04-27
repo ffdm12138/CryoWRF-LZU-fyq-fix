@@ -47,23 +47,31 @@ build-dependencies:
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
     - git config --global protocol.file.allow always
     - git config --global fetch.recurseSubmodules false
-    # Inject CI_JOB_TOKEN auth for the private cryowrf submodule (its URL is git.wsl.ch, an alias
-    # of the CI server). Without this, unauthenticated fetches return 404 and git reports the
-    # confusing "'origin' does not appear to be a git repository" error.
+    # Inject CI_JOB_TOKEN auth for the private cryowrf (and its nested meteoio/snowpack) URLs.
+    # All three live on git.wsl.ch which is an alias of the CI server; without this, fetches are
+    # unauthenticated and the server returns 404 for private repos.
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://git.wsl.ch/"
-    # Reset any stale cryowrf submodule state cached by the runner from prior pipelines (the
-    # cached .git/modules/phys/cryowrf can lose its origin remote, breaking subsequent fetches).
+    # Reset any stale cryowrf state cached on the runner from prior pipelines.
     - git submodule sync
     - git submodule deinit -f phys/cryowrf 2>/dev/null || true
     - rm -rf .git/modules/phys/cryowrf phys/cryowrf
-    - git submodule update --init --force
-    # Recursively initialize nested submodules inside phys/cryowrf (meteoio, snowpack)
+    # Initialize the public github submodules normally — their recorded SHAs are on default branches.
+    - git submodule update --init --force .ci/hpc-workflows phys/MYNN-EDMF phys/noahmp
+    # Clone cryowrf manually with FULL refs. `git clone` fetches all branches by default, unlike
+    # `git submodule update` which falls back to fetch-by-SHA when the recorded commit is not on
+    # the default branch — and GitLab rejects fetch-by-arbitrary-SHA, surfacing as the misleading
+    # "'origin' does not appear to be a git repository" error in branch→branch pipelines.
     - |
+      CRYOWRF_URL=$(git config -f .gitmodules submodule.phys/cryowrf.url)
+      CRYOWRF_SHA=$(git ls-tree HEAD phys/cryowrf | awk '{print $3}')
+      echo "Cloning cryowrf full-refs from $CRYOWRF_URL, target SHA: $CRYOWRF_SHA"
+      git clone "$CRYOWRF_URL" phys/cryowrf
       cd phys/cryowrf
+      git checkout "$CRYOWRF_SHA"
       git submodule sync --recursive
       git submodule update --init --recursive --force
       cd ../..
-    # If triggered from CRYOWRF, checkout the specific commit
+    # If triggered from CRYOWRF, override to the specific commit on the triggering branch.
     - |
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
         echo "=== Integration Test Triggered from CRYOWRF ==="
