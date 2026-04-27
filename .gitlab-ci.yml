@@ -23,6 +23,10 @@ variables:
   FF_ENABLE_JOB_CLEANUP: "true"
   GIT_STRATEGY: fetch
   GIT_ALLOW_PROTOCOL: "https:ssh:git:file"
+  # Prevent git from recursively fetching nested submodules (propagates to all child git processes)
+  GIT_CONFIG_COUNT: "1"
+  GIT_CONFIG_KEY_0: "fetch.recurseSubmodules"
+  GIT_CONFIG_VALUE_0: "false"
 
 stages:
   - dependencies
@@ -43,14 +47,19 @@ build-dependencies:
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
     - git config --global protocol.file.allow always
     - git config --global fetch.recurseSubmodules false
-    # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
-    # Sync first to reset any stale remote URLs from previous runner executions
+    # Inject CI_JOB_TOKEN auth for the private cryowrf submodule (its URL is git.wsl.ch, an alias
+    # of the CI server). Without this, unauthenticated fetches return 404 and git reports the
+    # confusing "'origin' does not appear to be a git repository" error.
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://git.wsl.ch/"
+    # Reset any stale cryowrf submodule state cached by the runner from prior pipelines (the
+    # cached .git/modules/phys/cryowrf can lose its origin remote, breaking subsequent fetches).
     - git submodule sync
+    - git submodule deinit -f phys/cryowrf 2>/dev/null || true
+    - rm -rf .git/modules/phys/cryowrf phys/cryowrf
     - git submodule update --init --force
-    # Handle nested submodules in phys/cryowrf explicitly
+    # Recursively initialize nested submodules inside phys/cryowrf (meteoio, snowpack)
     - |
       cd phys/cryowrf
-      git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
       git submodule sync --recursive
       git submodule update --init --recursive --force
       cd ../..
@@ -63,7 +72,6 @@ build-dependencies:
         echo "Pipeline ID: $CRYOWRF_PIPELINE_ID"
         echo "=============================================="
         cd phys/cryowrf
-        git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
         git fetch --no-recurse-submodules origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
         git submodule sync --recursive
@@ -115,14 +123,19 @@ build-wrf:
     - apt-get install -y libpng-dev netcdf-bin libnetcdff-dev tcsh libopenmpi-dev libhdf5-dev zlib1g-dev
     - git config --global protocol.file.allow always
     - git config --global fetch.recurseSubmodules false
-    # Initialize all submodules manually (GIT_SUBMODULE_STRATEGY: none skips automatic init)
-    # Sync first to reset any stale remote URLs from previous runner executions
+    # Inject CI_JOB_TOKEN auth for the private cryowrf submodule (its URL is git.wsl.ch, an alias
+    # of the CI server). Without this, unauthenticated fetches return 404 and git reports the
+    # confusing "'origin' does not appear to be a git repository" error.
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://git.wsl.ch/"
+    # Reset any stale cryowrf submodule state cached by the runner from prior pipelines (the
+    # cached .git/modules/phys/cryowrf can lose its origin remote, breaking subsequent fetches).
     - git submodule sync
+    - git submodule deinit -f phys/cryowrf 2>/dev/null || true
+    - rm -rf .git/modules/phys/cryowrf phys/cryowrf
     - git submodule update --init --force
-    # Handle nested submodules in phys/cryowrf explicitly
+    # Recursively initialize nested submodules inside phys/cryowrf (meteoio, snowpack)
     - |
       cd phys/cryowrf
-      git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
       git submodule sync --recursive
       git submodule update --init --recursive --force
       cd ../..
@@ -131,7 +144,6 @@ build-wrf:
       if [ -n "$CRYOWRF_COMMIT_SHA" ]; then
         echo "=== Testing with CRYOWRF commit $CRYOWRF_COMMIT_SHA ==="
         cd phys/cryowrf
-        git config --local credential.helper '!f() { echo "username=gitlab-ci-token"; echo "password=$CI_JOB_TOKEN"; }; f'
         git fetch --no-recurse-submodules origin "$CRYOWRF_BRANCH"
         git checkout $CRYOWRF_COMMIT_SHA
         git submodule sync --recursive
