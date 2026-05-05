@@ -356,10 +356,10 @@ if( (vw_left .eq. 0) .or. (vw_right .eq. 0) .or. (vw_up .eq. 0) .or. (vw_down .e
     divQy = 0.
 else
     divQx = (max(in_drift(I-1,J)*u_left/vw_left,0.0) + abs(min(in_drift(I+1,J)*u_right/vw_right,0.0)) - in_drift(I,J)*abs(U_ML)/in_VW   ) / DX
-    divQy = (max(in_drift(I,J-1)*v_up/vw_up,0.0) + abs(min(in_drift(I,J+1)*v_down/vw_down,0.0)) - in_drift(I,J)*abs(V_ML)/in_VW ) / DX
+    divQy = (max(in_drift(I,J-1)*v_down/vw_down,0.0) + abs(min(in_drift(I,J+1)*v_up/vw_up,0.0)) - in_drift(I,J)*abs(V_ML)/in_VW ) / DX
 endif
 
-tmp_divQ = sign(max(1e-12,abs(divQx+divQy)),divQx+divQy)
+tmp_divQ = divQx + divQy
 
 bs_bdg_div = real( tmp_divQ * DT, 8)
 
@@ -411,9 +411,6 @@ do k=1,snc_N
 
 
 
-d_sn_qi_dt(k) = sign(max(1.e-10,abs(d_sn_qi_dt(k))),d_sn_qi_dt(k))
-d_sn_qni_dt(k) = sign(max(1.e-5,abs(d_sn_qni_dt(k))),d_sn_qni_dt(k))
-
 if( snpack_mode == 'land' ) then
          d_sn_qi_dt(k) = 0.0
         d_sn_qni_dt(k) = 0.0
@@ -428,9 +425,11 @@ bs_sfc_qni_advt(I,k,J) = d_sn_qni_dt(k) / rho_v(I,kms,J)
 sn_qs(I,k,J) = sn_qs(I,k,J) + d_sn_qi_dt(k) / rho_v(I,kms,J)
 sn_ns(I,k,J) = sn_ns(I,k,J) + d_sn_qni_dt(k) / rho_v(I,kms,J)
 
-! Apply plausibility limits after horizontal advection
-sn_qs(I,k,J) = max(1.0E-12 , sn_qs(I,k,J))
-sn_ns(I,k,J) = max(1.0E-6  , sn_ns(I,k,J))
+! Zero out both fields together when mixing ratio drops below Morrison's QSMALL threshold
+IF (sn_qs(I,k,J) .LT. 1.E-14) THEN
+  sn_qs(I,k,J) = 0.
+  sn_ns(I,k,J) = 0.
+END IF
 enddo
 
 enddo
@@ -726,6 +725,11 @@ endif
          if( (SNDPTH .le. 0.2) .and. (snpack_mode == 'land') ) then
                  tmp_bs_bool = .false.
                  l_bs_bdg_total = 0.0
+         endif
+
+         if( (SNDPTH .le. 0.0) .and. (snpack_mode == 'antarctica') ) then
+                 l_bs_bdg_total = 0.0
+                 in_PSUM        = 0.0
          endif
 
 !         write(*,*) I,J,in_ISWR

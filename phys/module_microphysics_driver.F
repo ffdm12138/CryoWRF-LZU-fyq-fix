@@ -3516,8 +3516,8 @@ END SUBROUTINE sfc_profile_TQ
    !enddo
 
 
- qi_final = max(1.0E-12 , qi_final)
-qni_final = max(1.0E-6  , qni_final)
+ qi_final = max(0.0 , qi_final)
+qni_final = max(0.0 , qni_final)
 
 
 !!!!!!! SUBLIMATION
@@ -3643,8 +3643,8 @@ do k=1,bs_Ntot
 enddo
 
 !!! FIX MIN/MAX values for qi_final and qni_final
-qi_final = max(1.0E-12,qi_final)
-qni_final = max(1.0E-6,qni_final)
+qi_final = max(0.0,qi_final)
+qni_final = max(0.0,qni_final)
 
 
 else
@@ -3680,6 +3680,17 @@ endif
 
     sn_ns(I,1:snc_N,J)         =  qni_final(1:snc_N)
     bs_qni(I,kts:kte,J)        =  qni_final(snc_N+1:bs_Ntot)
+
+    ! Zero out both fields together when mixing ratio drops below Morrison's QSMALL threshold
+    WHERE (sn_qs(I,1:snc_N,J) .LT. 1.E-14)
+      sn_qs(I,1:snc_N,J) = 0.
+      sn_ns(I,1:snc_N,J) = 0.
+    END WHERE
+
+    WHERE (bs_qi(I,kts:kte,J) .LT. 1.E-14)
+      bs_qi(I,kts:kte,J) = 0.
+      bs_qni(I,kts:kte,J) = 0.
+    END WHERE
 
     sfc_meanR(I,1:snc_N,J)     = loc_sfc_meanR(1:snc_N)
     bs_meanR(I,kts:kte,J)      = loc_sfc_meanR(snc_N+1:bs_Ntot)
