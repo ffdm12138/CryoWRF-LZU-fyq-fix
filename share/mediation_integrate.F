@@ -1153,7 +1153,6 @@ RECURSIVE SUBROUTINE med_restart_out ( grid , config_flags )
    INTEGER                                :: myproc
    CHARACTER*80                           :: timestr
    TYPE (grid_config_rec_type)            :: kid_config_flags
-   TYPE(WRFU_Time)                        :: strt_time, cur_time
 
    IF ( wrf_dm_on_monitor() ) THEN
      CALL start_timing
@@ -1186,13 +1185,7 @@ RECURSIVE SUBROUTINE med_restart_out ( grid , config_flags )
    DO kid = 1, max_nests
       IF ( ASSOCIATED( grid%nests(kid)%ptr ) ) THEN
         CALL model_to_grid_config_rec ( grid%nests(kid)%ptr%id , model_config_rec , kid_config_flags )
-        ! Skip restart write for a domain at the first moment it is active
-        ! (current_time == domain start_time).  For such domains sn_start_from_file=.true.
-        ! so SNOWPACK state is fully preserved in the .sno files; duplicating it in the
-        ! WRF restart generates hundreds of MB of new NetCDF I/O that hangs the run.
-        CALL domain_clock_get( grid%nests(kid)%ptr, start_time=strt_time, current_time=cur_time )
-        IF ( strt_time .EQ. cur_time ) CYCLE
-        CALL med_restart_out ( grid%nests(kid)%ptr , kid_config_flags )
+        CALL med_restart_out ( grid%nests(kid)%ptr , kid_config_flags ) 
       ENDIF
    ENDDO
 
