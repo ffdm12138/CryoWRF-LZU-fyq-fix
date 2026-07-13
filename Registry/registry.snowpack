@@ -116,6 +116,10 @@ state   real    bs_qni_rad ikj       misc         1         -     i012rhd=(inter
 state   real    bs_qi_sublim3d ikj   misc         1         -     i012rhd=(interp_fcn_nn) "bs_qi_sublim3d" "blowing snow sublimation" "kg kg-1 s-1"
 state   real    sn_qi_sublim3d i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sn_qi_sublim3d" "sfc layer bs snow sublim" "kg kg-1 s-1"
 
+# sublimation latent-heat temperature tendency (Ls/Cp * sublim rate); negative = cooling
+state   real    bs_qi_sublheat3d ikj   misc         1         -     i012rhd=(interp_fcn_nn) "bs_qi_sublheat3d" "blowing snow sublim heating rate" "K s-1"
+state   real    sn_qi_sublheat3d i{snc_N}j   misc         1         -     i012rhd=(interp_fcn_nn) "sn_qi_sublheat3d" "sfc layer bs snow sublim heating rate" "K s-1"
+
 rconfig   logical  blowing_snow              namelist,physics     max_domains   .true.
 rconfig   logical  sn_start_from_file        namelist,physics     max_domains   .true.
 rconfig   logical  blowing_snow_sublimation  namelist,physics     max_domains   .false.

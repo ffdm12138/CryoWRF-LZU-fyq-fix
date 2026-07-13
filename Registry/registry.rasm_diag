@@ -37,6 +37,22 @@ state    real  SWUPT_MEAN      ij      misc        1         -     rh5        "S
 state    real  SWDNT_MEAN      ij      misc        1         -     rh5        "SWDNT_M"        "AVERAGE DOWNWELLING SHORTWAVE FLUX AT TOP"                    "W m-2"
 state    real  LWUPT_MEAN      ij      misc        1         -     rh5        "LWUPT_M"        "AVERAGE UPWELLING LONGWAVE FLUX AT TOP"                       "W m-2"
 state    real  LWDNT_MEAN      ij      misc        1         -     rh5        "LWDNT_M"        "AVERAGE DOWNWELLING LONGWAVE FLUX AT TOP"                     "W m-2"
+# --- Blowing-snow / snowdrift means (added) ---
+state    real  IN_DRIFT_MEAN        ij         misc  1  -  rh5  "IN_DRIFT_M"      "AVERAGE SNOW DRIFT"                          "kg m-1 s-1"
+state    real  BS_SUBLIM_MEAN       ij         misc  1  -  rh5  "BS_SUBLIM_M"     "AVERAGE BLOWING SNOW SUBLIMATION"            "kg m-2"
+state    real  BS_QI_MEAN           ikj        misc  1  -  rh5  "BS_QI_M"         "AVERAGE BLOWING SNOW QI"                     "kg kg-1"
+state    real  BS_QNI_MEAN          ikj        misc  1  -  rh5  "BS_QNI_M"        "AVERAGE BLOWING SNOW NUMBER CONC"            "# kg-1"
+state    real  BS_QI_SUBLIM3D_MEAN  ikj        misc  1  -  rh5  "BS_QI_SUBL3D_M"  "AVERAGE BLOWING SNOW SUBLIMATION 3D"         "kg kg-1 s-1"
+state    real  BS_QI_SUBLHEAT3D_MEAN ikj       misc  1  -  rh5  "BS_QI_SUBLHT3D_M" "AVERAGE BS SUBLIM HEATING RATE 3D"          "K s-1"
+state    real  SN_QS_MEAN           i{snc_N}j  misc  1  -  rh5  "SN_QS_M"         "AVERAGE SN SURFACE QS"                       "kg kg-1"
+state    real  SN_NS_MEAN           i{snc_N}j  misc  1  -  rh5  "SN_NS_M"         "AVERAGE SN SURFACE NS"                       "# kg-1"
+state    real  SFC_QI_DRIFT_MEAN    i{snc_N}j  misc  1  -  rh5  "SFC_QI_DRIFT_M"  "AVERAGE BLOWING SNOW MASS DRIFT"             "kg m-2 s-1"
+state    real  SN_QI_SUBLIM3D_MEAN  i{snc_N}j  misc  1  -  rh5  "SN_QI_SUBL3D_M"  "AVERAGE SFC LAYER BS SNOW SUBLIM"            "kg kg-1 s-1"
+state    real  SN_QI_SUBLHEAT3D_MEAN i{snc_N}j misc  1  -  rh5  "SN_QI_SUBLHT3D_M" "AVERAGE SFC LAYER BS SUBLIM HEATING RATE"   "K s-1"
+state    real  SFC_T_MEAN           i{snc_N}j  misc  1  -  rh5  "SFC_T_M"         "AVERAGE SURFACE LAYER TEMPERATURE"           "K"
+state    real  SFC_Q_MEAN           i{snc_N}j  misc  1  -  rh5  "SFC_Q_M"         "AVERAGE SURFACE LAYER SPEC HUMIDITY"         "kg kg-1"
+state    real  SFC_RH_MEAN          i{snc_N}j  misc  1  -  rh5  "SFC_RH_M"        "AVERAGE SURFACE LAYER RH"                    "-"
+state    real  VW_SFC_MEAN          i{snc_N}j  misc  1  -  rh5  "VW_SFC_M"        "AVERAGE SURFACE LAYER WIND SPEED"            "m s-1"
 state  character OUTDATE_MEAN  -       misc        -         -     -          ""               ""
 state  integer NSTEPS_MEAN     -       misc        -         -     r          "NSTEP_M"        "NUMBER OF MEAN STEPS ACCUMULATED"
 
@@ -85,7 +101,7 @@ state  integer NSTEPSMEAN_DIURN  -     misc        -         -     r          "N
 
 # -RASM_DIAG: Mean
 package   mean_diag_off      mean_diag==0                  -    -
-package   mean_diag_on       mean_diag==1                  -    state:psfc_mean,tsk_mean,pmsl_mean,t2_mean,th2_mean,q2_mean,u10_mean,v10_mean,hfx_mean,lh_mean,swdnb_mean,glw_mean,lwupb_mean,swupb_mean,swupt_mean,swdnt_mean,lwupt_mean,lwdnt_mean
+package   mean_diag_on       mean_diag==1                  -    state:psfc_mean,tsk_mean,pmsl_mean,t2_mean,th2_mean,q2_mean,u10_mean,v10_mean,hfx_mean,lh_mean,swdnb_mean,glw_mean,lwupb_mean,swupb_mean,swupt_mean,swdnt_mean,lwupt_mean,lwdnt_mean,in_drift_mean,bs_sublim_mean,bs_qi_mean,bs_qni_mean,bs_qi_sublim3d_mean,sn_qs_mean,sn_ns_mean,sfc_qi_drift_mean,sn_qi_sublim3d_mean,sfc_t_mean,sfc_q_mean,sfc_rh_mean,vw_sfc_mean,bs_qi_sublheat3d_mean,sn_qi_sublheat3d_mean
 
 # -RASM_DIAG: Diurnal
 package   diurnal_diag_off   diurnal_diag==0               -    -

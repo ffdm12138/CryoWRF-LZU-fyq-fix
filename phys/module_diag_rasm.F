@@ -31,6 +31,18 @@ CONTAINS
        ,lwupb, lwupb_mean, swupb, swupb_mean      &
        ,swupt, swupt_mean, swdnt, swdnt_mean      &
        ,lwupt, lwupt_mean, lwdnt, lwdnt_mean      &
+       ,num_bs_sfc_layers                         & ! snc_N size for layer-3D snowdrift means
+       ,in_drift, in_drift_mean                   & ! 2D snowdrift means (auxhist5/wrfmean)
+       ,bs_sublim, bs_sublim_mean                 &
+       ,bs_qi, bs_qi_mean, bs_qni, bs_qni_mean    & ! atmospheric 3D
+       ,bs_qi_sublim3d, bs_qi_sublim3d_mean       &
+       ,sn_qs, sn_qs_mean, sn_ns, sn_ns_mean      & ! snowpack surface-layer 3D
+       ,sfc_qi_drift, sfc_qi_drift_mean           &
+       ,sn_qi_sublim3d, sn_qi_sublim3d_mean       &
+       ,bs_qi_sublheat3d, bs_qi_sublheat3d_mean   &
+       ,sn_qi_sublheat3d, sn_qi_sublheat3d_mean   &
+       ,sfc_T, sfc_T_mean, sfc_Q, sfc_Q_mean      &
+       ,sfc_RH, sfc_RH_mean, VW_SFC, VW_SFC_mean  &
        ,avgoutalarm, avgOutDateStr   &
        ,nsteps                                    &
        ,ids, ide, jds, jde, kds, kde              &
@@ -101,7 +113,19 @@ CONTAINS
     REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: swdnb_mean, glw_mean
     REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: lwupb_mean, swupb_mean
     REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: swupt_mean, swdnt_mean
-    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: lwupt_mean, lwdnt_mean   
+    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: lwupt_mean, lwdnt_mean
+
+    ! --- Blowing-snow / snowdrift means (added for wrfmean / auxhist5) ---
+    INTEGER, INTENT(IN) :: num_bs_sfc_layers
+    ! 2D (ij)
+    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN)  :: in_drift, bs_sublim
+    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(OUT) :: in_drift_mean, bs_sublim_mean
+    ! atmospheric 3D (ikj)
+    REAL, DIMENSION( ims:ime , kms:kme, jms:jme ), INTENT(IN)  :: bs_qi, bs_qni, bs_qi_sublim3d, bs_qi_sublheat3d
+    REAL, DIMENSION( ims:ime , kms:kme, jms:jme ), INTENT(OUT) :: bs_qi_mean, bs_qni_mean, bs_qi_sublim3d_mean, bs_qi_sublheat3d_mean
+    ! snowpack surface-layer 3D (i{snc_N}j)
+    REAL, DIMENSION( ims:ime , num_bs_sfc_layers, jms:jme ), INTENT(IN)  :: sn_qs, sn_ns, sfc_qi_drift, sn_qi_sublim3d, sn_qi_sublheat3d, sfc_T, sfc_Q, sfc_RH, VW_SFC
+    REAL, DIMENSION( ims:ime , num_bs_sfc_layers, jms:jme ), INTENT(OUT) :: sn_qs_mean, sn_ns_mean, sfc_qi_drift_mean, sn_qi_sublim3d_mean, sn_qi_sublheat3d_mean, sfc_T_mean, sfc_Q_mean, sfc_RH_mean, VW_SFC_mean
 
     ! LOCAL  VAR
     INTEGER     :: i, j, ij
@@ -170,7 +194,24 @@ CONTAINS
           ENDDO
        ENDDO
 
-       ! restart step count 
+       ! reset the added blowing-snow / snowdrift means (whole-array; 2D & 3D)
+       in_drift_mean       = 0.0
+       bs_sublim_mean      = 0.0
+       bs_qi_mean          = 0.0
+       bs_qni_mean         = 0.0
+       bs_qi_sublim3d_mean = 0.0
+       bs_qi_sublheat3d_mean = 0.0
+       sn_qs_mean          = 0.0
+       sn_ns_mean          = 0.0
+       sfc_qi_drift_mean   = 0.0
+       sn_qi_sublim3d_mean = 0.0
+       sn_qi_sublheat3d_mean = 0.0
+       sfc_T_mean          = 0.0
+       sfc_Q_mean          = 0.0
+       sfc_RH_mean         = 0.0
+       VW_SFC_mean         = 0.0
+
+       ! restart step count
        nsteps = 0.0
 
        WRITE(message, *) "RASM Statistics: RESET accumaltions and means ..................... nsteps=", nsteps
@@ -241,6 +282,26 @@ CONTAINS
     ! LWDNT - DOWNWELLING LONGWAVE FLUX AT TOP
     CALL var_accum_2d(lwdnt,ime-ims+1,jme-jms+1,lwdnt_mean)
 
+    ! --- Blowing-snow / snowdrift accumulation (added for wrfmean/auxhist5) ---
+    ! 2D (ij)
+    CALL var_accum_2d(in_drift, ime-ims+1, jme-jms+1, in_drift_mean)
+    CALL var_accum_2d(bs_sublim,ime-ims+1, jme-jms+1, bs_sublim_mean)
+    ! atmospheric 3D (full depth, kms:kme)
+    CALL var_accum_3d_full(bs_qi,          ime-ims+1, kme-kms+1, jme-jms+1, bs_qi_mean)
+    CALL var_accum_3d_full(bs_qni,         ime-ims+1, kme-kms+1, jme-jms+1, bs_qni_mean)
+    CALL var_accum_3d_full(bs_qi_sublim3d, ime-ims+1, kme-kms+1, jme-jms+1, bs_qi_sublim3d_mean)
+    CALL var_accum_3d_full(bs_qi_sublheat3d, ime-ims+1, kme-kms+1, jme-jms+1, bs_qi_sublheat3d_mean)
+    ! snowpack surface-layer 3D (num_bs_sfc_layers)
+    CALL var_accum_3d_full(sn_qs,          ime-ims+1, num_bs_sfc_layers, jme-jms+1, sn_qs_mean)
+    CALL var_accum_3d_full(sn_ns,          ime-ims+1, num_bs_sfc_layers, jme-jms+1, sn_ns_mean)
+    CALL var_accum_3d_full(sfc_qi_drift,   ime-ims+1, num_bs_sfc_layers, jme-jms+1, sfc_qi_drift_mean)
+    CALL var_accum_3d_full(sn_qi_sublim3d, ime-ims+1, num_bs_sfc_layers, jme-jms+1, sn_qi_sublim3d_mean)
+    CALL var_accum_3d_full(sn_qi_sublheat3d, ime-ims+1, num_bs_sfc_layers, jme-jms+1, sn_qi_sublheat3d_mean)
+    CALL var_accum_3d_full(sfc_T,          ime-ims+1, num_bs_sfc_layers, jme-jms+1, sfc_T_mean)
+    CALL var_accum_3d_full(sfc_Q,          ime-ims+1, num_bs_sfc_layers, jme-jms+1, sfc_Q_mean)
+    CALL var_accum_3d_full(sfc_RH,         ime-ims+1, num_bs_sfc_layers, jme-jms+1, sfc_RH_mean)
+    CALL var_accum_3d_full(VW_SFC,         ime-ims+1, num_bs_sfc_layers, jme-jms+1, VW_SFC_mean)
+
     CALL getAvgState(currentTime, xtime, dt, mean_interval, output_freq, compute_avg, avgOutDateStr)
     IF (compute_avg) THEN
        psfc_mean=psfc_mean/nsteps
@@ -261,7 +322,24 @@ CONTAINS
        swdnt_mean=swdnt_mean/nsteps
        lwupt_mean=lwupt_mean/nsteps
        lwdnt_mean=lwdnt_mean/nsteps
-      
+
+       ! --- Blowing-snow / snowdrift means ---
+       in_drift_mean       = in_drift_mean       / nsteps
+       bs_sublim_mean      = bs_sublim_mean      / nsteps
+       bs_qi_mean          = bs_qi_mean          / nsteps
+       bs_qni_mean         = bs_qni_mean         / nsteps
+       bs_qi_sublim3d_mean = bs_qi_sublim3d_mean / nsteps
+       bs_qi_sublheat3d_mean = bs_qi_sublheat3d_mean / nsteps
+       sn_qs_mean          = sn_qs_mean          / nsteps
+       sn_ns_mean          = sn_ns_mean          / nsteps
+       sfc_qi_drift_mean   = sfc_qi_drift_mean   / nsteps
+       sn_qi_sublim3d_mean = sn_qi_sublim3d_mean / nsteps
+       sn_qi_sublheat3d_mean = sn_qi_sublheat3d_mean / nsteps
+       sfc_T_mean          = sfc_T_mean          / nsteps
+       sfc_Q_mean          = sfc_Q_mean          / nsteps
+       sfc_RH_mean         = sfc_RH_mean         / nsteps
+       VW_SFC_mean         = VW_SFC_mean         / nsteps
+
        if ( output_freq .EQ. MONTHLY) then
              WRITE(message, *) "RASM Statistics: MONTHLY_INTERVAL turn ON ALARM to generate output ........................"
              CALL wrf_debug(200, message)
@@ -680,6 +758,22 @@ CONTAINS
     ENDDO
  
   END SUBROUTINE var_accum_3d_01
+
+  SUBROUTINE var_accum_3d_full(var, dx, dz, dy, var_accum)
+    ! Accumulates a FULL 3D variable, preserving every level (i,k,j) instead of
+    ! collapsing to the lowest level like var_accum_3d_01. Generic in the middle
+    ! dimension dz, so the same routine serves the atmospheric kme dimension and
+    ! the snowpack surface-layer snc_N (num_bs_sfc_layers) dimension.
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(IN)                        :: dx, dz, dy
+    REAL, DIMENSION(dx,dz,dy), INTENT(IN)      :: var
+    REAL, DIMENSION(dx,dz,dy), INTENT(INOUT)   :: var_accum
+
+    var_accum = var_accum + var
+
+  END SUBROUTINE var_accum_3d_full
 
   SUBROUTINE shum_accum_01(ims, ime, jms, jme, kms, kme,    &
                            ide, jde, ips, ipe, jps, jpe,    &

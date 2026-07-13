@@ -20,7 +20,6 @@ include registry.noahmp
 include registry.sbm
 include registry.polrad
 include registry.afwa
-include registry.rasm_diag
 include registry.elec
 include registry.bdy_perturb
 include registry.hyb_coord
@@ -29,5 +28,6 @@ include registry.trad_fields
 include registry.solar_fields
 include registry.diags
 include registry.snowpack
+include registry.rasm_diag
 include registry.iau
 include registry.CMAQ

@@ -4005,6 +4005,8 @@ BENCH_START(micro_driver_tim)
       &        ,in_hsalt=grid%in_hsalt,bs_sublim=grid%bs_sublim              & ! Blowing snow
       &        ,xkhv_LES=grid%xkmv,bs_qi_sublim3d=grid%bs_qi_sublim3d        & ! Blowing snow
       &        ,sn_qi_sublim3d=grid%sn_qi_sublim3d,znt_mean=grid%znt_mean    & ! Blowing snow
+      &        ,bs_qi_sublheat3d=grid%bs_qi_sublheat3d                       & ! Blowing snow
+      &        ,sn_qi_sublheat3d=grid%sn_qi_sublheat3d                       & ! Blowing snow
       &        ,snpack_dt=config_flags%snpack_dt,HFX=grid%hfx,UST=grid%ust   & ! Blowing snow
       &        ,XICE=grid%xice                                               & ! Blowing snow
       &        ,FRACTIONAL_SEAICE=config_flags%fractional_seaice             & ! Blowing snow

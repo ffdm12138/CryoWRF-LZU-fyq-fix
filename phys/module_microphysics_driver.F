@@ -171,6 +171,7 @@ SUBROUTINE microphysics_driver(                                          &
                       ,bs_bool,bool_snow_sublimation                     & ! CRYOWRF
                       ,bs_rad_effect,in_hsalt,bs_sublim,xkhv_LES         & ! CRYOWRF
                       ,bs_qi_sublim3d,sn_qi_sublim3d                     & ! CRYOWRF
+                      ,bs_qi_sublheat3d,sn_qi_sublheat3d                 & ! CRYOWRF
                       ,ZNT_MEAN, snpack_dt, HFX, UST, XICE               & ! CRYOWRF
                       ,FRACTIONAL_SEAICE                                 & ! CRYOWRF
 )
@@ -717,6 +718,8 @@ real,dimension(ims:ime,jms:jme), intent(in) :: tsk,in_q_lb,in_N_lb,ZNT_MEAN,HFX,
 real,dimension(ims:ime,jms:jme), intent(inout) :: in_bs_sedi
 real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublim3d
 real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
+real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublheat3d
+real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublheat3d
 real,intent(in) :: snpack_dt
 real            :: xice_threshold
 !!! Added for CRYOWRF !!!
@@ -878,7 +881,8 @@ real            :: xice_threshold
                &            ,i_start(ij),i_end(ij),j_start(ij),j_end(ij),kts,kte                                   &
                &            ,exch_h,z,pi_phy,th,dz8w,qv_curr,P,RHO,tsk,in_q_lb,in_N_lb &
                &            ,in_bs_sedi,ht,dt,itimestep,bool_snow_sublimation,bs_rad_effect &
-               &            ,in_hsalt,bs_sublim,xkhv_LES,bs_qi_sublim3d,sn_qi_sublim3d,w   )
+               &            ,in_hsalt,bs_sublim,xkhv_LES,bs_qi_sublim3d,sn_qi_sublim3d,w   &
+               &            ,bs_qi_sublheat3d,sn_qi_sublheat3d                             )
             enddo
             !$OMP END PARALLEL DO
    endif
@@ -3175,7 +3179,8 @@ END SUBROUTINE sfc_profile_TQ
                &            ,z_at_half,PII,TH,DZ,QV,P,RHO,tsk,in_q_lb,in_N_lb           &
                &            ,in_bs_sedi,altitude,DT_IN,itimestep,bool_snow_sublimation  &
                &            ,bs_rad_effect,in_hsalt, bs_sublim, xkhv_LES, bs_qi_sublim3d &
-               &            ,sn_qi_sublim3d, w   )
+               &            ,sn_qi_sublim3d, w                                          &
+               &            ,bs_qi_sublheat3d, sn_qi_sublheat3d                         )
 
    IMPLICIT NONE
 
@@ -3209,6 +3214,8 @@ END SUBROUTINE sfc_profile_TQ
 
    real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublim3d
    real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublim3d
+   real,dimension(ims:ime,kms:kme,jms:jme), intent(inout) :: bs_qi_sublheat3d
+   real,dimension(ims:ime,snc_N,jms:jme), intent(inout) :: sn_qi_sublheat3d
 
 
    integer, intent(in)    ::       ids,ide, jds,jde, kds,kde
@@ -3620,6 +3627,10 @@ if(bool_snow_sublimation) then
     bs_qi_sublim3d(I,kts:kte,J) = bs_sublim_qi(snc_N+1:bs_Ntot)
     sn_qi_sublim3d(I,1:snc_N,J) = bs_sublim_qi(1:snc_N)
 
+    !!! sublimation latent-heat temperature tendency for output [K s-1] (negative = cooling)
+    !!! = Ls(k)/Cp * sublim_rate ; per-layer local heating (same layer mapping as *_qi_sublim3d)
+    bs_qi_sublheat3d(I,kts:kte,J) = lsub(snc_N+1:bs_Ntot) * bs_sublim_qi(snc_N+1:bs_Ntot) / Cp_air
+    sn_qi_sublheat3d(I,1:snc_N,J) = lsub(1:snc_N)         * bs_sublim_qi(1:snc_N)         / Cp_air
 
     !!! correcting the surface heat flux and the vapor flux
     HFX_corr = 0.0 ! sum(lsub(1:snc_N) * bs_sublim_qi(1:snc_N) * bs_grid_height(1:snc_N) * bs_rho(1:snc_N))

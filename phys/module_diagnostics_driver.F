@@ -35,6 +35,7 @@ CONTAINS
                                           PARAM_FIRST_SCALAR,                          &
                                           P_QG, P_QH, P_QV, P_QC, P_QI, P_QS,          &
                                           P_QNG, P_QH, P_QNH, P_QR, P_QNR, P_QVOLG,    &
+                                          P_bs_qi, P_bs_qni,                           &
                                           F_QV, F_QC, F_QI, F_QS,                      &
                      KESSLERSCHEME, LINSCHEME, SBU_YLINSCHEME, WSM3SCHEME, WSM5SCHEME, &
                      WSM6SCHEME, ETAMPNEW, THOMPSON, THOMPSONAERO, THOMPSONGH,         &
@@ -1022,6 +1023,22 @@ CONTAINS
                        ,SWDNT=grid%swdnt, SWDNT_MEAN=grid%swdnt_mean          &
                        ,LWUPT=grid%lwupt, LWUPT_MEAN=grid%lwupt_mean          &
                        ,LWDNT=grid%lwdnt, LWDNT_MEAN=grid%lwdnt_mean          &
+                       ,NUM_BS_SFC_LAYERS=config_flags%num_bs_sfc_layers      &
+                       ,IN_DRIFT=grid%in_drift, IN_DRIFT_MEAN=grid%in_drift_mean               &
+                       ,BS_SUBLIM=grid%bs_sublim, BS_SUBLIM_MEAN=grid%bs_sublim_mean           &
+                       ,BS_QI=grid%moist(:,:,:,P_bs_qi), BS_QI_MEAN=grid%bs_qi_mean            &
+                       ,BS_QNI=grid%scalar(:,:,:,P_bs_qni), BS_QNI_MEAN=grid%bs_qni_mean       &
+                       ,BS_QI_SUBLIM3D=grid%bs_qi_sublim3d, BS_QI_SUBLIM3D_MEAN=grid%bs_qi_sublim3d_mean &
+                       ,SN_QS=grid%sn_qs, SN_QS_MEAN=grid%sn_qs_mean          &
+                       ,SN_NS=grid%sn_ns, SN_NS_MEAN=grid%sn_ns_mean          &
+                       ,SFC_QI_DRIFT=grid%sfc_qi_drift, SFC_QI_DRIFT_MEAN=grid%sfc_qi_drift_mean         &
+                       ,SN_QI_SUBLIM3D=grid%sn_qi_sublim3d, SN_QI_SUBLIM3D_MEAN=grid%sn_qi_sublim3d_mean &
+                       ,BS_QI_SUBLHEAT3D=grid%bs_qi_sublheat3d, BS_QI_SUBLHEAT3D_MEAN=grid%bs_qi_sublheat3d_mean &
+                       ,SN_QI_SUBLHEAT3D=grid%sn_qi_sublheat3d, SN_QI_SUBLHEAT3D_MEAN=grid%sn_qi_sublheat3d_mean &
+                       ,SFC_T=grid%sfc_T, SFC_T_MEAN=grid%sfc_T_mean          &
+                       ,SFC_Q=grid%sfc_Q, SFC_Q_MEAN=grid%sfc_Q_mean          &
+                       ,SFC_RH=grid%sfc_RH, SFC_RH_MEAN=grid%sfc_RH_mean      &
+                       ,VW_SFC=grid%VW_SFC, VW_SFC_MEAN=grid%VW_SFC_mean      &
                        ,AVGOUTALARM=grid%alarms(AUXHIST5_ALARM)               &
                        ,AVGOUTDATESTR=grid%OUTDATE_MEAN                       &
                        ,NSTEPS=grid%NSTEPS_MEAN                               &
