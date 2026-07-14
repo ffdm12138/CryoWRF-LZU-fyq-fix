@@ -370,6 +370,20 @@ if ( tag == 1 )
 
 
     if ( p->ndims == 0 ) {
+      /* Scalar character state is excluded from the block below (name[0] != 'c'), so nothing
+         ever initializes it.  A field missing from an input/restart stream is not fatal --
+         wrf_ext_read_field just returns Status -- so such a variable is then used as
+         uninitialized memory.  Blank it so TRIM/LEN_TRIM are meaningful and so callers can
+         detect "not restored" rather than reading garbage. */
+      if ( sw == 1 && p->type->name[0] == 'c' && p->type->type_type != DERIVED && p->node_kind != RCONFIG && !nolistthese(p->name) ) {
+        for ( tag = 1 ; tag <= p->ntl ; tag++ )
+        {
+          strcpy(fname,field_name(t4,p,(p->ntl>1)?tag:0)) ;
+          fprintf(fp, "IF ( setinitval .EQ. 3 ) %s%s=' '\n",
+                      structname ,
+                      fname ) ;
+        }
+      }
       if ( p->type->name[0] != 'c' && p->type->type_type != DERIVED && p->node_kind != RCONFIG && !nolistthese(p->name) ) {
         for ( tag = 1 ; tag <= p->ntl ; tag++ )
         {

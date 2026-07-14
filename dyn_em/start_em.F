@@ -244,15 +244,16 @@
        first_trip_for_this_domain = .TRUE.
    ENDIF
 
-   ! CryoWRF: initialize the RASM mean/diurnal output date strings so the
-   ! auxhist5/auxhist6 (wrfmean) write at the initial time -- which happens before
-   ! the first mean_output_calc runs -- does not read uninitialized garbage and
-   ! overflow the message string ("End of record" in mediation_integrate). Only on
-   ! a fresh start; on restart these carry over from the restart file.
-   IF ( .NOT. config_flags%restart ) THEN
-      IF ( config_flags%mean_diag    == 1 ) grid%OUTDATE_MEAN  = "0000-00-00-00000"
-      IF ( config_flags%diurnal_diag == 1 ) grid%OUTDATE_DIURN = "0000-00-00-00000"
-   ENDIF
+   ! CryoWRF: seed the RASM mean/diurnal output date strings.  The auxhist5/auxhist6
+   ! (wrfmean) file is opened at the initial time and again at the restart time, both
+   ! before mean_output_calc has run, and open_hist_w list-directed writes the string
+   ! into a CHARACTER*256 buffer -- an unset one overflows it ("End of record").
+   ! Character state cannot be carried in a restart file (WRF has no WRF_CHARACTER
+   ! field type), so it is blank on every start and must be seeded here.
+   IF ( config_flags%mean_diag    == 1 .AND. LEN_TRIM(grid%OUTDATE_MEAN)  == 0 ) &
+        grid%OUTDATE_MEAN  = "0000-00-00-00000"
+   IF ( config_flags%diurnal_diag == 1 .AND. LEN_TRIM(grid%OUTDATE_DIURN) == 0 ) &
+        grid%OUTDATE_DIURN = "0000-00-00-00000"
 
    ! Print out the maximum map scale factor on the coarse domain
 
