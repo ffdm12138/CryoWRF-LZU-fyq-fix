@@ -1269,7 +1269,7 @@ CONTAINS
 !
    INTEGER :: i,J,K,NK,jj,ij
    INTEGER :: gfdl_ntsflg
-   LOGICAL :: radiation, myj, myjpbl, frpcpn, isisfc
+   LOGICAL :: radiation, myj, myjpbl, frpcpn, isisfc, qz0_sea_available
    LOGICAL, INTENT(in), OPTIONAL :: rdlai2d
    LOGICAL, INTENT(in), OPTIONAL :: usemonalb
    REAL    :: total_depth,mid_point_depth
@@ -1985,6 +1985,13 @@ CONTAINS
 #endif
             (sf_sfclay_physics .EQ. GFSSFCSCHEME ) )    &
            )
+
+  ! QZ0_SEA capability: only MYJ/QNSE surface-layer schemes diagnose
+  ! specific humidity at roughness length (QZ0), so only their seaice
+  ! wrappers produce QZ0_SEA. MYNN/GFS/SFCLAY/SFCLAYREV/PX do not —
+  ! skip QZ0 blend for them to avoid reading uninitialized QZ0_SEA.
+  qz0_sea_available = ((sf_sfclay_physics .EQ. MYJSFCSCHEME) .OR. &
+                       (sf_sfclay_physics .EQ. QNSESFCSCHEME) )
 
   IF (ra_lw_physics .gt. 0) radiation = .true.
 
@@ -3034,7 +3041,9 @@ CONTAINS
                         chs(i,j)  = ( chs(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * chs_sea(i,j)  )
                         qsfc(i,j) = ( qsfc(i,j) * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qsfc_sea(i,j) )
                         qgh(i,j)  = ( qgh(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qgh_sea(i,j)  )
+                        IF (qz0_sea_available) THEN
                         qz0(i,j)  = ( qz0(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qz0_sea(i,j)  )
+                        END IF
                                                             !  print *,'hfx =',hfx_sea(170,20)
                                                             !   print *,'XICE =',XICE(170,20)
                                                             !    print *,'QSFC =',QSFC(170,20)
@@ -3329,7 +3338,9 @@ endif
                         chs(i,j)  = ( chs(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * chs_sea(i,j)  )
                         qsfc(i,j) = ( qsfc(i,j) * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qsfc_sea(i,j) )
                         qgh(i,j)  = ( qgh(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qgh_sea(i,j)  )
+                        IF (qz0_sea_available) THEN
                         qz0(i,j)  = ( qz0(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qz0_sea(i,j)  )
+                        END IF
                         hfx(i,j)  = ( hfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * hfx_sea(i,j)  )
                         qfx(i,j)  = ( qfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qfx_sea(i,j)  )
                         lh(i,j)   = ( lh(i,j)   * XICE(i,j) ) + ( (1.0-XICE(i,j)) * lh_sea(i,j)   )
@@ -3708,7 +3719,9 @@ endif
                         chs(i,j)  = ( chs(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * chs_sea(i,j)  )
                         qsfc(i,j) = ( qsfc(i,j) * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qsfc_sea(i,j) )
                         qgh(i,j)  = ( qgh(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qgh_sea(i,j)  )
+                        IF (qz0_sea_available) THEN
                         qz0(i,j)  = ( qz0(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qz0_sea(i,j)  )
+                        END IF
                         hfx(i,j)  = ( hfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * hfx_sea(i,j)  )
                         qfx(i,j)  = ( qfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qfx_sea(i,j)  )
                         lh(i,j)   = ( lh(i,j)   * XICE(i,j) ) + ( (1.0-XICE(i,j)) * lh_sea(i,j)   )
@@ -4264,7 +4277,9 @@ endif
                         chs(i,j)  = ( chs(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * chs_sea(i,j)  )
                         qsfc(i,j) = ( qsfc(i,j) * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qsfc_sea(i,j) )
                         qgh(i,j)  = ( qgh(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qgh_sea(i,j)  )
+                        IF (qz0_sea_available) THEN
                         qz0(i,j)  = ( qz0(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qz0_sea(i,j)  )
+                        END IF
                         hfx(i,j)  = ( hfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * hfx_sea(i,j)  )
                         qfx(i,j)  = ( qfx(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qfx_sea(i,j)  )
                         lh(i,j)   = ( lh(i,j)   * XICE(i,j) ) + ( (1.0-XICE(i,j)) * lh_sea(i,j)   )
@@ -4479,7 +4494,9 @@ endif
                         chs(i,j)  = ( chs(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * chs_sea(i,j)  )
                         qsfc(i,j) = ( qsfc(i,j) * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qsfc_sea(i,j) )
                         qgh(i,j)  = ( qgh(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qgh_sea(i,j)  )
+                        IF (qz0_sea_available) THEN
                         qz0(i,j)  = ( qz0(i,j)  * XICE(i,j) ) + ( (1.0-XICE(i,j)) * qz0_sea(i,j)  )
+                        END IF
                                                             !  print *,'hfx =',hfx_sea(170,20)
                                                             !   print *,'XICE =',XICE(170,20)
                                                             !    print *,'QSFC =',QSFC(170,20)
