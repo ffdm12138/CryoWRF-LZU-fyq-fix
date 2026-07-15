@@ -242,6 +242,8 @@ CONTAINS
 
     real :: add_to_top_qi,add_to_top_ni
     integer :: l_sn_nlayers
+    integer :: snpack_write_steps
+    CHARACTER(LEN=256) :: message
     double precision, allocatable, dimension(:) :: arr_T
 
     double precision, allocatable, dimension(:) :: arr_thick
@@ -577,6 +579,19 @@ endif
 
 
 !-----------------------------------------------------------------------
+
+    ! Compute write-period in steps with division-by-zero guard.
+    ! Uses INT() (truncation) to preserve original output schedule.
+    IF (dt <= 0.0) THEN
+       CALL wrf_error_fatal('dt must be positive in snowpacklsm')
+    ENDIF
+    snpack_write_steps = INT(snpack_write_dt / dt)
+    IF (snpack_write_steps < 1) THEN
+       WRITE(message,*) 'snpack_write_dt=', snpack_write_dt, &
+            ' must be >= dt=', dt, ' for domain ', inest
+       CALL wrf_error_fatal(TRIM(message))
+    ENDIF
+
    ILOOP : DO I = its, ite
 
 
@@ -772,7 +787,7 @@ endif
 
     sn_nlayers(I,J)     = l_sn_nlayers
 
-    if( mod(itimestep,int(snpack_write_dt/dt)) .eq. 0) then
+    if( mod(itimestep,snpack_write_steps) .eq. 0) then
         sn_T(I,:,J)     = real(arr_T,4)
         sn_thick(I,:,J) = real(arr_thick,4)
         sn_volI(I,:,J)  = real(arr_volI,4)
@@ -943,7 +958,7 @@ endif
 !!! expanding the sn_XXX arrays to have non-zero values even for points that are 'in ocean' at the moment. 
 !!! This is done so that when the downscaling is done for the nested domain, points in the high resolution coastline
 !!! where there is somehow no snowpack will get initialized properly
-    if( mod(itimestep,int(snpack_write_dt/dt)) .eq. 0) then
+    if( mod(itimestep,snpack_write_steps) .eq. 0) then
 
    IILOOP : DO I = its, ite
         JJLOOP : DO J = jts , jte
