@@ -602,6 +602,16 @@ endif
        SH2O (i,1:NSOIL,j) = 1.0
        m_budg_deposit(I,J) =    m_budg_deposit(I,J)  +  real(l_mbug_deposit   ,4)
 
+       ! Sea-ice/frozen-water: CYCLE skips the diagnostic block below.
+       ! Set deterministic output so surface_driver never consumes
+       ! stale or uninitialized T2_snpack/Q2_snpack.
+       ! Pre-condition (verified at this SHA):
+       !   TSK  — INTENT(INOUT), caller-provided, valid at entry
+       !   QSFC — INTENT(INOUT), caller-provided, valid at entry
+       !   TH2_snpack — no downstream consumers (grep confirmed)
+       T2_snpack(I,J) = TSK(I,J)
+       Q2_snpack(I,J) = QSFC(I,J)
+
        CYCLE ILOOP ! Skip any processing at sea-ice points
 
     ELSE
