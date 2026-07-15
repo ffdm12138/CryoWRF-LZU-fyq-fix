@@ -1,6 +1,7 @@
 !WRF:MEDIATION_LAYER:PHYSICS
 !
 MODULE module_surface_driver
+  USE, INTRINSIC :: ieee_arithmetic, ONLY: ieee_is_finite
   real, private, parameter :: QVAPOR_MIN = 0.0, SMOIS_MIN = 0.0, SMOIS_MAX = 1.0
 CONTAINS
 
@@ -1529,6 +1530,10 @@ CONTAINS
    real,dimension(ims:ime,jms:jme), intent(inout) :: sfc_u_angle,sfc_v_angle
    real,dimension(ims:ime,jms:jme) :: Q2_snpack,T2_snpack,RMOL_OLD
    real,dimension(ims:ime,jms:jme) :: U10_snpack,V10_snpack
+
+   ! Q2_SEA/T2_SEA independent validity check (defensive fallback)
+   REAL, PARAMETER :: Q2_SEA_MAX_VALID = 0.1
+   LOGICAL :: bad_t2_sea, bad_q2_sea
    real,intent(in) :: snpack_dt,snpack_write_dt
 
    real,dimension(ims:ime,jms:jme), intent(in) :: loc_sza,tau_qc,tau_qi,tau_qc_tot,tau_qi_tot
@@ -2463,6 +2468,7 @@ CONTAINS
                CHS2_SEA,CHS_SEA,CPM_SEA,CQS2_SEA,FLHC_SEA,FLQC_SEA,&
                HFX_SEA,LH_SEA,QFX_SEA,QGH_SEA,QSFC_SEA,ZNT_SEA,    &
                TICE2TSK_IF2COLD,XICE_THRESHOLD,                    &
+               T2_SEA, TH2_SEA, Q2_SEA,                            &
                ids,ide, jds,jde, kds,kde,                          &
                ims,ime, jms,jme, kms,kme,                          &
                i_start(ij),i_end(ij),j_start(ij),j_end(ij),kts,kte,&
@@ -3221,6 +3227,43 @@ CONTAINS
                   T2(I,J)  = T2_snpack(I,J)
                   Q2(I,J)  = Q2_snpack(I,J)
                   TH2(I,J) = T2(I,J) * (1.E5/PSFC(i,j))**RCP
+
+                  ! Only validate cells that actually participate in
+                  ! fractional sea-ice blending: XICE_THRESHOLD <= XICE < 1.0.
+                  ! Pure ice (XICE=1.0) has zero sea-side weight.
+                  IF (FRACTIONAL_SEAICE == 1 .AND. &
+                      XICE(I,J) >= xice_threshold .AND. &
+                      XICE(I,J) < 1.0) THEN
+                     bad_t2_sea = .NOT. ieee_is_finite(T2_SEA(I,J)) .OR. &
+                          T2_SEA(I,J) < 150.0 .OR. T2_SEA(I,J) > 350.0
+                     bad_q2_sea = .NOT. ieee_is_finite(Q2_SEA(I,J)) .OR. &
+                          Q2_SEA(I,J) < 0.0 .OR. Q2_SEA(I,J) > Q2_SEA_MAX_VALID
+                     IF (bad_t2_sea) THEN
+                        IF (.NOT. ieee_is_finite(T2_snpack(I,J)) .OR. &
+                            T2_snpack(I,J) < 150.0 .OR. &
+                            T2_snpack(I,J) > 350.0) THEN
+                           CALL wrf_error_fatal( &
+                                'Both T2_SEA and T2_snpack are invalid')
+                        ENDIF
+                        T2_SEA(I,J)  = T2_snpack(I,J)
+                        IF (ieee_is_finite(PSFC(I,J)) .AND. &
+                            PSFC(I,J) > 0.0) THEN
+                           TH2_SEA(I,J) = T2_SEA(I,J)*(1.E5/PSFC(I,J))**RCP
+                        ELSE
+                           CALL wrf_error_fatal( &
+                                'Invalid PSFC in T2_SEA fallback')
+                        ENDIF
+                     ENDIF
+                     IF (bad_q2_sea) THEN
+                        IF (.NOT. ieee_is_finite(Q2_snpack(I,J)) .OR. &
+                            Q2_snpack(I,J) < 0.0 .OR. &
+                            Q2_snpack(I,J) > Q2_SEA_MAX_VALID) THEN
+                           CALL wrf_error_fatal( &
+                                'Both Q2_SEA and Q2_snpack are invalid')
+                        ENDIF
+                        Q2_SEA(I,J) = Q2_snpack(I,J)
+                     ENDIF
+                  ENDIF
                else
                   ! Calculate Q2 over the sea
                  IF(CQS2_sea(I,J).lt.1.E-5) then
@@ -5638,6 +5681,7 @@ endif
               CHS2_SEA,CHS_SEA,CPM_SEA,CQS2_SEA,FLHC_SEA,FLQC_SEA, &
               HFX_SEA,LH_SEA,QFX_SEA,QGH_SEA,QSFC_SEA,ZNT_SEA,     &
               TICE2TSK_IF2COLD,XICE_THRESHOLD,                     &
+              T2_SEA, TH2_SEA, Q2_SEA,                              &
               ids,ide, jds,jde, kds,kde,                           &
               ims,ime, jms,jme, kms,kme,                           &
               its,ite, jts,jte, kts,kte,                           &
@@ -5646,6 +5690,12 @@ endif
      USE module_sf_mynn
 
      implicit none
+
+     ! Q2_SEA/T2_SEA/TH2_SEA are caller-owned (surface_driver) arrays, passed
+     ! as INTENT(INOUT) so the open-water SFCLAY_mynn call writes directly into
+     ! them. They are full-domain arrays written per-tile; INOUT preserves
+     ! other tiles' values.
+     REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: T2_SEA, TH2_SEA, Q2_SEA
 
      INTEGER,  INTENT(IN )   ::       ids,ide, jds,jde, kds,kde,  &
                                       ims,ime, jms,jme, kms,kme,  &
@@ -5757,9 +5807,6 @@ endif
                  WSPD_SEA,                      WSPD_HOLD,        &
                                                 ZNT_HOLD,         &
                  ZOL_SEA,                       ZOL_HOLD,         &
-                 Q2_SEA,                                          &
-                 T2_SEA,                                          &
-                 TH2_SEA,                                         &
                  U10_SEA,                                         &
                  V10_SEA,                                         &
                  CD_SEA,                                          &
@@ -5820,6 +5867,19 @@ endif
           ims,ime, jms,jme, kms,kme,                          &
           its,ite, jts,jte, kts,kte,                          &
           ustm,ck,cka,cd,cda,isftcflx,iz0tlnd                 )
+
+     ! After the land/frozen-water call, seed the caller-owned sea
+     ! diagnostics with a defined land-based baseline for this tile.
+     ! The open-water call below overwrites the points it computes;
+     ! this guarantees every tile point has a defined (finite) value
+     ! even if open-water coverage changes in the future.
+     DO J = JTS, JTE
+        DO I = ITS, ITE
+           T2_SEA(I,J)  = T2(I,J)
+           TH2_SEA(I,J) = TH2(I,J)
+           Q2_SEA(I,J)  = Q2(I,J)
+        END DO
+     END DO
 
      ! Set up lower boundary conditions to force an open-water call
       DO j = JTS , JTE
