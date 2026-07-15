@@ -1107,6 +1107,8 @@ endif
     INTEGER :: counter_snowpoints
     logical :: new_alloc
     integer :: l_maxdom
+    integer :: layout_action
+    integer, allocatable :: req_i(:), req_j(:)
     real :: z_top,z_top_c,h_salt,logdz,logzi
     integer :: nz_c
     double precision :: tmp_snow,tmp_snowh
@@ -1130,15 +1132,29 @@ endif
             endif
          enddo
     enddo
-    !write(*,*) 'AFTER: counter snowpoints: ', counter_snowpoints
 
-    !write(*,*) 'IS TIME STEP present ? : DT == ', dt
-    !write(*,*) 'WHAT IS THE ID AND THE MAX ID ? : ID, MAX_DOM == ', id, max_domains
+    ! Build ordered (I,J) layout arrays matching snowpoint traversal
+    if (counter_snowpoints > 0) then
+       allocate(req_i(counter_snowpoints))
+       allocate(req_j(counter_snowpoints))
+    endif
+    counter_snowpoints=0
+    do J=jts,jtf
+         do I=its,itf
+            if( ((snpack_mode == 'antarctica') .and. (ISLTYP(I,J) == 8)) .or. &
+&               ((snpack_mode == 'land')  .and. (ISLTYP(I,J) .ne. 14)) ) then
+               counter_snowpoints = counter_snowpoints + 1
+               req_i(counter_snowpoints) = I
+               req_j(counter_snowpoints) = J
+            endif
+         enddo
+    enddo
 
     call nl_get_max_dom ( id, l_maxdom)
     call initialize_global_f(l_maxdom,id)
     new_alloc = .false.
-    call initialize_f(id,counter_snowpoints,new_alloc)
+    call initialize_f(id,counter_snowpoints,req_i,req_j, &
+                      layout_action,new_alloc)
 
     CALL nl_get_start_year   ( id, simulation_start_year   )
     CALL nl_get_start_month  ( id, simulation_start_month  )
