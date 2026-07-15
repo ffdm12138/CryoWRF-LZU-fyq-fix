@@ -1238,6 +1238,12 @@ endif
            enddo
         enddo
 
+        ! Mark layout initialized after all init_snowpack calls succeed.
+        ! Transitions ALLOCATED → INITIALIZED; no-op if already ACTIVE.
+        IF (new_alloc) THEN
+           CALL mark_layout_initialized(id)
+        ENDIF
+
         h_salt = 0.15 ! Quick fix: hard-code the same value as in Coupler.cpp
         counter_snowpoints=0
         do J=jts,jtf
