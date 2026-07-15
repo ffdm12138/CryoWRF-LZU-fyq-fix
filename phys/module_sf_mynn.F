@@ -62,6 +62,7 @@ MODULE module_sf_mynn
 !For WRF
   USE module_model_constants, only: &
        &p1000mb, ep_2
+  USE, INTRINSIC :: ieee_arithmetic, ONLY: ieee_is_finite
 
 !-------------------------------------------------------------------
   IMPLICIT NONE
@@ -2044,6 +2045,11 @@ END SUBROUTINE SFCLAY1D_mynn
          !print*,"SUCCESS,n=",n," Ri=",ri," z/L=",zolrib
       endif
 
+      ! Final safety net: if zolrib is non-finite, return neutral
+      if (.not. ieee_is_finite(zolrib)) then
+         zolrib = 0.
+      endif
+
       return
       end function
 !====================================================================
@@ -2198,9 +2204,17 @@ END SUBROUTINE SFCLAY1D_mynn
         integer :: nzol,psi_opt
         real    :: rzol,zolf
 
-        nzol = int(zolf*100.)
-        rzol = zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if (.not. ieee_is_finite(zolf)) then
+           psim_stable = 0.
+           return
+        endif
+        if (zolf < 0.0) then
+           psim_stable = 0.
+           return
+        endif
+        if (zolf >= 0.0 .and. zolf < 10.0) then
+           nzol = int(zolf*100.)
+           rzol = zolf*100. - real(nzol)
            psim_stable = psim_stab(nzol) + rzol*(psim_stab(nzol+1)-psim_stab(nzol))
         else
            if (psi_opt == 0) then
@@ -2217,9 +2231,17 @@ END SUBROUTINE SFCLAY1D_mynn
         integer :: nzol,psi_opt
         real    :: rzol,zolf
 
-        nzol = int(zolf*100.)
-        rzol = zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if (.not. ieee_is_finite(zolf)) then
+           psih_stable = 0.
+           return
+        endif
+        if (zolf < 0.0) then
+           psih_stable = 0.
+           return
+        endif
+        if (zolf >= 0.0 .and. zolf < 10.0) then
+           nzol = int(zolf*100.)
+           rzol = zolf*100. - real(nzol)
            psih_stable = psih_stab(nzol) + rzol*(psih_stab(nzol+1)-psih_stab(nzol))
         else
            if (psi_opt == 0) then
@@ -2236,9 +2258,17 @@ END SUBROUTINE SFCLAY1D_mynn
         integer :: nzol,psi_opt
         real    :: rzol,zolf
 
-        nzol = int(-zolf*100.)
-        rzol = -zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if (.not. ieee_is_finite(zolf)) then
+           psim_unstable = 0.
+           return
+        endif
+        if (zolf > 0.0) then
+           psim_unstable = 0.
+           return
+        endif
+        if (zolf <= 0.0 .and. zolf > -10.0) then
+           nzol = int(-zolf*100.)
+           rzol = -zolf*100. - real(nzol)
            psim_unstable = psim_unstab(nzol) + rzol*(psim_unstab(nzol+1)-psim_unstab(nzol))
         else
            if (psi_opt == 0) then
@@ -2255,9 +2285,17 @@ END SUBROUTINE SFCLAY1D_mynn
         integer :: nzol,psi_opt
         real    :: rzol,zolf
 
-        nzol = int(-zolf*100.)
-        rzol = -zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if (.not. ieee_is_finite(zolf)) then
+           psih_unstable = 0.
+           return
+        endif
+        if (zolf > 0.0) then
+           psih_unstable = 0.
+           return
+        endif
+        if (zolf <= 0.0 .and. zolf > -10.0) then
+           nzol = int(-zolf*100.)
+           rzol = -zolf*100. - real(nzol)
            psih_unstable = psih_unstab(nzol) + rzol*(psih_unstab(nzol+1)-psih_unstab(nzol))
         else
            if (psi_opt == 0) then
