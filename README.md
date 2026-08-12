@@ -24,12 +24,14 @@ This is a personal mirror with local bug fixes — **not** the official WSL/SLF 
 | `55212317` | fix: pass ordered (I,J) layout to initialize_f |
 | `7174cf42` | fix: call mark_layout_initialized after init_snowpack loop |
 | `35eae0ea`–`181072a2` | cryowrf submodule lifecycle fixes incl. FINALIZED terminal-state fix (`ca8ac9a`), STATE_UNALLOCATED transition, NDEBUG build, gfortran-9 compat, ordered layout init |
+| vendored tree | additionally carries the validated build-time changes: SNOWPACK clock advanced by the actual WRF dt (adaptive-timestep fix), unconditional snow layer-write in the coupler, SNOWPACK stability-warning throttling (`Meteo.cc`) |
 
 ## Licenses and copyright
 
 All original copyright and license notices are preserved unmodified:
 
 - **WRF** — `LICENSE.txt`: NCAR/UCAR public-domain notice (attribution requested).
+- **WPS** — `WPS/README`: NCAR/UCAR terms, same as WRF (WRF Preprocessing System 4.2).
 - **CryoWRF** — `phys/cryowrf/LICENSE.txt`: GNU GPL v3.
 - **MeteoIO** — `phys/cryowrf/external/meteoio/`: `License.txt`, `COPYING`, `COPYING.LESSER`.
 - **SNOWPACK** — `phys/cryowrf/external/snowpack/`: `License.txt`, `COPYING`, `COPYING.LESSER`.
@@ -45,6 +47,10 @@ Redistribution must comply with the GPL-family and per-component licenses above.
 - Fully vendored monorepo: all four former submodules (`phys/cryowrf`,
   `phys/noahmp`, `phys/MYNN-EDMF`, `.ci/hpc-workflows`) are inlined into the
   tree — no `git submodule` setup needed.
+- Deployment extras: `WPS/` (preprocessing sources + `namelist.wps`),
+  `namelist.input`, `io.ini`, `tslist`, `outhist_variables_ALPS.txt`,
+  `runtime/` scripts, `run/` static tables, and `DEPLOYMENT.md` (build and
+  data-pipeline guide for the reference deployment).
 - Build products, run outputs and personal data are excluded from this repository.
 
 ## Contact
