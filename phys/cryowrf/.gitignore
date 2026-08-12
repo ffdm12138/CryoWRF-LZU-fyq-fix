@@ -1,0 +1,23 @@
+# Build artifacts
+*.o
+*.mod
+*.a
+*.so
+*.so.*
+
+# Test executables
+tests/test_coupler
+tests/test_funcs
+
+# Dependency build directories
+external/*/build/
+external/*/lib/
+
+# Editor files
+*.swp
+*~
+.vscode/
+.idea/
+
+# CI artifacts
+.gitlab-ci-local/

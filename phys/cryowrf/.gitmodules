@@ -1,0 +1,21 @@
+[submodule "WPS"]
+	path = WPS
+	url = https://gitlabext.wsl.ch/atmospheric-models/CRYOWRF-WPS.git
+[submodule "WRF"]
+	path = WRF
+	url = https://gitlabext.wsl.ch/atmospheric-models/CRYOWRF-WRF.git
+[submodule "snpack_for_wrf/meteoio"]
+	path = snpack_for_wrf/meteoio
+	url = https://gitlabext.wsl.ch/snow-models/meteoio.git
+[submodule "snpack_for_wrf/snowpack"]
+	path = snpack_for_wrf/snowpack
+	url = https://gitlabext.wsl.ch/snow-models/snowpack.git
+[submodule "snowpack"]
+	path = snowpack
+	url = https://git.wsl.ch/snow-models/snowpack.git
+[submodule "external/snowpack"]
+	path = external/snowpack
+	url = https://git.wsl.ch/snow-models/snowpack.git
+[submodule "external/meteoio"]
+	path = external/meteoio
+	url = https://git.wsl.ch/snow-models/meteoio.git

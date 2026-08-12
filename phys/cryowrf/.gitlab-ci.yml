@@ -1,0 +1,77 @@
+default:
+  image: debian:12
+  tags: ["docker"]
+  before_script:
+    - apt-get update && apt-get -y install build-essential gfortran libopenmpi-dev cmake git libproj-dev curl openmpi-bin
+
+stages:
+  - build dependencies
+  - build
+  - test
+  - integration
+
+build dependencies:
+  stage: build dependencies
+  script:
+    - git submodule update --init --recursive
+    - mkdir -p external/meteoio/build && cd external/meteoio/build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DENABLE_DBO=OFF -DENABLE_IMIS=OFF -DENABLE_MYSQL=OFF -DENABLE_ODBC=OFF -DENABLE_ORACLE=OFF -DENABLE_POSTGRESQL=OFF -DENABLE_SQLITE=OFF -DENABLE_SMET=ON -DENABLE_GSN=ON -DENABLE_BORMA=ON -DENABLE_GRASS=ON -DENABLE_GEOTOP=ON -DENABLE_PROJ=ON -DENABLE_CURL=ON
+    - make -j $(nproc)
+    - make install
+    - cd ../../..
+    - mkdir -p external/snowpack/build && cd external/snowpack/build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=../lib -DBUILD_SHARED_LIBS=ON -DENABLE_CRYOWRF=ON -DBUILD_PLUGIN=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF -DOPERATIONAL=ON -DMETEOIO_BASE=../../meteoio/lib
+    - make -j $(nproc)
+    - make install
+    - cd ../../..
+    - find external/meteoio/build -name "*.o" -type f -delete
+    - find external/snowpack/build -name "*.o" -type f -delete
+  artifacts:
+    expire_in: 1h
+    paths:
+      - external/meteoio/lib/
+      - external/snowpack/lib/
+  cache:
+    key: cryowrf-deps-v1
+    paths:
+      - external/meteoio/lib/
+      - external/snowpack/lib/
+
+build:
+  stage: build
+  script:
+    - cd src
+    - make -j $(nproc) libcoupler.a
+  artifacts:
+    expire_in: 1h
+    paths:
+      - src/libcoupler.a
+      - src/*.mod
+      - src/*.o
+      - external/meteoio/lib/
+      - external/snowpack/lib/
+      - tests/io.ini
+      - tests/input/
+
+test:
+  stage: test
+  script:
+    - cd tests
+    - make
+    - export LD_LIBRARY_PATH=$PWD/../external/snowpack/lib:$PWD/../external/meteoio/lib/lib:$LD_LIBRARY_PATH
+    - make run
+
+# Trigger CRYOWRF-WRF build to verify integration with this commit
+trigger-wrf-build:
+  stage: integration
+  trigger:
+    project: atmospheric-models/CRYOWRF-WRF
+    branch: master
+    strategy: depend  # Wait for WRF to finish building ~ 1hr
+  variables:
+    CRYOWRF_COMMIT_SHA: $CI_COMMIT_SHA
+    CRYOWRF_BRANCH: $CI_COMMIT_REF_NAME
+    CRYOWRF_PIPELINE_ID: $CI_PIPELINE_ID
+  only:
+    - branches  # Run on all branches
+    - merge_requests
