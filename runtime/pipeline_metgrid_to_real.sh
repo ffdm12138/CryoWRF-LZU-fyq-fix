@@ -1,11 +1,17 @@
 #!/bin/bash
-# 河西走廊 metgrid → sno → real 自动化流水线
-# 运行: bash /wrfrun/2021-2023_hexizoulang/runtime/pipeline_metgrid_to_real.sh
+# REMOTE: case-specific metgrid → official-simple snow profiles → real pipeline.
+# The fixed count of 5841 files per domain is specific to the original three-domain case.
+# Set io.ini SNOWPATH to SNO_OUTPUT_DIR only after profile validation.
+# 从源码目录运行，并按下方要求显式设置算例路径与时刻。
 
 set -e
-WORK=/wrfrun/2021-2023_hexizoulang
+WORK="${WORK:?Set the intended case directory explicitly}"
 LOG=$WORK/logs/pipeline.log
-PYTHON=/home/liguang/miniconda3/bin/python3
+PYTHON="${PYTHON:-python3}"
+SNO_GENERATOR="${SNO_GENERATOR:-$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/make_sno_from_met.py}"
+SNO_OUTPUT_DIR="${SNO_OUTPUT_DIR:?Choose a NEW profile directory inside WORK}"
+SNO_START_UTC="${SNO_START_UTC:?Set exact YYYY-MM-DD_HH:MM:SS from namelist}"
+test -s "$WORK/input/COSMO.smet" || { echo "Prepare the meteo stub separately; this pipeline no longer invents it"; exit 1; }
 
 exec >> $LOG 2>&1
 echo "=========================================="
@@ -37,12 +43,12 @@ grep -q "Successful completion" $WORK/logs/metgrid.stdout.log && echo "metgrid: 
 
 # ---- Step 1: make_sno_from_met.py ----
 echo ""
-echo "[1/3] 生成 .sno + COSMO.smet: $(date)"
+echo "[1/3] 生成官方简化30层 .sno；COSMO.smet单独保留: $(date)"
 cd $WORK
-$PYTHON runtime/make_sno_from_met.py -n 64
+"$PYTHON" "$SNO_GENERATOR" --case-dir "$WORK" --date "$SNO_START_UTC" --met-dir "$WORK/wpsout/metgrid" --output-dir "$SNO_OUTPUT_DIR" -n 4
 echo "make_sno_from_met: DONE ($(date))"
 
-SNO_COUNT=$(ls $WORK/input/snpack_*.sno 2>/dev/null | wc -l)
+SNO_COUNT=$(ls $SNO_OUTPUT_DIR/snpack_*.sno 2>/dev/null | wc -l)
 echo ".sno 文件数: $SNO_COUNT"
 [ -f "$WORK/input/COSMO.smet" ] && echo "COSMO.smet: OK" || echo "COSMO.smet: MISSING"
 
