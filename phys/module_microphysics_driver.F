@@ -2,6 +2,7 @@
 ! *** add new modules of schemes here
 !
 MODULE module_microphysics_driver
+  USE, INTRINSIC :: ieee_arithmetic
   real, private, parameter :: QX_MIN = 1.E-12
   real, private, parameter :: NI_MIN = 1.E-6
 CONTAINS
@@ -3308,6 +3309,7 @@ END SUBROUTINE sfc_profile_TQ
     bs_sublim_qni = 0.
     VQ = 0.
     VN = 0.
+    loc_sfc_meanR = 0.   ! BUG13 fix: was missing from zeroing block -> stack residue written back
     bs_qi_rad_loc  = 0.
     bs_qni_rad_loc = 0.
     loc_w = 0.
@@ -3398,6 +3400,7 @@ END SUBROUTINE sfc_profile_TQ
         else
             VN(k) = 0.001
             VQ(k) = 0.001
+            loc_sfc_meanR(k) = 0.0   ! BUG13 fix: defined default (was uninitialized/stale -> huge-finite garbage written back)
         endif
 
     enddo
@@ -3685,6 +3688,14 @@ endif
 
 
  !!!! Transfer values to main matrix
+
+    ! BUG13 fix: degenerate tridiag3 can yield NaN when bs_dz(1)->0; do not propagate
+    WHERE (.NOT. ieee_is_finite(qi_final))
+      qi_final = 0.0
+    END WHERE
+    WHERE (.NOT. ieee_is_finite(qni_final))
+      qni_final = 0.0
+    END WHERE
 
     sn_qs(I,1:snc_N,J)         =  qi_final(1:snc_N)
     bs_qi(I,kts:kte,J)         =  qi_final(snc_N+1:bs_Ntot)
