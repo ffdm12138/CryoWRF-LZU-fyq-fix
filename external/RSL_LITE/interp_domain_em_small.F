@@ -29,7 +29,7 @@
       INTEGER i,j,pig,pjg,cm,cn,nig,njg,retval,k
       INTEGER iparstrt,jparstrt,sw
       TYPE (grid_config_rec_type)            :: config_flags
-      REAL xv(2000)
+      REAL xv(8192)
       INTEGER       ::           ids,  ide,  jds,  jde,  kds,  kde,    &
                                  ims,  ime,  jms,  jme,  kms,  kme,    &
                                  ips,  ipe,  jps,  jpe,  kps,  kpe
@@ -220,7 +220,7 @@
       INTEGER nlev, msize
       INTEGER i,j,pig,pjg,cm,cn,nig,njg,retval,k
       TYPE (grid_config_rec_type)            :: config_flags
-      REAL xv(2000)
+      REAL xv(8192)
       INTEGER       ::          cids, cide, cjds, cjde, ckds, ckde,    &
                                 cims, cime, cjms, cjme, ckms, ckme,    &
                                 cips, cipe, cjps, cjpe, ckps, ckpe

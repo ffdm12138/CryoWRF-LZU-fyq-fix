@@ -478,9 +478,29 @@ void rsl_lite_to_peerpoint_msg ( nbuf_p, buf )
   nbuf = *nbuf_p ;
 
   if ( Sendbufcurs + nbuf >= Sendbufsize ) {
-    sprintf(mess,"rsl_lite_to_peerpoint_msg: Sendbufcurs + nbuf (%d) would exceed Sendbufsize (%d)\n",
-           Sendbufcurs + nbuf , Sendbufsize ) ;
-    RSL_TEST_ERR(1,mess) ;
+    /* Grow the send buffer on demand.  The size established by
+       rsl_lite_to_child_info / rsl_lite_to_parent_info budgets every field
+       as nlev words; fields whose vertical extent is far larger (CRYOWRF
+       snowpack profiles, dimension no_snpack_lay_to_sav) blow that
+       estimate.  Peers size their receive buffers from the byte counts
+       exchanged via MPI_Alltoall(Ssizes->Rsizes), so growing here is
+       transparent to the receiving side. */
+    char *newbuf ;
+    int   newsize ;
+    newsize = 2 * Sendbufsize ;
+    if ( newsize < Sendbufcurs + nbuf + 65536 ) newsize = Sendbufcurs + nbuf + 65536 ;
+    newbuf = RSL_MALLOC( char , newsize ) ;
+    RSL_TEST_ERR( newbuf == NULL , "rsl_lite_to_peerpoint_msg: out of memory growing Sendbuf" ) ;
+    if ( Sendbufcurs > 0 ) {
+      char *csrc = Sendbuf ;
+      char *cdst = newbuf ;
+      int   ic ;
+      for ( ic = 0 ; ic < Sendbufcurs ; ic++ ) *cdst++ = *csrc++ ;
+    }
+    if ( Sendbuf != NULL ) RSL_FREE( Sendbuf ) ;
+    Sendbuf = newbuf ;
+    Sendbufsize = newsize ;
+    fprintf(stderr,"rsl_lite_to_peerpoint_msg: Sendbuf grown to %d bytes\n", Sendbufsize ) ;
   }
 
   if ( nbuf % sizeof(int) == 0 ) {
