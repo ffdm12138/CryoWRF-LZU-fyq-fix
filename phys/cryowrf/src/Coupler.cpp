@@ -1,5 +1,7 @@
 #include "Coupler.hpp"
 #include <iostream>
+#include <cstdio>
+#include <cstdlib>
 #include <snowpack/libsnowpack.h>
 #include <meteoio/MeteoIO.h>
 #include <getopt.h>
@@ -1239,6 +1241,14 @@ double v_check_mass = init_mass + surfFluxes.mass[SurfaceFluxes::MS_HNW]
    const vector<ElementData>& elem_data = vecXdata.Edata;
 
    const int get_size = (int)vecXdata.getNumberOfElements();
+
+   // [bug10 fail-closed writer] refuse to silently truncate the profile: a wrfrst
+   // snapshot that drops active layers is unfaithful and poisons any .false. restart.
+   if (get_size > loc_snpack_lay_to_sav) {
+      fprintf(stderr, "BUG10_WRFRST_CAPACITY_EXCEEDED grid=(%d,%d) date=%s nElems=%d capacity=%d -- increase no_snpack_lay_to_sav\n",
+              I, J, current_date.toString().c_str(), get_size, loc_snpack_lay_to_sav);
+      abort();
+   }
 
    const int lim_size = std::max(0,get_size-loc_snpack_lay_to_sav);
   
